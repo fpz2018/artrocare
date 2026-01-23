@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { base44 } from "@/api/base44Client";
 
 import { 
   LayoutDashboard, 
@@ -57,6 +58,7 @@ const translations = {
 };
 
 export default function Layout({ children, currentPageName }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isChangingLanguage, setIsChangingLanguage] = useState(false);
@@ -67,10 +69,16 @@ export default function Layout({ children, currentPageName }) {
 
   const loadUser = async () => {
     try {
+      const isAuth = await base44.auth.isAuthenticated();
+      if (!isAuth) {
+        navigate("/");
+        return;
+      }
       const userData = await base44.auth.me();
       setUser(userData);
     } catch (error) {
-      console.log("User not logged in");
+      console.error("Error loading user:", error);
+      navigate("/");
     }
   };
 
