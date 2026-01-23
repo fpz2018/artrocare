@@ -17,9 +17,11 @@ import {
   Target,
   MessageCircle,
   Heart,
-  Pill
+  Pill,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 
 const translations = {
   nl: {
@@ -305,12 +307,14 @@ export default function Layout({ children, currentPageName }) {
 
         <div className="ml-64 flex-1">
           {children}
+          <FooterDisclaimer lang={user?.language || "nl"} />
         </div>
-      </div>
+        </div>
 
-      <div className="lg:hidden pt-16">
+        <div className="lg:hidden pt-16">
         {children}
-      </div>
-    </div>
-  );
-}
+        <FooterDisclaimer lang={user?.language || "nl"} />
+        </div>
+        </div>
+        );
+        }

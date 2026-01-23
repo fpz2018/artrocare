@@ -4,7 +4,8 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Activity, Apple, TrendingUp, BookOpen, Globe, ArrowRight, CheckCircle } from "lucide-react";
+import { Heart, Activity, Apple, TrendingUp, BookOpen, Globe, ArrowRight, CheckCircle, Shield } from "lucide-react";
+import { disclaimerContent } from "@/components/legal/Disclaimer";
 
 const translations = {
   nl: {
@@ -241,8 +242,12 @@ export default function Home() {
               <p className="text-sm text-gray-500">
                 {t.termsAgreement}
               </p>
+              <p className="text-xs text-gray-400 mt-2 flex items-center justify-center gap-1">
+                <Shield className="w-3 h-3" />
+                {disclaimerContent[lang].shortDisclaimer}
+              </p>
             </div>
-          </div>
+            </div>
         </div>
 
         <div className="mt-20 grid md:grid-cols-3 gap-8">

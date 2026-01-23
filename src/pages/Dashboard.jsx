@@ -17,7 +17,8 @@ import {
   Lock,
   Apple,
   BookOpen,
-  PartyPopper
+  PartyPopper,
+  UserCheck
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import DashboardOnboarding from "../components/dashboard/DashboardOnboarding";
@@ -162,6 +163,34 @@ export default function Dashboard() {
             {new Date().toLocaleDateString(lang, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
+
+        {/* Therapist Reminder */}
+        {!user?.therapistEmail && (
+          <Card className="mb-6 border-2 border-blue-300 bg-blue-50">
+            <CardContent className="pt-4">
+              <div className="flex items-start gap-3">
+                <UserCheck className="w-6 h-6 text-blue-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-semibold text-blue-900">
+                    {lang === "nl" 
+                      ? "Koppel een fysiotherapeut voor optimale begeleiding" 
+                      : "Link a physiotherapist for optimal guidance"}
+                  </p>
+                  <p className="text-sm text-blue-800 mt-1">
+                    {lang === "nl"
+                      ? "Wij raden aan om deze app te gebruiken in samenwerking met een fysiotherapeut. Zo krijg je persoonlijke feedback en kun je je voortgang delen."
+                      : "We recommend using this app in collaboration with a physiotherapist. This way you get personal feedback and can share your progress."}
+                  </p>
+                  <Link to={createPageUrl("Therapist")}>
+                    <Button size="sm" className="mt-3 bg-blue-600 hover:bg-blue-700">
+                      {lang === "nl" ? "Fysiotherapeut Koppelen" : "Link Physiotherapist"}
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Education Progress Card - ALWAYS SHOW if not complete */}
         {!hasCompletedEducation && (

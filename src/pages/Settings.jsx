@@ -13,8 +13,16 @@ import {
   Bell, 
   Shield,
   LogOut,
-  Save
+  Save,
+  FileText
 } from "lucide-react";
+import { disclaimerContent } from "@/components/legal/Disclaimer";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const translations = {
   nl: {
@@ -98,6 +106,7 @@ export default function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showTerms, setShowTerms] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -376,6 +385,37 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          {/* Terms & Disclaimer */}
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-emerald-600" />
+                {lang === "nl" ? "Voorwaarden & Disclaimer" : "Terms & Disclaimer"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setShowTerms(true)}
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                {lang === "nl" ? "Bekijk gebruiksvoorwaarden" : "View terms of use"}
+              </Button>
+              
+              {user?.disclaimerAcceptedAt && (
+                <p className="text-xs text-gray-500">
+                  {lang === "nl" ? "Akkoord gegaan op: " : "Agreed on: "}
+                  {new Date(user.disclaimerAcceptedAt).toLocaleDateString(lang, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Save Button */}
           <div className="flex gap-3">
             <Button
@@ -405,6 +445,24 @@ export default function Settings() {
             </Button>
           </div>
         </div>
+
+        {showTerms && (
+          <Dialog open={showTerms} onOpenChange={setShowTerms}>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {lang === "nl" ? "Gebruiksvoorwaarden & Disclaimer" : "Terms of Use & Disclaimer"}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="text-sm text-gray-700 whitespace-pre-line">
+                {disclaimerContent[lang].fullDisclaimer}
+              </div>
+              <Button onClick={() => setShowTerms(false)} className="mt-4">
+                {lang === "nl" ? "Sluiten" : "Close"}
+              </Button>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
