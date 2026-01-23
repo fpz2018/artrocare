@@ -170,7 +170,7 @@ export default function Settings() {
   };
 
   const handleLogout = async () => {
-    await base44.auth.logout();
+    await base44.auth.logout("/Home");
   };
 
   if (isLoading) {
