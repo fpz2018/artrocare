@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { sanitizeInput } from "@/components/utils/sanitize";
 import { base44 } from "@/api/base44Client";
+import { requestNotificationPermission } from "@/components/utils/notifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { 
   User as UserIcon, 
   Bell, 
@@ -31,6 +33,11 @@ const translations = {
     dailyReminders: "Dagelijkse herinneringen",
     exerciseNotifications: "Oefening notificaties",
     progressReports: "Voortgangsrapporten",
+    pushNotifications: "Push notificaties",
+    pushNotificationsDesc: "Ontvang herinneringen op je apparaat",
+    enabled: "Ingeschakeld",
+    enable: "Inschakelen",
+    reminderTime: "Herinneringstijd",
     dataExport: "Data exporteren",
     deleteAccount: "Account verwijderen",
     logout: "Uitloggen",
@@ -55,6 +62,11 @@ const translations = {
     dailyReminders: "Daily reminders",
     exerciseNotifications: "Exercise notifications",
     progressReports: "Progress reports",
+    pushNotifications: "Push notifications",
+    pushNotificationsDesc: "Receive reminders on your device",
+    enabled: "Enabled",
+    enable: "Enable",
+    reminderTime: "Reminder time",
     dataExport: "Export data",
     deleteAccount: "Delete account",
     logout: "Logout",
@@ -76,8 +88,13 @@ export default function Settings() {
   const [notifications, setNotifications] = useState({
     dailyCheckIn: true,
     exerciseReminders: true,
-    progressReports: true
+    progressReports: true,
+    pushEnabled: false,
+    reminderTime: "09:00"
   });
+  const [notificationPermission, setNotificationPermission] = useState(
+    typeof window !== 'undefined' && "Notification" in window ? Notification.permission : "default"
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,6 +150,14 @@ export default function Settings() {
       console.error("Error saving settings:", error);
     }
     setIsSaving(false);
+  };
+
+  const enableNotifications = async () => {
+    const granted = await requestNotificationPermission();
+    setNotificationPermission(granted ? "granted" : "denied");
+    if (granted) {
+      setNotifications({ ...notifications, pushEnabled: true });
+    }
   };
 
   const handleLogout = async () => {
@@ -292,6 +317,39 @@ export default function Settings() {
                   checked={notifications.progressReports}
                   onCheckedChange={(checked) => setNotifications({ ...notifications, progressReports: checked })}
                 />
+              </div>
+
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="font-medium text-gray-900">{t.pushNotifications}</p>
+                    <p className="text-sm text-gray-600">
+                      {t.pushNotificationsDesc}
+                    </p>
+                  </div>
+                  {notificationPermission === "granted" ? (
+                    <Badge className="bg-green-100 text-green-800">
+                      {t.enabled}
+                    </Badge>
+                  ) : (
+                    <Button onClick={enableNotifications} size="sm">
+                      {t.enable}
+                    </Button>
+                  )}
+                </div>
+
+                {notificationPermission === "granted" && (
+                  <div className="mt-4">
+                    <Label htmlFor="reminderTime">{t.reminderTime}</Label>
+                    <Input
+                      id="reminderTime"
+                      type="time"
+                      value={notifications.reminderTime || "09:00"}
+                      onChange={(e) => setNotifications({ ...notifications, reminderTime: e.target.value })}
+                      className="mt-2 w-32"
+                    />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
