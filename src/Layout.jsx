@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { User } from "@/entities/User";
+
 import { 
   LayoutDashboard, 
   Dumbbell, 
@@ -67,7 +67,7 @@ export default function Layout({ children, currentPageName }) {
 
   const loadUser = async () => {
     try {
-      const userData = await User.me();
+      const userData = await base44.auth.me();
       setUser(userData);
     } catch (error) {
       console.log("User not logged in");
@@ -81,7 +81,7 @@ export default function Layout({ children, currentPageName }) {
     const newLang = user.language === "nl" ? "en" : "nl";
     
     try {
-      await User.updateMyUserData({ language: newLang });
+      await base44.auth.updateMe({ language: newLang });
       await new Promise(resolve => setTimeout(resolve, 300));
       window.location.reload();
     } catch (error) {
