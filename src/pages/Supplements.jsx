@@ -24,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 
 const translations = {
   nl: {
@@ -321,6 +322,8 @@ export default function Supplements() {
             onClose={() => setSelectedSupplement(null)} 
           />
         )}
+
+        <FooterDisclaimer lang={lang} />
       </div>
     </div>
   );

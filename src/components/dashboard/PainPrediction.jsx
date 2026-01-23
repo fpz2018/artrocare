@@ -18,6 +18,7 @@ import {
   Dumbbell,
   Activity
 } from "lucide-react";
+import { InlineDisclaimer } from "@/components/legal/Disclaimer";
 
 const translations = {
   nl: {
@@ -234,6 +235,10 @@ export default function PainPrediction({ user }) {
                 <p className="text-xs text-gray-400 text-center">{t.basedOn}</p>
               </div>
             )}
+
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <InlineDisclaimer type="ai" lang={lang} />
+            </div>
           </>
         )}
       </CardContent>

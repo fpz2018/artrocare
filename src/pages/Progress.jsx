@@ -21,6 +21,7 @@ import {
   MessageCircle
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { FooterDisclaimer } from "@/components/legal/Disclaimer";
 
 const translations = {
   nl: {
@@ -736,6 +737,8 @@ export default function Progress() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <FooterDisclaimer lang={lang} />
       </div>
     </div>
   );

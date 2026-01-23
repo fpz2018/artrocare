@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { InlineDisclaimer, FooterDisclaimer } from "@/components/legal/Disclaimer";
 
 const translations = {
   nl: {
@@ -178,6 +179,10 @@ export default function Medication() {
           <p className="text-gray-600">{t.subtitle}</p>
         </div>
 
+        <div className="mb-6">
+          <InlineDisclaimer type="medication" lang={lang} />
+        </div>
+
         {/* Quick Log Today */}
         <Card className="mb-8 shadow-lg border-purple-200">
           <CardHeader>
@@ -299,6 +304,8 @@ export default function Medication() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <FooterDisclaimer lang={lang} />
       </div>
     </div>
   );

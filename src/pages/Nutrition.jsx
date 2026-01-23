@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { InlineDisclaimer, FooterDisclaimer } from "@/components/legal/Disclaimer";
 
 const translations = {
   nl: {
@@ -247,6 +248,10 @@ export default function Nutrition() {
           </Button>
         </div>
 
+        <div className="mb-6">
+          <InlineDisclaimer type="nutrition" lang={lang} />
+        </div>
+
         {user?.personalizedNutritionPlan?.basedOn && (
           <Card className="mb-8 bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200">
             <CardContent className="pt-6">
@@ -363,6 +368,8 @@ export default function Nutrition() {
         {selectedRecipe && (
           <RecipeDialog recipe={selectedRecipe} t={t} onClose={() => setSelectedRecipe(null)} lang={lang} />
         )}
+
+        <FooterDisclaimer lang={lang} />
       </div>
     </div>
   );

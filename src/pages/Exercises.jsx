@@ -31,6 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { InlineDisclaimer, FooterDisclaimer } from "@/components/legal/Disclaimer";
 
 const translations = {
   nl: {
@@ -218,9 +219,13 @@ export default function Exercises() {
               {t.title}
             </h1>
             <p className="text-gray-600">{t.subtitle}</p>
-          </div>
+            </div>
 
-          <Card className="mb-8 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
+            <div className="mb-6">
+            <InlineDisclaimer type="exercise" lang={lang} />
+            </div>
+
+            <Card className="mb-8 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-orange-900">
                 <AlertTriangle className="w-6 h-6" />
@@ -562,6 +567,8 @@ export default function Exercises() {
             </DialogContent>
           </Dialog>
         )}
+
+        <FooterDisclaimer lang={lang} />
       </div>
     </div>
   );
