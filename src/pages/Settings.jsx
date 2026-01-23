@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { sanitizeInput } from "@/components/utils/sanitize";
 import { base44 } from "@/api/base44Client";
 import { requestNotificationPermission } from "@/components/utils/notifications";
+import { createPageUrl } from "@/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -170,7 +171,7 @@ export default function Settings() {
   };
 
   const handleLogout = async () => {
-    await base44.auth.logout("/Home");
+    await base44.auth.logout(createPageUrl("Home"));
   };
 
   if (isLoading) {
