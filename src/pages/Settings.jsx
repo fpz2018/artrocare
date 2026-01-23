@@ -170,16 +170,13 @@ export default function Settings() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      // Force logout
-      await base44.auth.logout();
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      // Always redirect, regardless of success or error
-      window.location.replace("/");
-    }
+  const handleLogout = () => {
+    console.log("Logout button clicked");
+    base44.auth.logout();
+    setTimeout(() => {
+      console.log("Redirecting to home");
+      window.location.href = "/";
+    }, 100);
   };
 
   if (isLoading) {
