@@ -20,7 +20,9 @@ import {
   Zap,
   Activity,
   AlertTriangle,
-  ArrowRight
+  ArrowRight,
+  Pause,
+  RotateCcw
 } from "lucide-react";
 import {
   Dialog,
@@ -71,7 +73,13 @@ const translations = {
     allExercises: "Alle Oefeningen",
     beginner: "Beginner",
     intermediate: "Gemiddeld",
-    advanced: "Gevorderd"
+    advanced: "Gevorderd",
+    watchVideo: "Bekijk Video",
+    videoAvailable: "Video beschikbaar",
+    noVideo: "Geen video",
+    playVideo: "Afspelen",
+    pauseVideo: "Pauzeren",
+    withVideo: "Met Video"
   },
   en: {
     title: "Exercise Program",
@@ -113,7 +121,13 @@ const translations = {
     allExercises: "All Exercises",
     beginner: "Beginner",
     intermediate: "Intermediate",
-    advanced: "Advanced"
+    advanced: "Advanced",
+    watchVideo: "Watch Video",
+    videoAvailable: "Video available",
+    noVideo: "No video",
+    playVideo: "Play",
+    pauseVideo: "Pause",
+    withVideo: "With Video"
   }
 };
 
@@ -325,8 +339,12 @@ export default function Exercises() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-8">
             <TabsTrigger value="all">{t.allExercises}</TabsTrigger>
+            <TabsTrigger value="with_video" className="flex items-center gap-1">
+              <Play className="w-4 h-4" />
+              <span className="hidden lg:inline">{t.withVideo}</span>
+            </TabsTrigger>
             <TabsTrigger value="warming_up">
               <Flame className="w-4 h-4 lg:mr-2" />
               <span className="hidden lg:inline">{t.warmingUp}</span>
@@ -381,6 +399,27 @@ export default function Exercises() {
             })}
           </TabsContent>
 
+          <TabsContent value="with_video">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {exercises.filter(e => e.videoUrl).map(exercise => (
+                <ExerciseCard
+                  key={exercise.id}
+                  exercise={exercise}
+                  isCompleted={completedToday.includes(exercise.key)}
+                  onClick={() => setSelectedExercise(exercise)}
+                  t={t}
+                  lang={lang}
+                />
+              ))}
+            </div>
+            {exercises.filter(e => e.videoUrl).length === 0 && (
+              <div className="text-center py-12 text-gray-500">
+                <Play className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                <p>{lang === "nl" ? "Nog geen oefeningen met video" : "No exercises with video yet"}</p>
+              </div>
+            )}
+          </TabsContent>
+
           {Object.keys(exercisesByCircle).map(circle => (
             <TabsContent key={circle} value={circle}>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -408,6 +447,45 @@ export default function Exercises() {
               </DialogHeader>
 
               <div className="space-y-6">
+                {selectedExercise.videoUrl && (
+                  <div className="mb-6">
+                    <div className="relative w-full bg-black rounded-lg overflow-hidden aspect-video">
+                      {selectedExercise.videoUrl.includes("youtube") || selectedExercise.videoUrl.includes("youtu.be") ? (
+                        <iframe
+                          src={`${selectedExercise.videoUrl.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")}?rel=0`}
+                          title={lang === "nl" ? selectedExercise.title_nl : selectedExercise.title_en}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : selectedExercise.videoUrl.includes("vimeo") ? (
+                        <iframe
+                          src={selectedExercise.videoUrl.replace("vimeo.com/", "player.vimeo.com/video/")}
+                          title={lang === "nl" ? selectedExercise.title_nl : selectedExercise.title_en}
+                          className="w-full h-full"
+                          allow="autoplay; fullscreen; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          src={selectedExercise.videoUrl}
+                          controls
+                          className="w-full h-full"
+                          poster={selectedExercise.videoThumbnail}
+                        >
+                          {lang === "nl" ? "Je browser ondersteunt geen video." : "Your browser does not support video."}
+                        </video>
+                      )}
+                    </div>
+                    {selectedExercise.videoDuration && (
+                      <p className="text-sm text-gray-500 mt-2 flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        {Math.floor(selectedExercise.videoDuration / 60)}:{(selectedExercise.videoDuration % 60).toString().padStart(2, '0')} min
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {selectedExercise.imageUrl && (
                   <div className="w-full bg-gray-100 rounded-lg overflow-hidden">
                     <img
@@ -537,6 +615,13 @@ function ExerciseCard({ exercise, isCompleted, onClick, t, lang }) {
             </div>
           )}
         </div>
+
+        {exercise.videoUrl && (
+          <Badge className="bg-red-100 text-red-800 text-xs flex items-center gap-1 mb-3 w-fit">
+            <Play className="w-3 h-3" />
+            Video
+          </Badge>
+        )}
 
         <Button
           size="sm"
