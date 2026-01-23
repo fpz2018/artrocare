@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { sanitizeInput } from "@/components/utils/sanitize";
-import { User } from "@/entities/User";
-import { Measurement } from "@/entities/Measurement";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -171,14 +170,14 @@ export default function Progress() {
 
   const loadData = async () => {
     try {
-      const userData = await User.me();
+      const userData = await base44.auth.me();
       if (!userData) {
         window.location.href = '/Home';
         return;
       }
       setUser(userData);
 
-      const logs = await Measurement.filter({ created_by: userData.email }, "-date", 30);
+      const logs = await base44.entities.Measurement.filter({ created_by: userData.email }, "-date", 30);
       setMeasurements(logs);
 
       setFormData(prev => ({
@@ -231,9 +230,9 @@ export default function Progress() {
         measurementData.weight = parseFloat(formData.weight);
       }
 
-      await Measurement.create(measurementData);
+      await base44.entities.Measurement.create(measurementData);
 
-      await User.updateMyUserData({
+      await base44.auth.updateMe({
         painScore: formData.painScore[0],
         stiffnessScore: formData.stiffnessScore[0],
         functionScore: formData.functionScore[0],

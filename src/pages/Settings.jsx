@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { sanitizeInput } from "@/components/utils/sanitize";
-import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,7 +113,7 @@ export default function Settings() {
     try {
       const languageChanged = formData.language !== user.language;
       
-      await User.updateMyUserData({
+      await base44.auth.updateMe({
         full_name: sanitizeInput(formData.full_name),
         height: parseFloat(formData.height) || null,
         weight: parseFloat(formData.weight) || null,

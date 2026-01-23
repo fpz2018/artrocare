@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { sanitizeInput } from "@/components/utils/sanitize";
-import { User } from "@/entities/User";
-import { Measurement } from "@/entities/Measurement";
-import { SendEmail } from "@/integrations/Core";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -155,7 +153,7 @@ export default function Therapist() {
 
   const loadData = async () => {
     try {
-      const userData = await User.me();
+      const userData = await base44.auth.me();
       if (!userData) {
         window.location.href = '/Home';
         return;
@@ -166,7 +164,7 @@ export default function Therapist() {
         setTherapistData(userData.therapist);
       }
 
-      const logs = await Measurement.filter({ created_by: userData.email }, "-date", 90);
+      const logs = await base44.entities.Measurement.filter({ created_by: userData.email }, "-date", 90);
       setMeasurements(logs);
     } catch (error) {
       console.error("Error loading data:", error);
@@ -181,7 +179,7 @@ export default function Therapist() {
       alert(lang === "nl" ? "Voer een geldig e-mailadres in" : "Please enter a valid email address");
       return;
     }
-    await User.updateMyUserData({ therapist: therapistData });
+    await base44.auth.updateMe({ therapist: therapistData });
     setShowTherapistForm(false);
     loadData();
   };
