@@ -171,12 +171,7 @@ export default function Settings() {
   };
 
   const handleLogout = () => {
-    console.log("Logout button clicked");
-    base44.auth.logout();
-    setTimeout(() => {
-      console.log("Redirecting to home");
-      window.location.href = "/";
-    }, 100);
+    base44.auth.logout("/");
   };
 
   if (isLoading) {
