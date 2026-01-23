@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -17,7 +16,8 @@ import {
   Loader2,
   Target,
   MessageCircle,
-  Heart // Added Heart icon
+  Heart,
+  Pill
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -98,7 +98,8 @@ export default function Layout({ children, currentPageName }) {
     { name: t.exercises, icon: Dumbbell, path: "Exercises" },
     { name: t.goals, icon: Target, path: "Goals" },
     { name: t.nutrition, icon: Apple, path: "Nutrition" },
-    { name: t.supplements, icon: Heart, path: "Supplements" }, // Added new nav item
+    { name: t.supplements, icon: Heart, path: "Supplements" },
+    { name: lang === "nl" ? "Medicatie" : "Medication", icon: Pill, path: "Medication" },
     { name: t.therapist, icon: MessageCircle, path: "Therapist" },
     { name: t.library, icon: BookOpen, path: "Library" },
     { name: t.premium, icon: Crown, path: "Premium", highlight: !isPremium }

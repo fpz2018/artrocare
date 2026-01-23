@@ -11,6 +11,7 @@ import Settings from './pages/Settings';
 import Supplements from './pages/Supplements';
 import Therapist from './pages/Therapist';
 import index from './pages/index';
+import Medication from './pages/Medication';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +29,7 @@ export const PAGES = {
     "Supplements": Supplements,
     "Therapist": Therapist,
     "index": index,
+    "Medication": Medication,
 }
 
 export const pagesConfig = {
