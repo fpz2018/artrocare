@@ -172,30 +172,16 @@ export default function Settings() {
 
   const handleLogout = async () => {
     try {
-      // Haal app configuratie op
-      const appId = localStorage.getItem('base44_app_id') || '68e2ebd7b6aafb45ea9f15f7';
-      const currentUrl = window.location.origin;
+      // Clear alle lokale data
+      localStorage.clear();
+      sessionStorage.clear();
       
-      // Clear alle lokale base44 data
-      localStorage.removeItem('base44_access_token');
-      localStorage.removeItem('token');
-      localStorage.removeItem('base44_analytics_session_id');
-      localStorage.removeItem('base44_from_url');
-      
-      // Roep SDK logout aan om authorization header te clearen
-      try {
-        await base44.auth.logout();
-      } catch (e) {
-        console.log("SDK logout called:", e);
-      }
-      
-      // Redirect naar Base44 auth logout endpoint om server-side sessie te beëindigen
-      const logoutUrl = `https://base44.app/api/apps/auth/logout?app_id=${appId}&redirect_uri=${encodeURIComponent(currentUrl)}`;
-      window.location.href = logoutUrl;
+      // Roep base44.auth.logout aan - dit redirect automatisch naar login
+      base44.auth.logout(createPageUrl("Home"));
     } catch (error) {
       console.error("Logout error:", error);
-      // Fallback: forceer redirect
-      window.location.href = window.location.origin;
+      // Fallback: forceer redirect naar home
+      window.location.href = createPageUrl("Home");
     }
   };
 
