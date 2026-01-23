@@ -172,21 +172,12 @@ export default function Settings() {
 
   const handleLogout = async () => {
     try {
-      // Clear local storage
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // Logout via base44 (verwijdert auth cookie)
-      await base44.auth.logout();
-      
-      // Kleine delay om cookie verwijdering te laten finishen
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      // Hard redirect naar root
-      window.location.href = window.location.origin;
+      // Logout via base44 met redirect naar home page
+      // base44.auth.logout() verwijdert de auth cookie en redirect automatisch
+      base44.auth.logout(window.location.origin);
     } catch (error) {
       console.error("Logout error:", error);
-      // Fallback: forceer redirect
+      // Fallback: forceer redirect naar home
       window.location.href = window.location.origin;
     }
   };
