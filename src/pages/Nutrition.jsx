@@ -145,6 +145,10 @@ export default function Nutrition() {
     setIsLoading(true);
     try {
       const userData = await base44.auth.me();
+      if (!userData) {
+        window.location.href = '/Home';
+        return;
+      }
       setUser(userData);
       
       if (userData.personalizedNutritionPlan && userData.personalizedNutritionPlan.recipes) {
@@ -154,6 +158,7 @@ export default function Nutrition() {
       }
     } catch (error) {
       console.error("Error loading nutrition:", error);
+      window.location.href = '/Home';
     }
     setIsLoading(false);
   };

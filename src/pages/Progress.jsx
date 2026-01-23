@@ -171,6 +171,10 @@ export default function Progress() {
   const loadData = async () => {
     try {
       const userData = await User.me();
+      if (!userData) {
+        window.location.href = '/Home';
+        return;
+      }
       setUser(userData);
 
       const logs = await Measurement.filter({ created_by: userData.email }, "-date", 30);
@@ -187,6 +191,7 @@ export default function Progress() {
       }));
     } catch (error) {
       console.error("Error loading progress data:", error);
+      window.location.href = '/Home';
     }
     setIsLoading(false);
   };

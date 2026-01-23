@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,6 +88,10 @@ export default function Settings() {
   const loadData = async () => {
     try {
       const userData = await User.me();
+      if (!userData) {
+        window.location.href = '/Home';
+        return;
+      }
       setUser(userData);
       setFormData({
         full_name: userData.full_name || "",
@@ -99,6 +102,7 @@ export default function Settings() {
       setNotifications(userData.notificationSettings || notifications);
     } catch (error) {
       console.error("Error loading settings:", error);
+      window.location.href = '/Home';
     }
     setIsLoading(false);
   };

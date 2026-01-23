@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Measurement } from "@/entities/Measurement";
@@ -155,6 +154,10 @@ export default function Therapist() {
   const loadData = async () => {
     try {
       const userData = await User.me();
+      if (!userData) {
+        window.location.href = '/Home';
+        return;
+      }
       setUser(userData);
       
       if (userData.therapist) {
@@ -165,6 +168,7 @@ export default function Therapist() {
       setMeasurements(logs);
     } catch (error) {
       console.error("Error loading data:", error);
+      window.location.href = '/Home';
     }
     setIsLoading(false);
   };
