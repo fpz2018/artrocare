@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { base44 } from "@/api/base44Client";
 import { Heart, CheckCircle, AlertTriangle } from "lucide-react";
+import { FullDisclaimer } from "@/components/legal/Disclaimer";
 
 const translations = {
   nl: {
@@ -82,7 +83,7 @@ const translations = {
 };
 
 export default function DashboardOnboarding({ user, onComplete, lang = "nl" }) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
     arthrosisStage: "",
     affectedJoints: [],
@@ -142,7 +143,9 @@ export default function DashboardOnboarding({ user, onComplete, lang = "nl" }) {
     try {
       await base44.auth.updateMe({
         ...formData,
-        onboardingCompleted: true
+        onboardingCompleted: true,
+        disclaimerAcceptedAt: new Date().toISOString(),
+        disclaimerVersion: "1.0"
       });
       onComplete();
     } catch (error) {
@@ -164,10 +167,10 @@ export default function DashboardOnboarding({ user, onComplete, lang = "nl" }) {
           <p className="text-xs text-gray-500 mt-1">{t.appTagline}</p>
           <p className="text-gray-600 mt-2">{t.subtitle}</p>
           <div className="flex justify-center gap-2 mt-6">
-            {[1, 2, 3, 4].map(i => (
+            {[0, 1, 2, 3, 4].map(i => (
               <div
                 key={i}
-                className={`h-2 w-16 rounded-full transition-all ${
+                className={`h-2 w-12 rounded-full transition-all ${
                   i === step ? "bg-blue-500" : i < step ? "bg-green-500" : "bg-gray-200"
                 }`}
               />
@@ -176,6 +179,13 @@ export default function DashboardOnboarding({ user, onComplete, lang = "nl" }) {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {step === 0 && (
+            <FullDisclaimer 
+              lang={lang} 
+              onAgree={() => setStep(1)}
+            />
+          )}
+
           {step === 1 && (
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-gray-900">{t.step1}</h3>
@@ -324,35 +334,37 @@ export default function DashboardOnboarding({ user, onComplete, lang = "nl" }) {
             </div>
           )}
 
-          <div className="flex justify-between pt-6 border-t">
-            <Button
-              variant="outline"
-              onClick={() => setStep(step - 1)}
-              disabled={step === 1}
-            >
-              {t.back}
-            </Button>
-            {step < 4 ? (
+          {step > 0 && (
+            <div className="flex justify-between pt-6 border-t">
               <Button
-                onClick={() => setStep(step + 1)}
-                disabled={
-                  (step === 1 && !formData.arthrosisStage) ||
-                  (step === 2 && formData.affectedJoints.length === 0)
-                }
-                className="bg-blue-600 hover:bg-blue-700"
+                variant="outline"
+                onClick={() => setStep(step - 1)}
+                disabled={step === 1}
               >
-                {t.next}
+                {t.back}
               </Button>
-            ) : (
-              <Button
-                onClick={handleComplete}
-                disabled={isSubmitting || formData.goals.length === 0}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                {isSubmitting ? "..." : t.finish}
-              </Button>
-            )}
-          </div>
+              {step < 4 ? (
+                <Button
+                  onClick={() => setStep(step + 1)}
+                  disabled={
+                    (step === 1 && !formData.arthrosisStage) ||
+                    (step === 2 && formData.affectedJoints.length === 0)
+                  }
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {t.next}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleComplete}
+                  disabled={isSubmitting || formData.goals.length === 0}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {isSubmitting ? "..." : t.finish}
+                </Button>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
