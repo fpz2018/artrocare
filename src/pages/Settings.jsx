@@ -171,15 +171,26 @@ export default function Settings() {
   };
 
   const handleLogout = async () => {
-    try {
-      // Logout via base44 met redirect naar home page
-      // base44.auth.logout() verwijdert de auth cookie en redirect automatisch
-      base44.auth.logout(window.location.origin);
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Fallback: forceer redirect naar home
-      window.location.href = window.location.origin;
+    // Debug: bekijk ALLE beschikbare methodes op base44 en base44.auth
+    console.log("=== BASE44 AUTH DEBUG ===");
+    console.log("base44 object keys:", Object.keys(base44));
+    console.log("base44.auth object:", base44.auth);
+    console.log("base44.auth keys:", base44.auth ? Object.keys(base44.auth) : 'auth is undefined');
+    
+    // Bekijk elke methode op base44.auth
+    if (base44.auth) {
+      for (const key of Object.keys(base44.auth)) {
+        console.log(`base44.auth.${key}:`, typeof base44.auth[key], base44.auth[key]);
+      }
     }
+    
+    // Check of er een signOut, clearSession, of andere logout variant is
+    console.log("base44.auth.signOut:", base44.auth?.signOut);
+    console.log("base44.auth.clearSession:", base44.auth?.clearSession);
+    console.log("base44.auth.revokeToken:", base44.auth?.revokeToken);
+    console.log("=== END DEBUG ===");
+    
+    alert("Check de console (F12) voor beschikbare base44.auth methodes. Klik OK na het bekijken.");
   };
 
   if (isLoading) {
