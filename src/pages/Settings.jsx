@@ -171,7 +171,7 @@ export default function Settings() {
   };
 
   const handleLogout = () => {
-    base44.auth.logout(createPageUrl("Home"));
+    base44.auth.logout("/");
   };
 
   if (isLoading) {

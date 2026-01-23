@@ -83,10 +83,17 @@ export default function Home() {
     try {
       const isAuth = await base44.auth.isAuthenticated();
       if (isAuth) {
-        // Als ingelogd, ga naar Dashboard
-        navigate(createPageUrl("Dashboard"));
+        // Kleine vertraging om logout proces te laten voltooien
+        setTimeout(() => {
+          base44.auth.isAuthenticated().then(stillAuth => {
+            if (stillAuth) {
+              navigate(createPageUrl("Dashboard"));
+            } else {
+              setIsCheckingAuth(false);
+            }
+          });
+        }, 100);
       } else {
-        // Niet ingelogd, toon welcome screen
         setIsCheckingAuth(false);
       }
     } catch (error) {
