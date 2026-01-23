@@ -171,6 +171,19 @@ export default function Settings() {
   };
 
   const handleLogout = async () => {
+    // Debug: toon alle localStorage keys
+    console.log("localStorage keys:", Object.keys(localStorage));
+    console.log("sessionStorage keys:", Object.keys(sessionStorage));
+    
+    // Debug: toon alle cookies
+    console.log("cookies:", document.cookie);
+    
+    // Zoek specifiek naar base44 of auth gerelateerde items
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      console.log(`localStorage[${key}]:`, localStorage.getItem(key));
+    }
+    
     try {
       // Clear alle lokale data
       localStorage.clear();
