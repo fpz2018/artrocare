@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { sanitizeInput } from "@/lib/utils";
+import { sanitizeInput } from "@/components/utils/sanitize";
 import { User } from "@/entities/User";
 import { Measurement } from "@/entities/Measurement";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

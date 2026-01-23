@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { sanitizeInput } from "@/lib/utils";
+import { sanitizeInput } from "@/components/utils/sanitize";
 import { User } from "@/entities/User";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
