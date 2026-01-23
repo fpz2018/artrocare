@@ -172,33 +172,31 @@ export default function Settings() {
 
   const handleLogout = async () => {
     // Debug: toon alle localStorage keys
+    console.log("=== DEBUG LOGOUT ===");
     console.log("localStorage keys:", Object.keys(localStorage));
-    console.log("sessionStorage keys:", Object.keys(sessionStorage));
     
-    // Debug: toon alle cookies
-    console.log("cookies:", document.cookie);
-    
-    // Zoek specifiek naar base44 of auth gerelateerde items
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      console.log(`localStorage[${key}]:`, localStorage.getItem(key));
+      console.log(`localStorage[${key}]:`, localStorage.getItem(key)?.substring(0, 100));
     }
     
-    try {
-      // Clear alle lokale data
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // Probeer base44 logout
-      if (base44.auth && typeof base44.auth.logout === 'function') {
-        await base44.auth.logout();
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
+    console.log("---");
+    console.log("sessionStorage keys:", Object.keys(sessionStorage));
+    
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      console.log(`sessionStorage[${key}]:`, sessionStorage.getItem(key)?.substring(0, 100));
     }
     
-    // Altijd redirect naar home, forceer page reload om state te resetten
-    window.location.replace('/Home');
+    console.log("---");
+    console.log("cookies:", document.cookie);
+    console.log("=== END DEBUG ===");
+    
+    // TIJDELIJK: Geen redirect, alleen alert zodat je console kunt lezen
+    alert("Check de browser console (F12) voor storage keys. Klik OK om door te gaan.");
+    
+    // Uitgecomment tot we weten welke keys verwijderd moeten worden:
+    // window.location.replace(window.location.origin);
   };
 
   if (isLoading) {
