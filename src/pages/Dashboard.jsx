@@ -22,6 +22,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import DashboardOnboarding from "../components/dashboard/DashboardOnboarding";
 import EducationProgress from "../components/dashboard/EducationProgress";
+import PainPrediction from "../components/dashboard/PainPrediction";
 
 const translations = {
   nl: {
@@ -243,6 +244,11 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* Pain Prediction Card */}
+        <div className="mb-8">
+          <PainPrediction user={user} />
+        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
