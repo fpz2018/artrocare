@@ -81,22 +81,15 @@ export default function Home() {
 
   const checkAuth = async () => {
     try {
-      const isAuth = await base44.auth.isAuthenticated();
-      if (isAuth) {
-        // Kleine vertraging om logout proces te laten voltooien
-        setTimeout(() => {
-          base44.auth.isAuthenticated().then(stillAuth => {
-            if (stillAuth) {
-              navigate(createPageUrl("Dashboard"));
-            } else {
-              setIsCheckingAuth(false);
-            }
-          });
-        }, 100);
+      const userData = await base44.auth.me();
+      if (userData) {
+        // User is logged in, redirect to dashboard
+        navigate(createPageUrl("Dashboard"));
       } else {
         setIsCheckingAuth(false);
       }
     } catch (error) {
+      // User not logged in, show home page
       setIsCheckingAuth(false);
     }
   };

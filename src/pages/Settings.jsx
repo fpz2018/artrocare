@@ -170,14 +170,14 @@ export default function Settings() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await base44.auth.logout();
+  const handleLogout = () => {
+    // Clear any local state and force logout
+    base44.auth.logout().then(() => {
       window.location.href = "/";
-    } catch (error) {
-      console.error("Logout error:", error);
+    }).catch(() => {
+      // Force redirect even on error
       window.location.href = "/";
-    }
+    });
   };
 
   if (isLoading) {

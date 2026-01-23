@@ -69,16 +69,12 @@ export default function Layout({ children, currentPageName }) {
 
   const loadUser = async () => {
     try {
-      const isAuth = await base44.auth.isAuthenticated();
-      if (!isAuth) {
-        navigate("/");
-        return;
-      }
       const userData = await base44.auth.me();
       setUser(userData);
     } catch (error) {
       console.error("Error loading user:", error);
-      navigate("/");
+      // User not authenticated, redirect to home
+      window.location.href = "/";
     }
   };
 
