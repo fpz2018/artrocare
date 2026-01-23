@@ -171,26 +171,32 @@ export default function Settings() {
   };
 
   const handleLogout = async () => {
-    // Debug: bekijk ALLE beschikbare methodes op base44 en base44.auth
-    console.log("=== BASE44 AUTH DEBUG ===");
-    console.log("base44 object keys:", Object.keys(base44));
-    console.log("base44.auth object:", base44.auth);
-    console.log("base44.auth keys:", base44.auth ? Object.keys(base44.auth) : 'auth is undefined');
-    
-    // Bekijk elke methode op base44.auth
-    if (base44.auth) {
-      for (const key of Object.keys(base44.auth)) {
-        console.log(`base44.auth.${key}:`, typeof base44.auth[key], base44.auth[key]);
+    try {
+      // Haal app configuratie op
+      const appId = localStorage.getItem('base44_app_id') || '68e2ebd7b6aafb45ea9f15f7';
+      const currentUrl = window.location.origin;
+      
+      // Clear alle lokale base44 data
+      localStorage.removeItem('base44_access_token');
+      localStorage.removeItem('token');
+      localStorage.removeItem('base44_analytics_session_id');
+      localStorage.removeItem('base44_from_url');
+      
+      // Roep SDK logout aan om authorization header te clearen
+      try {
+        await base44.auth.logout();
+      } catch (e) {
+        console.log("SDK logout called:", e);
       }
+      
+      // Redirect naar Base44 auth logout endpoint om server-side sessie te beëindigen
+      const logoutUrl = `https://base44.app/api/apps/auth/logout?app_id=${appId}&redirect_uri=${encodeURIComponent(currentUrl)}`;
+      window.location.href = logoutUrl;
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback: forceer redirect
+      window.location.href = window.location.origin;
     }
-    
-    // Check of er een signOut, clearSession, of andere logout variant is
-    console.log("base44.auth.signOut:", base44.auth?.signOut);
-    console.log("base44.auth.clearSession:", base44.auth?.clearSession);
-    console.log("base44.auth.revokeToken:", base44.auth?.revokeToken);
-    console.log("=== END DEBUG ===");
-    
-    alert("Check de console (F12) voor beschikbare base44.auth methodes. Klik OK na het bekijken.");
   };
 
   if (isLoading) {
