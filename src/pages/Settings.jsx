@@ -170,8 +170,22 @@ export default function Settings() {
     }
   };
 
-  const handleLogout = () => {
-    base44.auth.logout("/");
+  const handleLogout = async () => {
+    try {
+      // Clear alle lokale data
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Probeer base44 logout
+      if (base44.auth && typeof base44.auth.logout === 'function') {
+        await base44.auth.logout();
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+    
+    // Altijd redirect naar home, forceer page reload om state te resetten
+    window.location.replace('/Home');
   };
 
   if (isLoading) {
