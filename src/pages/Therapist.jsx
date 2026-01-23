@@ -147,6 +147,7 @@ export default function Therapist() {
   const [isSending, setIsSending] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastEmailTime, setLastEmailTime] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -175,6 +176,11 @@ export default function Therapist() {
   };
 
   const saveTherapist = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (therapistData.email && !emailRegex.test(therapistData.email)) {
+      alert(lang === "nl" ? "Voer een geldig e-mailadres in" : "Please enter a valid email address");
+      return;
+    }
     await User.updateMyUserData({ therapist: therapistData });
     setShowTherapistForm(false);
     loadData();
@@ -186,6 +192,16 @@ export default function Therapist() {
   const sendMessage = async () => {
     if (!therapistData.email) {
       alert(lang === "nl" ? "Voeg eerst een fysiotherapeut toe" : "Please add a therapist first");
+      return;
+    }
+
+    const now = Date.now();
+    const cooldownMs = 60000; // 1 minuut cooldown
+    if (now - lastEmailTime < cooldownMs) {
+      const waitSeconds = Math.ceil((cooldownMs - (now - lastEmailTime)) / 1000);
+      alert(lang === "nl" 
+        ? `Wacht nog ${waitSeconds} seconden voordat je een nieuw bericht stuurt` 
+        : `Please wait ${waitSeconds} seconds before sending another message`);
       return;
     }
 
@@ -211,6 +227,7 @@ Verzonden via ${appName} (${appTagline})
       setTimeout(() => setShowSuccess(false), 3000);
       setMessageData({ subject: "", message: "" });
       setShowMessageForm(false);
+      setLastEmailTime(Date.now());
     } catch (error) {
       console.error("Error sending message:", error);
       alert(lang === "nl" ? "Er ging iets mis bij het verzenden. Probeer het opnieuw." : "Something went wrong. Please try again.");
@@ -221,6 +238,16 @@ Verzonden via ${appName} (${appTagline})
   const sendConsultRequest = async () => {
     if (!therapistData.email) {
       alert(lang === "nl" ? "Voeg eerst een fysiotherapeut toe" : "Please add a therapist first");
+      return;
+    }
+
+    const now = Date.now();
+    const cooldownMs = 60000; // 1 minuut cooldown
+    if (now - lastEmailTime < cooldownMs) {
+      const waitSeconds = Math.ceil((cooldownMs - (now - lastEmailTime)) / 1000);
+      alert(lang === "nl" 
+        ? `Wacht nog ${waitSeconds} seconden voordat je een nieuw bericht stuurt` 
+        : `Please wait ${waitSeconds} seconds before sending another message`);
       return;
     }
 
@@ -262,6 +289,7 @@ ${lang === "nl" ? "Verzonden via" : "Sent via"} ${appName} (${appTagline})
       setTimeout(() => setShowSuccess(false), 3000);
       setConsultData({ urgency: "medium", preferredDate: "", preferredTime: "", reason: "" });
       setShowConsultForm(false);
+      setLastEmailTime(Date.now());
     } catch (error) {
       console.error("Error sending consultation request:", error);
       alert(lang === "nl" ? "Er ging iets mis bij het verzenden. Probeer het opnieuw." : "Something went wrong. Please try again.");
