@@ -96,6 +96,12 @@ export default function Dashboard() {
     enabled: !!user?.onboardingCompleted,
   });
 
+  const { data: lessons = [] } = useQuery({
+    queryKey: ['lessons'],
+    queryFn: () => base44.entities.EducationLesson.list("order", 50),
+    enabled: !!user?.onboardingCompleted,
+  });
+
   const [isLoadingData, setIsLoadingData] = useState(true);
 
   useEffect(() => {
@@ -120,7 +126,9 @@ export default function Dashboard() {
   }
 
   const completedCoreLessons = user?.completedCoreLessons || [];
-  const hasCompletedEducation = completedCoreLessons.length >= 3;
+  const coreLessons = lessons.filter(l => l.isCoreLesson === true);
+  const hasCompletedEducation = coreLessons.length > 0 && 
+    coreLessons.every(l => completedCoreLessons.includes(l.key));
   
   const chartData = measurements.slice(0, 7).reverse().map(log => ({
     date: new Date(log.date).toLocaleDateString(lang, { month: 'short', day: 'numeric' }),

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,7 +18,7 @@ const translations = {
     title: "Kennisbibliotheek",
     subtitle: "Evidence-based educatie voor beter begrip en resultaat",
     coreLessons: "Basis Kennismodules",
-    coreSubtitle: "Voltooi deze 3 lessen om je volledige programma te ontgrendelen",
+    coreSubtitle: "Voltooi deze lessen om je volledige programma te ontgrendelen",
     advancedLessons: "Verdieping & Extra Kennis",
     readingTime: "min leestijd",
     premium: "Premium",
@@ -43,7 +42,7 @@ const translations = {
     title: "Knowledge Library",
     subtitle: "Evidence-based education for better understanding and results",
     coreLessons: "Core Knowledge Modules",
-    coreSubtitle: "Complete these 3 lessons to unlock your full program",
+    coreSubtitle: "Complete these lessons to unlock your full program",
     advancedLessons: "Advanced & Extra Knowledge",
     readingTime: "min read",
     premium: "Premium",
@@ -64,8 +63,6 @@ const translations = {
     completeLessonFirst: "Complete lesson first", // Added 'completeLessonFirst' translation
   }
 };
-
-const coreLessonKeys = ["arthritis_basics", "movement_myth", "pain_science"];
 
 const lessonIcons = {
   "arthritis_basics": Brain,
@@ -114,18 +111,15 @@ export default function Library() {
   const isPremium = user?.subscriptionTier === "premium" || user?.subscriptionTier === "premium_practice";
   
   const completedLessons = user?.completedCoreLessons || [];
-  const coreProgress = (completedLessons.length / 3) * 100;
-  const allCoreComplete = completedLessons.length >= 3;
-
-  const coreLessonsRaw = lessons.filter(l => coreLessonKeys.includes(l.key));
   
-  const coreLessonsUnique = coreLessonKeys.map(key => 
-    coreLessonsRaw.find(l => l.key === key)
-  ).filter(Boolean);
+  const coreLessons = lessons.filter(l => l.isCoreLesson === true);
+  const advancedLessons = lessons.filter(l => l.isCoreLesson !== true);
   
-  const coreLessons = coreLessonsUnique;
-  
-  const advancedLessons = lessons.filter(l => !coreLessonKeys.includes(l.key));
+  const coreProgress = coreLessons.length > 0 
+    ? (completedLessons.filter(key => coreLessons.some(l => l.key === key)).length / coreLessons.length) * 100 
+    : 0;
+  const allCoreComplete = coreLessons.length > 0 && 
+    coreLessons.every(l => completedLessons.includes(l.key));
 
   return (
     <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -147,7 +141,7 @@ export default function Library() {
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold text-blue-600">
-                  {completedLessons.length}/3
+                  {completedLessons.filter(key => coreLessons.some(l => l.key === key)).length}/{coreLessons.length}
                 </p>
                 <p className="text-xs text-gray-600">{t.lessonsCompleted}</p>
               </div>
@@ -418,7 +412,7 @@ export default function Library() {
                 )}
 
                 <div className="flex gap-3 pt-4 border-t">
-                  {selectedLesson.key && coreLessonKeys.includes(selectedLesson.key) && !completedLessons.includes(selectedLesson.key) && (
+                  {selectedLesson.isCoreLesson && !completedLessons.includes(selectedLesson.key) && (
                     <Button 
                       onClick={() => markCompleteMutation.mutate(selectedLesson.key)}
                       className="flex-1 bg-green-600 hover:bg-green-700"
