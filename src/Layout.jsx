@@ -93,16 +93,20 @@ export default function Layout({ children, currentPageName }) {
   const isPremium = user?.subscriptionTier === "premium" || user?.subscriptionTier === "premium_practice";
 
   const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "Dashboard" },
-    { name: t.progress, icon: TrendingUp, path: "Progress" },
-    { name: t.exercises, icon: Dumbbell, path: "Exercises" },
-    { name: t.goals, icon: Target, path: "Goals" },
-    { name: t.nutrition, icon: Apple, path: "Nutrition" },
-    { name: t.supplements, icon: Heart, path: "Supplements" },
-    { name: lang === "nl" ? "Medicatie" : "Medication", icon: Pill, path: "Medication" },
-    { name: t.therapist, icon: MessageCircle, path: "Therapist" },
-    { name: t.library, icon: BookOpen, path: "Library" },
-    { name: t.premium, icon: Crown, path: "Premium", highlight: !isPremium }
+    ...(user?.role === "therapist" ? [
+      { name: lang === "nl" ? "Mijn Patiënten" : "My Patients", icon: Users, path: "TherapistDashboard" }
+    ] : [
+      { name: "Dashboard", icon: LayoutDashboard, path: "Dashboard" },
+      { name: t.progress, icon: TrendingUp, path: "Progress" },
+      { name: t.exercises, icon: Dumbbell, path: "Exercises" },
+      { name: t.goals, icon: Target, path: "Goals" },
+      { name: t.nutrition, icon: Apple, path: "Nutrition" },
+      { name: t.supplements, icon: Heart, path: "Supplements" },
+      { name: lang === "nl" ? "Medicatie" : "Medication", icon: Pill, path: "Medication" },
+      { name: t.therapist, icon: MessageCircle, path: "Therapist" },
+      { name: t.library, icon: BookOpen, path: "Library" },
+      { name: t.premium, icon: Crown, path: "Premium", highlight: !isPremium }
+    ])
   ];
 
   if (isChangingLanguage) {
