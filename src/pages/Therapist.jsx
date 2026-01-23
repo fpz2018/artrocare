@@ -208,7 +208,7 @@ export default function Therapist() {
       const appName = lang === "nl" ? "Artrose Kompas" : "JointWise";
       const appTagline = lang === "nl" ? "Powered by JointWise" : "Smart Care, Strong Joints";
       
-      await SendEmail({
+      await base44.integrations.Core.SendEmail({
         to: therapistData.email,
         subject: `${appName} - ${sanitizeInput(messageData.subject)}`,
         body: `
@@ -277,7 +277,7 @@ ${therapistData.agendaUrl ? `\n${lang === "nl" ? "Online agenda" : "Online calen
 ${lang === "nl" ? "Verzonden via" : "Sent via"} ${appName} (${appTagline})
       `;
 
-      await SendEmail({
+      await base44.integrations.Core.SendEmail({
         to: therapistData.email,
         subject: `${appName} - ${lang === "nl" ? "Consult Aanvraag" : "Consultation Request"} (${urgencyText[consultData.urgency]})`,
         body: emailBody
@@ -341,7 +341,7 @@ ${m.notes ? `- ${lang === "nl" ? "Notities" : "Notes"}: ${m.notes}` : ''}
 ${lang === "nl" ? "Verzonden via" : "Sent via"} ${appName} (${appTagline})
       `;
 
-      await SendEmail({
+      await base44.integrations.Core.SendEmail({
         to: therapistData.email,
         subject: `${appName} - ${lang === "nl" ? "Voortgangsrapport" : "Progress Report"} ${user.full_name}`,
         body: report

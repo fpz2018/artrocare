@@ -88,7 +88,7 @@ export default function Settings() {
 
   const loadData = async () => {
     try {
-      const userData = await User.me();
+      const userData = await base44.auth.me();
       if (!userData) {
         window.location.href = '/Home';
         return;
@@ -136,7 +136,7 @@ export default function Settings() {
   };
 
   const handleLogout = async () => {
-    await User.logout();
+    await base44.auth.logout();
   };
 
   if (isLoading) {
