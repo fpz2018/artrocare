@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { sanitizeInput } from "@/lib/utils";
 import { User } from "@/entities/User";
 import { Measurement } from "@/entities/Measurement";
 import { SendEmail } from "@/integrations/Core";
@@ -195,11 +196,11 @@ export default function Therapist() {
       
       await SendEmail({
         to: therapistData.email,
-        subject: `${appName} - ${messageData.subject}`,
+        subject: `${appName} - ${sanitizeInput(messageData.subject)}`,
         body: `
 Bericht van: ${user.full_name} (${user.email})
 
-${messageData.message}
+${sanitizeInput(messageData.message)}
 
 ---
 Verzonden via ${appName} (${appTagline})
@@ -243,7 +244,7 @@ ${lang === "nl" ? "Voorkeursdatum" : "Preferred Date"}: ${consultData.preferredD
 ${lang === "nl" ? "Voorkeurstijd" : "Preferred Time"}: ${consultData.preferredTime || (lang === "nl" ? "Niet opgegeven" : "Not specified")}
 
 ${lang === "nl" ? "Reden voor consult" : "Reason for consultation"}:
-${consultData.reason}
+${sanitizeInput(consultData.reason)}
 
 ${therapistData.agendaUrl ? `\n${lang === "nl" ? "Online agenda" : "Online calendar"}: ${therapistData.agendaUrl}\n` : ''}
 

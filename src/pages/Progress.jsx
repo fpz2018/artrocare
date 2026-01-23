@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { sanitizeInput } from "@/lib/utils";
 import { User } from "@/entities/User";
 import { Measurement } from "@/entities/Measurement";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -217,8 +218,8 @@ export default function Progress() {
         sleepQuality: formData.sleepQuality[0],
         stressLevel: formData.stressLevel[0],
         mood: formData.mood,
-        notes: formData.notes || "",
-        triggers: triggersList,
+        notes: sanitizeInput(formData.notes) || "",
+        triggers: triggersList.map(t => sanitizeInput(t)),
         isFlare: isFlare
       };
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { sanitizeInput } from "@/lib/utils";
 import { User } from "@/entities/User";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -113,7 +114,7 @@ export default function Settings() {
       const languageChanged = formData.language !== user.language;
       
       await User.updateMyUserData({
-        full_name: formData.full_name,
+        full_name: sanitizeInput(formData.full_name),
         height: parseFloat(formData.height) || null,
         weight: parseFloat(formData.weight) || null,
         language: formData.language,
