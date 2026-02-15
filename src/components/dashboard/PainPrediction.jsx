@@ -1,246 +1,158 @@
-import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import React, { useMemo, useState } from 'react';
+import { useI18n } from '@/i18n';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import {
-  Brain,
-  AlertTriangle,
-  TrendingUp,
-  Shield,
-  Sparkles,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp,
-  Moon,
-  Zap,
-  Dumbbell,
-  Activity
-} from "lucide-react";
-import { InlineDisclaimer } from "@/components/legal/Disclaimer";
+  Brain, TrendingUp, Moon, Frown, Activity, AlertTriangle,
+  ChevronDown, ChevronUp, RefreshCw, ShieldCheck
+} from 'lucide-react';
+import { InlineDisclaimer } from '@/components/legal/Disclaimer';
 
-const translations = {
-  nl: {
-    title: "Flare Voorspelling",
-    poweredBy: "AI-gestuurde analyse",
-    lowRisk: "Laag Risico",
-    moderateRisk: "Gemiddeld Risico",
-    highRisk: "Hoog Risico",
-    insufficientData: "Onvoldoende Data",
-    insufficientDataDesc: "Log minimaal 7 dagen om voorspellingen te krijgen",
-    confidence: "Betrouwbaarheid",
-    riskFactors: "Risicofactoren",
-    recommendations: "Aanbevelingen",
-    refresh: "Vernieuwen",
-    showMore: "Toon meer",
-    showLess: "Toon minder",
-    basedOn: "Gebaseerd op je laatste 90 dagen data",
-    noRiskFactors: "Geen significante risicofactoren gedetecteerd",
-    keepItUp: "Ga zo door!"
-  },
-  en: {
-    title: "Flare Prediction",
-    poweredBy: "AI-powered analysis",
-    lowRisk: "Low Risk",
-    moderateRisk: "Moderate Risk",
-    highRisk: "High Risk",
-    insufficientData: "Insufficient Data",
-    insufficientDataDesc: "Log at least 7 days to get predictions",
-    confidence: "Confidence",
-    riskFactors: "Risk Factors",
-    recommendations: "Recommendations",
-    refresh: "Refresh",
-    showMore: "Show more",
-    showLess: "Show less",
-    basedOn: "Based on your last 90 days of data",
-    noRiskFactors: "No significant risk factors detected",
-    keepItUp: "Keep it up!"
-  }
-};
+export default function PainPrediction({ measurements = [] }) {
+  const { t } = useI18n();
+  const [showDetails, setShowDetails] = useState(false);
 
-const riskColors = {
-  low: "bg-green-500",
-  moderate: "bg-yellow-500",
-  high: "bg-red-500",
-  insufficient_data: "bg-gray-400"
-};
+  const prediction = useMemo(() => {
+    if (measurements.length < 5) {
+      return { level: 'insufficient_data', score: 0, confidence: 0, factors: [], recommendations: [] };
+    }
 
-const riskBgColors = {
-  low: "from-green-50 to-emerald-50 border-green-200",
-  moderate: "from-yellow-50 to-orange-50 border-yellow-200",
-  high: "from-red-50 to-pink-50 border-red-200",
-  insufficient_data: "from-gray-50 to-slate-50 border-gray-200"
-};
+    const recent = measurements.slice(-7);
+    const prior = measurements.slice(-14, -7);
 
-const factorIcons = {
-  rising_pain: TrendingUp,
-  poor_sleep: Moon,
-  high_stress: Zap,
-  low_activity: Dumbbell,
-  multiple_triggers: AlertTriangle,
-  high_volatility: Activity
-};
+    const avg = (arr, key) => {
+      const vals = arr.map((m) => m[key]).filter((v) => v != null);
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+    };
 
-export default function PainPrediction({ user }) {
-  const [expanded, setExpanded] = useState(false);
-  const lang = user?.language || "nl";
-  const t = translations[lang];
+    const recentPain = avg(recent, 'pain_level');
+    const priorPain = avg(prior, 'pain_level');
+    const recentSleep = avg(recent, 'sleep_quality');
+    const recentStress = avg(recent, 'stress_level');
+    const exerciseDays = recent.filter((m) => m.exercise_done).length;
 
-  const { data: prediction, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['painPrediction', user?.email],
-    queryFn: () => base44.functions.predictPainFlare({}),
-    enabled: !!user,
-    staleTime: 1000 * 60 * 60
-  });
+    let score = 0;
+    const factors = [];
+    const recommendations = [];
 
-  if (isLoading) {
-    return (
-      <Card className="animate-pulse">
-        <CardHeader>
-          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-        </CardHeader>
-        <CardContent>
-          <div className="h-24 bg-gray-200 rounded"></div>
-        </CardContent>
-      </Card>
-    );
-  }
+    // Rising pain
+    if (priorPain > 0 && recentPain > priorPain + 1) {
+      score += 2;
+      factors.push('rising_pain');
+      recommendations.push(t('language') === 'nl' ? 'Verminder tijdelijk de intensiteit van je oefeningen' : 'Temporarily reduce exercise intensity');
+    }
 
-  if (!prediction) return null;
+    // Poor sleep
+    if (recentSleep < 5 && recentSleep > 0) {
+      score += 2;
+      factors.push('poor_sleep');
+      recommendations.push(t('language') === 'nl' ? 'Focus op slaaphygiene: vaste bedtijden, geen schermen voor het slapen' : 'Focus on sleep hygiene: consistent bedtimes, no screens before sleep');
+    }
 
-  const riskLevel = prediction.prediction;
-  const riskScore = prediction.riskScore || 0;
+    // High stress
+    if (recentStress > 6) {
+      score += 1.5;
+      factors.push('high_stress');
+      recommendations.push(t('language') === 'nl' ? 'Probeer ontspanningsoefeningen of ademhalingsoefeningen' : 'Try relaxation exercises or breathing exercises');
+    }
+
+    // Low activity
+    if (exerciseDays < 2) {
+      score += 1;
+      factors.push('low_activity');
+      recommendations.push(t('language') === 'nl' ? 'Probeer minstens 3x per week te bewegen, ook al is het licht' : 'Try to exercise at least 3x per week, even if it\'s light');
+    }
+
+    const level = score >= 5 ? 'high' : score >= 3 ? 'moderate' : 'low';
+    const confidence = Math.min(90, 40 + measurements.length * 3);
+
+    return { level, score, confidence, factors, recommendations };
+  }, [measurements, t]);
+
+  const riskColors = { low: 'text-green-700', moderate: 'text-amber-700', high: 'text-red-700', insufficient_data: 'text-gray-500' };
+  const riskBgColors = { low: 'from-green-50 to-emerald-50', moderate: 'from-amber-50 to-orange-50', high: 'from-red-50 to-rose-50', insufficient_data: 'from-gray-50 to-slate-50' };
+
+  const factorIcons = {
+    rising_pain: TrendingUp,
+    poor_sleep: Moon,
+    high_stress: Frown,
+    low_activity: Activity,
+  };
 
   return (
-    <Card className={`shadow-lg border-2 bg-gradient-to-br ${riskBgColors[riskLevel]}`}>
+    <Card className={`bg-gradient-to-br ${riskBgColors[prediction.level]} border-gray-200`}>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <Brain className="w-5 h-5 text-purple-600" />
-            {t.title}
+            {t('pred_title')}
           </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-          </Button>
+          <Badge className={riskColors[prediction.level]}>
+            {t(`pred_${prediction.level}`)}
+          </Badge>
         </div>
-        <p className="text-xs text-gray-500 flex items-center gap-1">
-          <Sparkles className="w-3 h-3" />
-          {t.poweredBy}
-        </p>
       </CardHeader>
-
-      <CardContent>
-        {riskLevel === "insufficient_data" ? (
-          <div className="text-center py-4">
-            <Activity className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-            <p className="font-semibold text-gray-700">{t.insufficientData}</p>
-            <p className="text-sm text-gray-500">{t.insufficientDataDesc}</p>
-          </div>
-        ) : (
+      <CardContent className="space-y-4">
+        {prediction.level !== 'insufficient_data' && (
           <>
-            <div className="flex items-center gap-4 mb-4">
-              <div className={`w-16 h-16 rounded-full ${riskColors[riskLevel]} flex items-center justify-center`}>
-                {riskLevel === "low" && <Shield className="w-8 h-8 text-white" />}
-                {riskLevel === "moderate" && <AlertTriangle className="w-8 h-8 text-white" />}
-                {riskLevel === "high" && <AlertTriangle className="w-8 h-8 text-white" />}
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-600">{t('pred_confidence')}</span>
+                <span className="font-semibold">{Math.round(prediction.confidence)}%</span>
               </div>
-              <div className="flex-1">
-                <p className="text-xl font-bold text-gray-900">
-                  {riskLevel === "low" && t.lowRisk}
-                  {riskLevel === "moderate" && t.moderateRisk}
-                  {riskLevel === "high" && t.highRisk}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-gray-600">{t.confidence}:</span>
-                  <Progress value={prediction.confidence * 100} className="w-20 h-2" />
-                  <span className="text-sm font-medium">{Math.round(prediction.confidence * 100)}%</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <div className="flex justify-between text-xs text-gray-500 mb-1">
-                <span>Laag</span>
-                <span>Hoog</span>
-              </div>
-              <div className="h-3 bg-gradient-to-r from-green-300 via-yellow-300 to-red-300 rounded-full relative">
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-gray-800 rounded-full shadow"
-                  style={{ left: `${Math.min(riskScore, 100)}%`, marginLeft: '-8px' }}
-                />
-              </div>
+              <Progress value={prediction.confidence} className="h-2" />
             </div>
 
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setExpanded(!expanded)}
-              className="w-full justify-between"
+              onClick={() => setShowDetails(!showDetails)}
+              className="w-full justify-center"
             >
-              {expanded ? t.showLess : t.showMore}
-              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              {showDetails ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
+              {showDetails ? t('close') : t('pred_factors')}
             </Button>
 
-            {expanded && (
-              <div className="mt-4 space-y-4">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">{t.riskFactors}</h4>
-                  {prediction.riskFactors?.length > 0 ? (
+            {showDetails && (
+              <div className="space-y-4">
+                {prediction.factors.length > 0 && (
+                  <div>
+                    <p className="text-sm font-semibold mb-2">{t('pred_factors')}:</p>
                     <div className="space-y-2">
-                      {prediction.riskFactors.map((factor, idx) => {
-                        const Icon = factorIcons[factor.factor] || AlertTriangle;
+                      {prediction.factors.map((factor) => {
+                        const Icon = factorIcons[factor] || AlertTriangle;
                         return (
-                          <div key={idx} className="flex items-start gap-2 p-2 bg-white/50 rounded-lg">
-                            <Icon className={`w-4 h-4 mt-0.5 ${
-                              factor.severity === "high" ? "text-red-500" :
-                              factor.severity === "medium" ? "text-yellow-600" : "text-blue-500"
-                            }`} />
-                            <span className="text-sm text-gray-700">
-                              {lang === "nl" ? factor.description_nl : factor.description_en}
-                            </span>
+                          <div key={factor} className="flex items-center gap-2 text-sm">
+                            <Icon className="w-4 h-4 text-amber-600" />
+                            <span className="capitalize">{factor.replace(/_/g, ' ')}</span>
                           </div>
                         );
                       })}
                     </div>
-                  ) : (
-                    <p className="text-sm text-gray-600 flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-green-500" />
-                      {t.noRiskFactors} {t.keepItUp}
-                    </p>
-                  )}
-                </div>
-
-                {prediction.recommendations?.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">{t.recommendations}</h4>
-                    <div className="space-y-2">
-                      {prediction.recommendations.map((rec, idx) => (
-                        <div key={idx} className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg">
-                          <Sparkles className="w-4 h-4 text-blue-600 mt-0.5" />
-                          <span className="text-sm text-blue-900">
-                            {lang === "nl" ? rec.description_nl : rec.description_en}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 )}
 
-                <p className="text-xs text-gray-400 text-center">{t.basedOn}</p>
+                {prediction.recommendations.length > 0 && (
+                  <div>
+                    <p className="text-sm font-semibold mb-2">{t('pred_recommendations')}:</p>
+                    <ul className="space-y-1 text-sm">
+                      {prediction.recommendations.map((rec, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <ShieldCheck className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
-
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <InlineDisclaimer type="ai" lang={lang} />
-            </div>
           </>
         )}
+
+        <InlineDisclaimer type="ai" />
       </CardContent>
     </Card>
   );

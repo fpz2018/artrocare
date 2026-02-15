@@ -1,82 +1,117 @@
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClientInstance } from '@/lib/query-client'
-import NavigationTracker from '@/lib/NavigationTracker'
-import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/query-client';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { I18nProvider } from '@/i18n';
+import { Toaster } from 'sonner';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import Layout from '@/Layout';
 
-const { Pages, Layout, mainPage } = pagesConfig;
-const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
+// Lazy load all pages for code splitting
+const Home = lazy(() => import('@/pages/Home'));
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Progress = lazy(() => import('@/pages/Progress'));
+const Exercises = lazy(() => import('@/pages/Exercises'));
+const Goals = lazy(() => import('@/pages/Goals'));
+const Nutrition = lazy(() => import('@/pages/Nutrition'));
+const Supplements = lazy(() => import('@/pages/Supplements'));
+const Medication = lazy(() => import('@/pages/Medication'));
+const Therapist = lazy(() => import('@/pages/Therapist'));
+const TherapistDashboard = lazy(() => import('@/pages/TherapistDashboard'));
+const Library = lazy(() => import('@/pages/Library'));
+const Premium = lazy(() => import('@/pages/Premium'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Community = lazy(() => import('@/pages/Community'));
 
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
-
-const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+// Loading spinner component
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-blue-50">
+      <div className="flex flex-col items-center gap-3">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        <p className="text-sm text-gray-500">Laden...</p>
       </div>
-    );
-  }
-
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
-  }
-
-  // Render the main app
-  return (
-    <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    </div>
   );
-};
-
-
-function App() {
-
-  return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
-  )
 }
 
-export default App
+// Protected route wrapper
+function ProtectedRoute({ children, requiredRole }) {
+  const { isAuthenticated, loading, profile } = useAuth();
+
+  if (loading) return <PageLoader />;
+  if (!isAuthenticated) return <Navigate to="/" replace />;
+
+  // Role-based access control
+  if (requiredRole && profile?.role !== requiredRole) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Layout>{children}</Layout>;
+}
+
+// Route configuration
+function AppRoutes() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) return <PageLoader />;
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Public route */}
+        <Route
+          path="/"
+          element={
+            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Home />
+          }
+        />
+
+        {/* Protected routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+        <Route path="/exercises" element={<ProtectedRoute><Exercises /></ProtectedRoute>} />
+        <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
+        <Route path="/nutrition" element={<ProtectedRoute><Nutrition /></ProtectedRoute>} />
+        <Route path="/supplements" element={<ProtectedRoute><Supplements /></ProtectedRoute>} />
+        <Route path="/medication" element={<ProtectedRoute><Medication /></ProtectedRoute>} />
+        <Route path="/therapist" element={<ProtectedRoute><Therapist /></ProtectedRoute>} />
+        <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+        <Route path="/premium" element={<ProtectedRoute><Premium /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+
+        {/* Therapist-only route */}
+        <Route
+          path="/therapist-dashboard"
+          element={
+            <ProtectedRoute requiredRole="therapist">
+              <TherapistDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <I18nProvider>
+          <AuthProvider>
+            <Router>
+              <AppRoutes />
+            </Router>
+            <Toaster position="top-center" richColors closeButton />
+          </AuthProvider>
+        </I18nProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+}

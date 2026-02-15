@@ -1,477 +1,190 @@
-import React, { useState, useEffect } from "react";
-import { User } from "@/entities/User";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useMemo } from 'react';
+import { useAuth } from '@/lib/AuthContext';
+import { useI18n } from '@/i18n';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import {
-  Target,
-  Plus,
-  CheckCircle,
-  Trophy,
-  Flame,
-  Award
-} from "lucide-react";
-
-const translations = {
-  nl: {
-    title: "Mijn Doelen",
-    subtitle: "Stel persoonlijke doelen en volg je voortgang",
-    addGoal: "Nieuw Doel Toevoegen",
-    goalTitle: "Doel",
-    targetValue: "Streefwaarde",
-    currentValue: "Huidige waarde",
-    deadline: "Streefdatum",
-    category: "Categorie",
-    save: "Opslaan",
-    cancel: "Annuleren",
-    edit: "Bewerken",
-    complete: "Voltooid",
-    inProgress: "Bezig",
-    notStarted: "Nog niet gestart",
-    progress: "Voortgang",
-    streak: "Streak",
-    days: "dagen",
-    achievements: "Behaalde Prestaties",
-    noGoals: "Nog geen doelen ingesteld",
-    getStarted: "Stel je eerste doel in",
-    categories: {
-      pain: "Pijnvermindering",
-      mobility: "Mobiliteit",
-      exercise: "Beweging",
-      weight: "Gewicht",
-      nutrition: "Voeding",
-      sleep: "Slaap",
-      other: "Anders"
-    },
-    badges: {
-      firstGoal: "Eerste Doel",
-      weekStreak: "7 Dagen Streak",
-      monthStreak: "30 Dagen Streak",
-      goalCompleted: "Doel Behaald",
-      fiveGoals: "5 Doelen Voltooid"
-    }
-  },
-  en: {
-    title: "My Goals",
-    subtitle: "Set personal goals and track your progress",
-    addGoal: "Add New Goal",
-    goalTitle: "Goal",
-    targetValue: "Target value",
-    currentValue: "Current value",
-    deadline: "Target date",
-    category: "Category",
-    save: "Save",
-    cancel: "Cancel",
-    edit: "Edit",
-    complete: "Completed",
-    inProgress: "In Progress",
-    notStarted: "Not Started",
-    progress: "Progress",
-    streak: "Streak",
-    days: "days",
-    achievements: "Achievements Unlocked",
-    noGoals: "No goals set yet",
-    getStarted: "Set your first goal",
-    categories: {
-      pain: "Pain Reduction",
-      mobility: "Mobility",
-      exercise: "Exercise",
-      weight: "Weight",
-      nutrition: "Nutrition",
-      sleep: "Sleep",
-      other: "Other"
-    },
-    badges: {
-      firstGoal: "First Goal",
-      weekStreak: "7 Day Streak",
-      monthStreak: "30 Day Streak",
-      goalCompleted: "Goal Achieved",
-      fiveGoals: "5 Goals Completed"
-    }
-  }
-};
+  Dialog, DialogContent, DialogHeader, DialogTitle
+} from '@/components/ui/dialog';
+import { Target, Plus, Edit3, CheckCircle, Flame, Award, Trophy } from 'lucide-react';
 
 export default function Goals() {
-  const [user, setUser] = useState(null);
-  const [goals, setGoals] = useState([]);
+  const { profile, updateProfile } = useAuth();
+  const { t } = useI18n();
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    targetValue: "",
-    currentValue: "",
-    deadline: "",
-    category: "exercise"
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const [form, setForm] = useState({ title: '', category: 'health', targetValue: 100, currentValue: 0, deadline: '' });
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      const userData = await User.me();
-      setUser(userData);
-      setGoals(userData.goals || []);
-    } catch (error) {
-      console.error("Error loading goals:", error);
-    }
-    setIsLoading(false);
-  };
+  const goals = profile?.user_goals || [];
 
   const handleSubmit = async () => {
     const newGoal = {
-      id: editingGoal?.id || Date.now().toString(),
-      ...formData,
-      createdAt: editingGoal?.createdAt || new Date().toISOString(),
+      ...form,
+      id: editingGoal?.id || crypto.randomUUID(),
+      progress: Math.round((form.currentValue / form.targetValue) * 100),
+      completed: form.currentValue >= form.targetValue,
       updatedAt: new Date().toISOString(),
-      completed: false
     };
 
-    const updatedGoals = editingGoal
-      ? goals.map(g => g.id === editingGoal.id ? newGoal : g)
-      : [...goals, newGoal];
+    let updated;
+    if (editingGoal) {
+      updated = goals.map((g) => (g.id === editingGoal.id ? newGoal : g));
+    } else {
+      updated = [...goals, newGoal];
+    }
 
-    await User.updateMyUserData({ goals: updatedGoals });
-    setGoals(updatedGoals);
+    await updateProfile({ user_goals: updated });
     setShowForm(false);
     setEditingGoal(null);
-    setFormData({ title: "", targetValue: "", currentValue: "", deadline: "", category: "exercise" });
+    setForm({ title: '', category: 'health', targetValue: 100, currentValue: 0, deadline: '' });
   };
 
-  const updateProgress = async (goalId, newValue) => {
-    const updatedGoals = goals.map(g => {
+  const updateGoalProgress = async (goalId, newCurrent) => {
+    const updated = goals.map((g) => {
       if (g.id === goalId) {
-        const progress = (parseFloat(newValue) / parseFloat(g.targetValue)) * 100;
-        return {
-          ...g,
-          currentValue: newValue,
-          completed: progress >= 100,
-          updatedAt: new Date().toISOString()
-        };
+        const progress = Math.round((newCurrent / g.targetValue) * 100);
+        return { ...g, currentValue: newCurrent, progress, completed: progress >= 100, updatedAt: new Date().toISOString() };
       }
       return g;
     });
-
-    await User.updateMyUserData({ goals: updatedGoals });
-    setGoals(updatedGoals);
+    await updateProfile({ user_goals: updated });
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  const lang = user?.language || "nl";
-  const t = translations[lang];
-
-  const completedGoals = goals.filter(g => g.completed).length;
-  const streak = calculateStreak(goals);
-  const badges = calculateBadges(goals, streak);
+  const stats = useMemo(() => {
+    const completed = goals.filter((g) => g.completed).length;
+    return { total: goals.length, completed };
+  }, [goals]);
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{t.title}</h1>
-          <p className="text-gray-600">{t.subtitle}</p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">{t.progress}</p>
-                  <p className="text-3xl font-bold">{completedGoals}/{goals.length}</p>
-                </div>
-                <Target className="w-12 h-12 opacity-30" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">{t.streak}</p>
-                  <p className="text-3xl font-bold">{streak}</p>
-                  <p className="text-xs opacity-75">{t.days}</p>
-                </div>
-                <Flame className="w-12 h-12 opacity-30" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">{t.achievements}</p>
-                  <p className="text-3xl font-bold">{badges.length}</p>
-                </div>
-                <Trophy className="w-12 h-12 opacity-30" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Badges */}
-        {badges.length > 0 && (
-          <Card className="mb-8 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-amber-900">
-                <Award className="w-5 h-5" />
-                {t.achievements}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-3">
-                {badges.map((badge, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-amber-300 shadow-md"
-                  >
-                    <span className="text-2xl">{badge.icon}</span>
-                    <span className="font-medium text-gray-900">{t.badges[badge.id]}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Add Goal Button */}
-        <div className="mb-6">
-          <Button
-            onClick={() => setShowForm(true)}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            {t.addGoal}
-          </Button>
-        </div>
-
-        {/* Goal Form */}
-        {showForm && (
-          <Card className="mb-8 shadow-lg border-blue-200">
-            <CardHeader>
-              <CardTitle>{editingGoal ? t.edit : t.addGoal}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>{t.goalTitle}</Label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder={lang === "nl" ? "Bijv. 10 minuten wandelen per dag" : "E.g. Walk 10 minutes daily"}
-                  className="mt-2"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label>{t.category}</Label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {Object.entries(t.categories).map(([key, label]) => (
-                      <option key={key} value={key}>{label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <Label>{t.deadline}</Label>
-                  <Input
-                    type="date"
-                    value={formData.deadline}
-                    onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                    className="mt-2"
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label>{t.targetValue}</Label>
-                  <Input
-                    type="number"
-                    value={formData.targetValue}
-                    onChange={(e) => setFormData({ ...formData, targetValue: e.target.value })}
-                    placeholder="100"
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label>{t.currentValue}</Label>
-                  <Input
-                    type="number"
-                    value={formData.currentValue}
-                    onChange={(e) => setFormData({ ...formData, currentValue: e.target.value })}
-                    placeholder="0"
-                    className="mt-2"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button onClick={handleSubmit} className="flex-1 bg-blue-600 hover:bg-blue-700">
-                  {t.save}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditingGoal(null);
-                    setFormData({ title: "", targetValue: "", currentValue: "", deadline: "", category: "exercise" });
-                  }}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  {t.cancel}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Goals List */}
-        {goals.length === 0 ? (
-          <Card className="text-center py-16">
-            <CardContent>
-              <Target className="w-20 h-20 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.noGoals}</h3>
-              <p className="text-gray-600 mb-6">{t.getStarted}</p>
-              <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-5 h-5 mr-2" />
-                {t.addGoal}
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-6">
-            {goals.map((goal) => {
-              const progress = (parseFloat(goal.currentValue) / parseFloat(goal.targetValue)) * 100;
-              const isCompleted = goal.completed || progress >= 100;
-
-              return (
-                <Card key={goal.id} className={`shadow-lg ${isCompleted ? 'border-green-300 bg-green-50' : 'border-blue-200'}`}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          {goal.title}
-                          {isCompleted && <CheckCircle className="w-5 h-5 text-green-600" />}
-                        </CardTitle>
-                        <Badge className="mt-2">{t.categories[goal.category]}</Badge>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingGoal(goal);
-                          setFormData(goal);
-                          setShowForm(true);
-                        }}
-                      >
-                        {t.edit}
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-gray-600">{t.progress}</span>
-                        <span className="font-semibold text-blue-600">
-                          {goal.currentValue} / {goal.targetValue}
-                        </span>
-                      </div>
-                      <Progress value={Math.min(progress, 100)} className="h-3" />
-                      <p className="text-xs text-gray-500 mt-1">{Math.round(progress)}%</p>
-                    </div>
-
-                    {goal.deadline && (
-                      <div className="text-sm text-gray-600">
-                        <span className="font-medium">{t.deadline}:</span> {new Date(goal.deadline).toLocaleDateString(lang)}
-                      </div>
-                    )}
-
-                    {!isCompleted && (
-                      <div>
-                        <Label className="text-sm">{t.currentValue}</Label>
-                        <div className="flex gap-2 mt-2">
-                          <Input
-                            type="number"
-                            value={goal.currentValue}
-                            onChange={(e) => updateProgress(goal.id, e.target.value)}
-                            className="flex-1"
-                          />
-                          <Button
-                            onClick={() => updateProgress(goal.id, parseFloat(goal.currentValue) + 1)}
-                            variant="outline"
-                            size="icon"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <Target className="w-7 h-7 text-blue-600" />
+          {t('goals_title')}
+        </h1>
+        <Button onClick={() => { setShowForm(true); setEditingGoal(null); }} className="bg-blue-600 hover:bg-blue-700">
+          <Plus className="w-4 h-4 mr-1" /> {t('goals_add')}
+        </Button>
       </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4 text-center">
+            <Trophy className="w-6 h-6 text-blue-600 mx-auto mb-1" />
+            <p className="text-2xl font-bold">{stats.completed}/{stats.total}</p>
+            <p className="text-xs text-gray-500">{t('goals_completed')}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <Flame className="w-6 h-6 text-orange-500 mx-auto mb-1" />
+            <p className="text-2xl font-bold">0</p>
+            <p className="text-xs text-gray-500">{t('goals_streak')}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <Award className="w-6 h-6 text-purple-600 mx-auto mb-1" />
+            <p className="text-2xl font-bold">{stats.completed}</p>
+            <p className="text-xs text-gray-500">{t('goals_badges')}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Goals Grid */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {goals.map((goal) => (
+          <Card key={goal.id} className={goal.completed ? 'bg-green-50 border-green-200' : ''}>
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-semibold">{goal.title}</h3>
+                  <Badge variant="secondary" className="text-xs mt-1">{goal.category}</Badge>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => { setEditingGoal(goal); setForm(goal); setShowForm(true); }}
+                >
+                  <Edit3 className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span>{t('goals_progress')}</span>
+                  <span className="font-semibold">{goal.progress || 0}%</span>
+                </div>
+                <Progress value={goal.progress || 0} />
+              </div>
+              {goal.deadline && (
+                <p className="text-xs text-gray-500">{t('goals_deadline')}: {goal.deadline}</p>
+              )}
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => updateGoalProgress(goal.id, Math.max(0, (goal.currentValue || 0) - 1))}
+                >-</Button>
+                <span className="text-sm font-medium">{goal.currentValue || 0} / {goal.targetValue}</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => updateGoalProgress(goal.id, (goal.currentValue || 0) + 1)}
+                >+</Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {goals.length === 0 && (
+        <Card className="bg-gray-50">
+          <CardContent className="p-8 text-center text-gray-500">
+            <Target className="w-12 h-12 mx-auto mb-4 opacity-30" />
+            <p>{t('language') === 'nl' ? 'Nog geen doelen ingesteld. Voeg je eerste doel toe!' : 'No goals set yet. Add your first goal!'}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Form Dialog */}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingGoal ? t('edit') : t('goals_add')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder={t('language') === 'nl' ? 'Doel titel' : 'Goal title'}
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+            <Input
+              type="number"
+              placeholder={t('goals_target')}
+              value={form.targetValue}
+              onChange={(e) => setForm({ ...form, targetValue: parseInt(e.target.value) || 0 })}
+            />
+            <Input
+              type="number"
+              placeholder={t('goals_current')}
+              value={form.currentValue}
+              onChange={(e) => setForm({ ...form, currentValue: parseInt(e.target.value) || 0 })}
+            />
+            <Input
+              type="date"
+              value={form.deadline}
+              onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+            />
+            <Button onClick={handleSubmit} disabled={!form.title} className="w-full bg-blue-600 hover:bg-blue-700">
+              {t('save')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-}
-
-function calculateStreak(goals) {
-  if (goals.length === 0) return 0;
-  const sortedGoals = [...goals].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-  
-  let streak = 0;
-  let currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0);
-
-  for (let goal of sortedGoals) {
-    const goalDate = new Date(goal.updatedAt);
-    goalDate.setHours(0, 0, 0, 0);
-    
-    const diffDays = Math.floor((currentDate - goalDate) / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === streak) {
-      streak++;
-    } else if (diffDays > streak) {
-      break;
-    }
-  }
-  
-  return streak;
-}
-
-function calculateBadges(goals, streak) {
-  const badges = [];
-  
-  if (goals.length >= 1) badges.push({ id: "firstGoal", icon: "🎯" });
-  if (streak >= 7) badges.push({ id: "weekStreak", icon: "🔥" });
-  if (streak >= 30) badges.push({ id: "monthStreak", icon: "⭐" });
-  
-  const completed = goals.filter(g => g.completed).length;
-  if (completed >= 1) badges.push({ id: "goalCompleted", icon: "✅" });
-  if (completed >= 5) badges.push({ id: "fiveGoals", icon: "🏆" });
-  
-  return badges;
 }

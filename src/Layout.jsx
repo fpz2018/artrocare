@@ -1,324 +1,189 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
+import React, { useState, useMemo } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
+import { useI18n } from '@/i18n';
+import {
+  LayoutDashboard, TrendingUp, Dumbbell, Target, Apple, Pill,
+  Stethoscope, BookOpen, Crown, Settings, Users, Menu, X,
+  Globe, LogOut, ChevronRight, Heart
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FooterDisclaimer } from '@/components/legal/Disclaimer';
 
-import { 
-  LayoutDashboard, 
-  Dumbbell, 
-  Apple, 
-  TrendingUp, 
-  BookOpen, 
-  Crown,
-  Settings,
-  Menu,
-  X,
-  Globe,
-  Loader2,
-  Target,
-  MessageCircle,
-  Heart,
-  Pill,
-  Users
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { FooterDisclaimer } from "@/components/legal/Disclaimer";
+const navItems = [
+  { path: '/dashboard', icon: LayoutDashboard, labelKey: 'nav_dashboard' },
+  { path: '/progress', icon: TrendingUp, labelKey: 'nav_progress' },
+  { path: '/exercises', icon: Dumbbell, labelKey: 'nav_exercises' },
+  { path: '/goals', icon: Target, labelKey: 'nav_goals' },
+  { path: '/nutrition', icon: Apple, labelKey: 'nav_nutrition' },
+  { path: '/supplements', icon: Pill, labelKey: 'nav_supplements' },
+  { path: '/medication', icon: Pill, labelKey: 'nav_medication' },
+  { path: '/therapist', icon: Stethoscope, labelKey: 'nav_therapist' },
+  { path: '/library', icon: BookOpen, labelKey: 'nav_library' },
+  { path: '/premium', icon: Crown, labelKey: 'nav_premium' },
+  { path: '/settings', icon: Settings, labelKey: 'nav_settings' },
+];
 
-const translations = {
-  nl: {
-    dashboard: "Dashboard",
-    exercises: "Oefeningen",
-    nutrition: "Voeding",
-    progress: "Voortgang",
-    goals: "Doelen",
-    supplements: "Supplementen", // Added new translation key
-    therapist: "Fysiotherapeut",
-    library: "Bibliotheek",
-    premium: "Premium",
-    settings: "Instellingen",
-    upgradePremium: "Upgrade naar Premium",
-    appName: "Artrose Kompas",
-    appTagline: "Powered by JointWise"
-  },
-  en: {
-    dashboard: "Dashboard",
-    exercises: "Exercises",
-    nutrition: "Nutrition",
-    progress: "Progress",
-    goals: "Goals",
-    supplements: "Supplements", // Added new translation key
-    therapist: "Therapist",
-    library: "Library",
-    premium: "Premium",
-    settings: "Settings",
-    upgradePremium: "Upgrade to Premium",
-    appName: "JointWise",
-    appTagline: "Smart Care, Strong Joints"
-  }
-};
+const therapistNavItems = [
+  { path: '/therapist-dashboard', icon: Users, labelKey: 'nav_my_patients' },
+  { path: '/settings', icon: Settings, labelKey: 'nav_settings' },
+];
 
-export default function Layout({ children, currentPageName }) {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+export default function Layout({ children }) {
+  const { profile, signOut } = useAuth();
+  const { t, language, setLanguage } = useI18n();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
 
-  useEffect(() => {
-    loadUser();
-  }, []);
+  const items = useMemo(() => {
+    return profile?.role === 'therapist' ? therapistNavItems : navItems;
+  }, [profile?.role]);
 
-  const loadUser = async () => {
-    try {
-      const userData = await base44.auth.me();
-      setUser(userData);
-    } catch (error) {
-      console.error("Error loading user:", error);
-      // User not authenticated, redirect to home
-      window.location.href = "/";
-    }
+  const isPremium = profile?.subscription_tier === 'premium' || profile?.subscription_tier === 'practice';
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'nl' ? 'en' : 'nl');
   };
-
-  const toggleLanguage = async () => {
-    if (!user || isChangingLanguage) return;
-    
-    setIsChangingLanguage(true);
-    const newLang = user.language === "nl" ? "en" : "nl";
-    
-    try {
-      await base44.auth.updateMe({ language: newLang });
-      await new Promise(resolve => setTimeout(resolve, 300));
-      window.location.reload();
-    } catch (error) {
-      console.error("Error updating language:", error);
-      setIsChangingLanguage(false);
-    }
-  };
-
-  const lang = user?.language || "nl";
-  const t = translations[lang];
-  const isPremium = user?.subscriptionTier === "premium" || user?.subscriptionTier === "premium_practice";
-
-  const navItems = [
-    ...(user?.role === "therapist" ? [
-      { name: lang === "nl" ? "Mijn Patiënten" : "My Patients", icon: Users, path: "TherapistDashboard" }
-    ] : [
-      { name: "Dashboard", icon: LayoutDashboard, path: "Dashboard" },
-      { name: t.progress, icon: TrendingUp, path: "Progress" },
-      { name: t.exercises, icon: Dumbbell, path: "Exercises" },
-      { name: t.goals, icon: Target, path: "Goals" },
-      { name: t.nutrition, icon: Apple, path: "Nutrition" },
-      { name: t.supplements, icon: Heart, path: "Supplements" },
-      { name: lang === "nl" ? "Medicatie" : "Medication", icon: Pill, path: "Medication" },
-      { name: t.therapist, icon: MessageCircle, path: "Therapist" },
-      { name: t.library, icon: BookOpen, path: "Library" },
-      { name: t.premium, icon: Crown, path: "Premium", highlight: !isPremium }
-    ])
-  ];
-
-  if (isChangingLanguage) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-blue-50">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-600">
-            {lang === "nl" ? "Taal wijzigen..." : "Changing language..."}
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50">
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">{lang === "nl" ? "AK" : "JW"}</span>
-            </div>
-            <div>
-              <span className="font-bold text-gray-900 text-sm">{t.appName}</span>
-              <p className="text-[10px] text-gray-500 leading-tight">{t.appTagline}</p>
-            </div>
+            <Heart className="w-6 h-6 text-blue-600" />
+            <span className="font-bold text-gray-900">{t('app_name')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleLanguage}
-              disabled={isChangingLanguage}
-              className="text-gray-600"
-            >
-              {isChangingLanguage ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Globe className="w-5 h-5" />
-              )}
+            <Button variant="ghost" size="icon" onClick={toggleLanguage}>
+              <Globe className="w-5 h-5" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-white pt-16">
-          <nav className="p-4 space-y-2">
-            {navItems.map((item) => {
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <nav className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg max-h-[80vh] overflow-y-auto">
+            {items.map((item) => {
               const Icon = item.icon;
-              const isActive = currentPageName === item.path;
+              const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
-                  to={createPageUrl(item.path)}
+                  to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  className={`flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
                     isActive
-                      ? "bg-blue-500 text-white"
-                      : item.highlight
-                      ? "bg-gradient-to-r from-amber-50 to-orange-50 text-orange-700 border border-orange-200"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? 'bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600'
+                      : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.name}</span>
-                  {item.highlight && <Crown className="w-4 h-4 ml-auto" />}
+                  {t(item.labelKey)}
+                  {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
                 </Link>
               );
             })}
-            <Link
-              to={createPageUrl("Settings")}
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100"
+            <button
+              onClick={signOut}
+              className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 w-full"
             >
-              <Settings className="w-5 h-5" />
-              <span className="font-medium">{t.settings}</span>
-            </Link>
+              <LogOut className="w-5 h-5" />
+              {t('logout')}
+            </button>
           </nav>
-        </div>
-      )}
+        )}
+      </header>
 
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex">
-        <div className="w-64 fixed left-0 top-0 bottom-0 bg-white border-r border-gray-200 p-6 overflow-y-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-sm">{lang === "nl" ? "AK" : "JW"}</span>
-            </div>
+      <div className="flex">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-gray-200 z-40">
+          {/* Logo */}
+          <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
+            <Heart className="w-8 h-8 text-blue-600" />
             <div>
-              <h1 className="font-bold text-gray-900 text-lg leading-tight">{t.appName}</h1>
-              <p className="text-[10px] text-gray-500 leading-tight">{t.appTagline}</p>
+              <h1 className="font-bold text-gray-900">{t('app_name')}</h1>
+              <p className="text-xs text-gray-500">{t('tagline')}</p>
             </div>
           </div>
 
-          <nav className="space-y-2 mb-8">
-            {navItems.map((item) => {
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            {items.map((item) => {
               const Icon = item.icon;
-              const isActive = currentPageName === item.path;
+              const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
-                  to={createPageUrl(item.path)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  to={item.path}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                     isActive
-                      ? "bg-blue-500 text-white shadow-lg"
-                      : item.highlight
-                      ? "bg-gradient-to-r from-amber-50 to-orange-50 text-orange-700 border border-orange-200 hover:shadow-md"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? 'bg-blue-50 text-blue-700 font-semibold shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.name}</span>
-                  {item.highlight && <Crown className="w-4 h-4 ml-auto" />}
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                  {t(item.labelKey)}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="border-t border-gray-200 pt-4 space-y-2">
-            <Link
-              to={createPageUrl("Settings")}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                currentPageName === "Settings"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <Settings className="w-5 h-5" />
-              <span className="font-medium">{t.settings}</span>
-            </Link>
-
-            <Button
-              variant="outline"
-              onClick={toggleLanguage}
-              disabled={isChangingLanguage}
-              className="w-full justify-start gap-3"
-            >
-              {isChangingLanguage ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Globe className="w-5 h-5" />
-              )}
-              <span>{lang === "nl" ? "🇳🇱 Nederlands" : "🇬🇧 English"}</span>
-            </Button>
-          </div>
-
-          {!isPremium && (
-            <div className="mt-6 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-orange-200">
-              <Crown className="w-8 h-8 text-orange-600 mb-2" />
-              <h3 className="font-semibold text-gray-900 mb-1">Premium</h3>
-              <p className="text-xs text-gray-600 mb-3">
-                {lang === "nl" 
-                  ? "Ontgrendel alle functies" 
-                  : "Unlock all features"}
-              </p>
-              <Link to={createPageUrl("Premium")}>
-                <Button size="sm" className="w-full bg-orange-600 hover:bg-orange-700">
-                  {t.upgradePremium}
+          {/* Premium upsell */}
+          {!isPremium && profile?.role !== 'therapist' && (
+            <div className="mx-3 mb-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
+              <Crown className="w-5 h-5 text-blue-600 mb-2" />
+              <p className="text-sm font-semibold text-gray-900 mb-1">{t('nav_upgrade')}</p>
+              <Link to="/premium">
+                <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
+                  {t('prem_upgrade')}
                 </Button>
               </Link>
             </div>
           )}
 
-          {user && (
-            <div className="mt-6 p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                  {user.full_name?.[0] || user.email[0].toUpperCase()}
+          {/* User profile & actions */}
+          <div className="border-t border-gray-100 px-4 py-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-semibold text-blue-700">
+                  {(profile?.full_name || profile?.email || '?')[0].toUpperCase()}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {user.full_name || user.email}
-                  </p>
-                  {isPremium && (
-                    <p className="text-xs text-orange-600 flex items-center gap-1">
-                      <Crown className="w-3 h-3" />
-                      Premium
-                    </p>
-                  )}
-                </div>
+                <span className="text-sm font-medium text-gray-700 truncate">
+                  {profile?.full_name || profile?.email || 'User'}
+                </span>
               </div>
+              <Button variant="ghost" size="icon" onClick={toggleLanguage} title={language === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands'}>
+                <Globe className="w-4 h-4" />
+              </Button>
             </div>
-          )}
-        </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={signOut}
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              {t('logout')}
+            </Button>
+          </div>
+        </aside>
 
-        <div className="ml-64 flex-1">
-          {children}
-          <FooterDisclaimer lang={user?.language || "nl"} />
-        </div>
-        </div>
-
-        <div className="lg:hidden pt-16">
-        {children}
-        <FooterDisclaimer lang={user?.language || "nl"} />
-        </div>
-        </div>
-        );
-        }
+        {/* Main content */}
+        <main className="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+          <div className="max-w-5xl mx-auto p-4 lg:p-8">
+            {children}
+          </div>
+          <FooterDisclaimer />
+        </main>
+      </div>
+    </div>
+  );
+}
