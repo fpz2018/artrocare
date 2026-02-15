@@ -196,12 +196,24 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    setUser(null);
-    setProfile(null);
-    setIsAuthenticated(false);
-    profileFetchedRef.current = false;
+    try {
+      // Clear state first so UI updates immediately
+      setUser(null);
+      setProfile(null);
+      setIsAuthenticated(false);
+      profileFetchedRef.current = false;
+
+      // Then sign out from Supabase
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Sign out error:', err);
+      // State already cleared, so user is effectively logged out
+    }
+
+    // Force redirect to home page
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   }, []);
 
   const resetPassword = useCallback(async (email) => {
