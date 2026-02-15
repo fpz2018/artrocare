@@ -9,32 +9,47 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const mountedRef = useRef(true);
+  const profileFetchedRef = useRef(false);
 
   // Fetch user profile from profiles table
-  const fetchProfile = useCallback(async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+  const fetchProfile = useCallback(async (userId, retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error);
+        if (error && error.code === 'PGRST116') {
+          // Profile not found yet (trigger may not have fired yet)
+          if (i < retries - 1) {
+            await new Promise(r => setTimeout(r, 1000)); // wait 1s
+            continue;
+          }
+          return null;
+        }
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return null;
+        }
+        return data;
+      } catch (err) {
+        console.error('Profile fetch error:', err);
+        if (i < retries - 1) {
+          await new Promise(r => setTimeout(r, 1000));
+          continue;
+        }
         return null;
       }
-      return data;
-    } catch (err) {
-      console.error('Profile fetch error:', err);
-      return null;
     }
+    return null;
   }, []);
 
   // Update user profile
   const updateProfile = useCallback(async (updates) => {
     if (!user) throw new Error('Not authenticated');
 
-    // Sanitize updates - remove any undefined values
     const cleanUpdates = Object.fromEntries(
       Object.entries(updates).filter(([, v]) => v !== undefined)
     );
@@ -57,16 +72,54 @@ export function AuthProvider({ children }) {
   // Initialize auth state
   useEffect(() => {
     mountedRef.current = true;
+    let timeoutId;
+
+    // Safety timeout: never stay loading forever
+    timeoutId = setTimeout(() => {
+      if (mountedRef.current && loading) {
+        console.warn('Auth loading timeout - forcing complete');
+        setLoading(false);
+      }
+    }, 8000);
 
     async function initAuth() {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // First, let Supabase process any hash tokens in the URL
+        // This handles the redirect back from email verification
+        const hashParams = window.location.hash;
+        const hasAuthTokens = hashParams && (
+          hashParams.includes('access_token') ||
+          hashParams.includes('refresh_token') ||
+          hashParams.includes('type=signup') ||
+          hashParams.includes('type=recovery')
+        );
+
+        if (hasAuthTokens) {
+          // Wait a bit for Supabase to process the hash
+          await new Promise(r => setTimeout(r, 500));
+        }
+
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('Auth session error:', error);
+          if (mountedRef.current) setLoading(false);
+          return;
+        }
 
         if (session?.user && mountedRef.current) {
           setUser(session.user);
           setIsAuthenticated(true);
           const prof = await fetchProfile(session.user.id);
-          if (mountedRef.current) setProfile(prof);
+          if (mountedRef.current) {
+            setProfile(prof);
+            profileFetchedRef.current = true;
+          }
+
+          // Clean up URL hash after successful auth
+          if (hasAuthTokens && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
         }
       } catch (err) {
         console.error('Auth init error:', err);
@@ -82,10 +135,13 @@ export function AuthProvider({ children }) {
       async (event, session) => {
         if (!mountedRef.current) return;
 
+        console.log('Auth event:', event);
+
         if (event === 'SIGNED_OUT' || !session?.user) {
           setUser(null);
           setProfile(null);
           setIsAuthenticated(false);
+          profileFetchedRef.current = false;
           setLoading(false);
           return;
         }
@@ -94,10 +150,18 @@ export function AuthProvider({ children }) {
           setUser(session.user);
           setIsAuthenticated(true);
 
-          // Only re-fetch profile on sign-in, not on token refresh
-          if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+          // Fetch profile on sign-in or if we haven't fetched it yet
+          if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || !profileFetchedRef.current) {
             const prof = await fetchProfile(session.user.id);
-            if (mountedRef.current) setProfile(prof);
+            if (mountedRef.current) {
+              setProfile(prof);
+              profileFetchedRef.current = true;
+            }
+          }
+
+          // Clean up URL hash after auth callback
+          if (window.location.hash.includes('access_token') && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
           }
         }
         if (mountedRef.current) setLoading(false);
@@ -106,6 +170,7 @@ export function AuthProvider({ children }) {
 
     return () => {
       mountedRef.current = false;
+      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
@@ -136,6 +201,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     setProfile(null);
     setIsAuthenticated(false);
+    profileFetchedRef.current = false;
   }, []);
 
   const resetPassword = useCallback(async (email) => {
