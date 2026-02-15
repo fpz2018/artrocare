@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Heart, Dumbbell, Apple, BookOpen, TrendingUp, Globe,
-  LogIn, UserPlus, Stethoscope
+  LogIn, UserPlus, Stethoscope, CheckCircle
 } from 'lucide-react';
 import { InlineDisclaimer } from '@/components/legal/Disclaimer';
 
@@ -16,14 +16,15 @@ export default function Home() {
   const { t, language, setLanguage } = useI18n();
   const { signIn, signUp, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [authMode, setAuthMode] = useState('login');
+  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'register_therapist'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [practice, setPractice] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
-  // Use effect for navigation instead of calling during render
   React.useEffect(() => {
     if (isAuthenticated) {
       navigate('/dashboard', { replace: true });
@@ -32,11 +33,14 @@ export default function Home() {
 
   if (isAuthenticated) return null;
 
+  const isTherapist = authMode === 'register_therapist';
+  const isRegister = authMode === 'register' || isTherapist;
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
+    setRegistrationSuccess(false);
 
-    // Client-side validation
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       setError(language === 'nl' ? 'Voer een geldig e-mailadres in' : 'Enter a valid email address');
@@ -46,7 +50,7 @@ export default function Home() {
       setError(language === 'nl' ? 'Wachtwoord moet minimaal 6 tekens zijn' : 'Password must be at least 6 characters');
       return;
     }
-    if (authMode === 'register' && name.trim().length < 2) {
+    if (isRegister && name.trim().length < 2) {
       setError(language === 'nl' ? 'Voer je naam in (minimaal 2 tekens)' : 'Enter your name (at least 2 characters)');
       return;
     }
@@ -56,11 +60,45 @@ export default function Home() {
       if (authMode === 'login') {
         await signIn(trimmedEmail, password);
       } else {
-        await signUp(trimmedEmail, password, { full_name: name.trim() });
+        const metadata = {
+          full_name: name.trim(),
+          role: isTherapist ? 'therapist' : 'patient',
+        };
+        if (isTherapist && practice.trim()) {
+          metadata.practice = practice.trim();
+        }
+        const result = await signUp(trimmedEmail, password, metadata);
+
+        // Check if email confirmation is required
+        if (result?.user && !result?.session) {
+          setRegistrationSuccess(true);
+          return;
+        }
       }
-      // Navigation handled by onAuthStateChange via AuthProvider
     } catch (err) {
-      setError(err.message || t('error'));
+      // Handle specific error types with user-friendly messages
+      const msg = err?.message || '';
+      const status = err?.status || 0;
+
+      if (status === 429 || msg.includes('rate limit') || msg.includes('Too Many Requests')) {
+        setError(language === 'nl'
+          ? 'Te veel pogingen. Wacht een paar minuten en probeer het opnieuw.'
+          : 'Too many attempts. Please wait a few minutes and try again.');
+      } else if (msg.includes('User already registered') || msg.includes('already been registered')) {
+        setError(language === 'nl'
+          ? 'Dit e-mailadres is al geregistreerd. Probeer in te loggen.'
+          : 'This email is already registered. Try logging in.');
+      } else if (msg.includes('Invalid login credentials')) {
+        setError(language === 'nl'
+          ? 'Onjuist e-mailadres of wachtwoord.'
+          : 'Incorrect email or password.');
+      } else if (msg.includes('Email not confirmed')) {
+        setError(language === 'nl'
+          ? 'Bevestig eerst je e-mailadres via de link in je inbox.'
+          : 'Please confirm your email address first via the link in your inbox.');
+      } else {
+        setError(msg || (language === 'nl' ? 'Er ging iets mis. Probeer het opnieuw.' : 'Something went wrong. Please try again.'));
+      }
     } finally {
       setLoading(false);
     }
@@ -72,6 +110,12 @@ export default function Home() {
     { icon: BookOpen, title: t('home_feature_education'), desc: t('home_feature_education_desc') },
     { icon: TrendingUp, title: t('home_feature_tracking'), desc: t('home_feature_tracking_desc') },
   ];
+
+  const switchAuthMode = (mode) => {
+    setAuthMode(mode);
+    setError('');
+    setRegistrationSuccess(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50">
@@ -121,100 +165,166 @@ export default function Home() {
               <CardTitle className="flex items-center gap-2">
                 {authMode === 'login' ? (
                   <><LogIn className="w-5 h-5 text-blue-600" /> {t('login_title')}</>
+                ) : isTherapist ? (
+                  <><Stethoscope className="w-5 h-5 text-green-600" /> {language === 'nl' ? 'Registreer als Therapeut' : 'Register as Therapist'}</>
                 ) : (
                   <><UserPlus className="w-5 h-5 text-blue-600" /> {t('register_title')}</>
                 )}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleAuth} className="space-y-4">
-                {authMode === 'register' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="name">{t('set_name')}</Label>
-                    <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder={t('set_name')}
-                    />
+              {registrationSuccess ? (
+                <div className="text-center py-6 space-y-4">
+                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {language === 'nl' ? 'Registratie gelukt!' : 'Registration successful!'}
+                  </h3>
+                  <p className="text-gray-600">
+                    {language === 'nl'
+                      ? 'Controleer je e-mail inbox en klik op de bevestigingslink om je account te activeren.'
+                      : 'Check your email inbox and click the confirmation link to activate your account.'}
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => switchAuthMode('login')}
+                    className="mt-4"
+                  >
+                    {language === 'nl' ? 'Naar inloggen' : 'Go to login'}
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <form onSubmit={handleAuth} className="space-y-4">
+                    {isRegister && (
+                      <div className="space-y-2">
+                        <Label htmlFor="name">{t('set_name')}</Label>
+                        <Input
+                          id="name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder={language === 'nl' ? 'Je volledige naam' : 'Your full name'}
+                          required
+                        />
+                      </div>
+                    )}
+
+                    {isTherapist && (
+                      <div className="space-y-2">
+                        <Label htmlFor="practice">
+                          {language === 'nl' ? 'Praktijknaam (optioneel)' : 'Practice name (optional)'}
+                        </Label>
+                        <Input
+                          id="practice"
+                          value={practice}
+                          onChange={(e) => setPractice(e.target.value)}
+                          placeholder={language === 'nl' ? 'Naam van je praktijk' : 'Name of your practice'}
+                        />
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email">{t('email')}</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder={t('email')}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="password">{t('password')}</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder={language === 'nl' ? 'Minimaal 6 tekens' : 'At least 6 characters'}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+
+                    {isTherapist && (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
+                        <Stethoscope className="w-4 h-4 inline mr-1" />
+                        {language === 'nl'
+                          ? 'Als therapeut kun je patiënten koppelen en hun voortgang volgen.'
+                          : 'As a therapist you can link patients and track their progress.'}
+                      </div>
+                    )}
+
+                    {error && (
+                      <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>
+                    )}
+
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className={`w-full ${isTherapist ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                    >
+                      {loading
+                        ? (language === 'nl' ? 'Bezig...' : 'Loading...')
+                        : authMode === 'login'
+                          ? t('login')
+                          : (language === 'nl' ? 'Account aanmaken' : 'Create account')
+                      }
+                    </Button>
+                  </form>
+
+                  <div className="mt-4 text-center text-sm text-gray-600">
+                    {authMode === 'login' ? (
+                      <p>
+                        {t('no_account')}{' '}
+                        <button
+                          type="button"
+                          onClick={() => switchAuthMode('register')}
+                          className="text-blue-600 hover:underline font-medium"
+                        >
+                          {t('register')}
+                        </button>
+                      </p>
+                    ) : (
+                      <p>
+                        {t('has_account')}{' '}
+                        <button
+                          type="button"
+                          onClick={() => switchAuthMode('login')}
+                          className="text-blue-600 hover:underline font-medium"
+                        >
+                          {t('login')}
+                        </button>
+                      </p>
+                    )}
                   </div>
-                )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t('email')}</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t('email')}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">{t('password')}</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t('password')}
-                    required
-                    minLength={6}
-                  />
-                </div>
-
-                {error && (
-                  <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</p>
-                )}
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                >
-                  {loading ? t('loading') : authMode === 'login' ? t('login') : t('register')}
-                </Button>
-
-                <div className="text-center text-sm text-gray-600">
-                  {authMode === 'login' ? (
-                    <p>
-                      {t('no_account')}{' '}
-                      <button
-                        type="button"
-                        onClick={() => { setAuthMode('register'); setError(''); }}
-                        className="text-blue-600 hover:underline font-medium"
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    {isTherapist ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => switchAuthMode('register')}
+                        className="w-full text-gray-500"
                       >
-                        {t('register')}
-                      </button>
-                    </p>
-                  ) : (
-                    <p>
-                      {t('has_account')}{' '}
-                      <button
-                        type="button"
-                        onClick={() => { setAuthMode('login'); setError(''); }}
-                        className="text-blue-600 hover:underline font-medium"
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        {language === 'nl' ? 'Registreer als patiënt' : 'Register as patient'}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => switchAuthMode('register_therapist')}
+                        className="w-full text-gray-500"
                       >
-                        {t('login')}
-                      </button>
-                    </p>
-                  )}
-                </div>
-              </form>
-
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-                  className="w-full text-gray-500"
-                >
-                  <Stethoscope className="w-4 h-4 mr-2" />
-                  {t('login_as_therapist')}
-                </Button>
-              </div>
+                        <Stethoscope className="w-4 h-4 mr-2" />
+                        {language === 'nl' ? 'Registreer als therapeut' : 'Register as therapist'}
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

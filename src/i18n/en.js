@@ -18,6 +18,7 @@ const en = {
   no: 'No',
   or: 'or',
   saved: 'Saved!',
+  required_field_warning: 'This field is required',
   error: 'An error occurred',
   low: 'Low',
   high: 'High',

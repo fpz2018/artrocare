@@ -18,6 +18,7 @@ const nl = {
   no: 'Nee',
   or: 'of',
   saved: 'Opgeslagen!',
+  required_field_warning: 'Dit veld is verplicht',
   error: 'Er is een fout opgetreden',
   low: 'Laag',
   high: 'Hoog',
