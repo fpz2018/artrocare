@@ -28,6 +28,8 @@ export default function Therapist() {
   const [messageForm, setMessageForm] = useState({ subject: '', body: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+  const [saved, setSaved] = useState(false);
 
   const { data: recentMeasurements = [] } = useQuery({
     queryKey: ['measurements', profile?.id, 'therapist'],
@@ -47,18 +49,38 @@ export default function Therapist() {
   });
 
   const saveTherapist = async () => {
-    if (!isValidEmail(form.therapist_email)) return;
+    setError('');
+    setSaved(false);
+
+    // Validate email if provided
+    const email = form.therapist_email.trim();
+    if (email && !isValidEmail(email)) {
+      setError(language === 'nl' ? 'Voer een geldig e-mailadres in' : 'Enter a valid email address');
+      return;
+    }
+
+    // Validate name
+    if (!form.therapist_name.trim()) {
+      setError(language === 'nl' ? 'Voer de naam van je therapeut in' : 'Enter your therapist\'s name');
+      return;
+    }
+
     setSaving(true);
     try {
       await updateProfile({
-        therapist_email: sanitizeInput(form.therapist_email),
+        therapist_email: email ? sanitizeInput(email) : null,
         therapist_name: sanitizeInput(form.therapist_name),
-        therapist_practice: sanitizeInput(form.therapist_practice),
-        therapist_phone: sanitizeInput(form.therapist_phone),
+        therapist_practice: form.therapist_practice.trim() ? sanitizeInput(form.therapist_practice) : null,
+        therapist_phone: form.therapist_phone.trim() ? sanitizeInput(form.therapist_phone) : null,
       });
       setEditing(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } catch (err) {
-      console.error(err);
+      console.error('Save therapist error:', err);
+      setError(language === 'nl'
+        ? 'Opslaan mislukt. Probeer het opnieuw.'
+        : 'Save failed. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -94,6 +116,12 @@ export default function Therapist() {
         {t('ther_title')}
       </h1>
 
+      {saved && (
+        <div className="bg-green-50 border border-green-200 text-green-700 text-sm p-3 rounded-lg">
+          ✅ {language === 'nl' ? 'Therapeutgegevens opgeslagen!' : 'Therapist details saved!'}
+        </div>
+      )}
+
       {/* Therapist Info */}
       <Card>
         <CardHeader>
@@ -111,6 +139,7 @@ export default function Therapist() {
               <div><Label>{t('ther_name')}</Label><Input value={form.therapist_name} onChange={(e) => setForm({ ...form, therapist_name: e.target.value })} /></div>
               <div><Label>{t('ther_practice')}</Label><Input value={form.therapist_practice} onChange={(e) => setForm({ ...form, therapist_practice: e.target.value })} /></div>
               <div><Label>{t('ther_phone')}</Label><Input value={form.therapist_phone} onChange={(e) => setForm({ ...form, therapist_phone: e.target.value })} /></div>
+              {error && <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</p>}
               <Button onClick={saveTherapist} disabled={saving} className="bg-blue-600 hover:bg-blue-700">{saving ? t('loading') : t('save')}</Button>
             </div>
           ) : hasTherapist ? (
