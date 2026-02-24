@@ -16,6 +16,7 @@ import { format, subDays, differenceInCalendarDays, parseISO } from 'date-fns';
 import DashboardOnboarding from '@/components/dashboard/DashboardOnboarding';
 import PainPrediction from '@/components/dashboard/PainPrediction';
 import { InlineDisclaimer } from '@/components/legal/Disclaimer';
+import ResearchInsights from '@/components/ResearchInsights';
 
 function calculateStreak(measurements) {
   if (!measurements || measurements.length === 0) return 0;
@@ -278,6 +279,8 @@ export default function Dashboard() {
           </Card>
         </Link>
       </div>
+
+      <ResearchInsights />
 
       <InlineDisclaimer />
     </div>

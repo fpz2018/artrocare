@@ -38,6 +38,7 @@ const en = {
   nav_settings: 'Settings',
   nav_community: 'Community',
   nav_my_patients: 'My Patients',
+  nav_research: 'Research Monitor',
   nav_upgrade: 'Upgrade to Premium',
 
   // Auth
@@ -346,6 +347,26 @@ const en = {
   flare_title: 'Flare Protocol',
   flare_active: 'Active flare detected',
   flare_advice: 'Temporarily reduce exercise intensity, but keep moving. Contact your therapist if symptoms persist.',
+
+  // Research Monitor
+  research_title: 'Research Monitor',
+  research_desc: 'Automatically fetch and summarize scientific research',
+  research_fetch: 'Fetch new papers',
+  research_fetching: 'Fetching papers...',
+  research_papers: 'Papers',
+  research_queries: 'Queries',
+  research_log: 'Log',
+  research_approve: 'Approve',
+  research_reject: 'Reject',
+  research_resummarize: 'Re-summarize',
+  research_no_papers: 'No papers found',
+  research_latest: 'Latest Research',
+  research_relevance: 'Relevance',
+  research_evidence: 'Evidence level',
+  research_clinical: 'Clinical relevance',
+  research_findings: 'Key findings',
+  research_summary: 'AI Summary',
+  research_therapist_only: 'Therapists only',
 };
 
 export default en;

@@ -23,6 +23,7 @@ const Library = lazy(() => import('@/pages/Library'));
 const Premium = lazy(() => import('@/pages/Premium'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const Community = lazy(() => import('@/pages/Community'));
+const ResearchMonitor = lazy(() => import('@/pages/ResearchMonitor'));
 
 // Loading spinner component
 function PageLoader() {
@@ -81,6 +82,7 @@ function AppRoutes() {
         <Route path="/premium" element={<ProtectedRoute><Premium /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+        <Route path="/research" element={<ProtectedRoute requiredRole="therapist"><ResearchMonitor /></ProtectedRoute>} />
 
         {/* Therapist-only route */}
         <Route

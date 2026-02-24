@@ -5,7 +5,7 @@ import { useI18n } from '@/i18n';
 import {
   LayoutDashboard, TrendingUp, Dumbbell, Target, Apple, Pill,
   Stethoscope, BookOpen, Crown, Settings, Users, Menu, X,
-  Globe, LogOut, ChevronRight, Heart
+  Globe, LogOut, ChevronRight, Heart, FlaskConical
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FooterDisclaimer } from '@/components/legal/Disclaimer';
@@ -26,6 +26,7 @@ const navItems = [
 
 const therapistNavItems = [
   { path: '/therapist-dashboard', icon: Users, labelKey: 'nav_my_patients' },
+  { path: '/research', icon: FlaskConical, labelKey: 'nav_research' },
   { path: '/settings', icon: Settings, labelKey: 'nav_settings' },
 ];
 

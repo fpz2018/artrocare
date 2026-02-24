@@ -38,6 +38,7 @@ const nl = {
   nav_settings: 'Instellingen',
   nav_community: 'Community',
   nav_my_patients: 'Mijn Patienten',
+  nav_research: 'Research Monitor',
   nav_upgrade: 'Upgrade naar Premium',
 
   // Auth
@@ -346,6 +347,26 @@ const nl = {
   flare_title: 'Opvlammingsprotocol',
   flare_active: 'Actieve opvlamming gedetecteerd',
   flare_advice: 'Tijdelijk minder intensief bewegen, maar blijf wel bewegen. Neem contact op met je therapeut als de klachten aanhouden.',
+
+  // Research Monitor
+  research_title: 'Research Monitor',
+  research_desc: 'Automatisch wetenschappelijk onderzoek ophalen en samenvatten',
+  research_fetch: 'Nieuwe papers ophalen',
+  research_fetching: 'Papers ophalen...',
+  research_papers: 'Papers',
+  research_queries: 'Zoekopdrachten',
+  research_log: 'Logboek',
+  research_approve: 'Goedkeuren',
+  research_reject: 'Afwijzen',
+  research_resummarize: 'Opnieuw samenvatten',
+  research_no_papers: 'Geen papers gevonden',
+  research_latest: 'Nieuwste Onderzoeken',
+  research_relevance: 'Relevantie',
+  research_evidence: 'Bewijsniveau',
+  research_clinical: 'Klinische relevantie',
+  research_findings: 'Belangrijkste bevindingen',
+  research_summary: 'AI Samenvatting',
+  research_therapist_only: 'Alleen voor therapeuten',
 };
 
 export default nl;
