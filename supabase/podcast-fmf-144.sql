@@ -1,0 +1,26 @@
+-- Insert podcast analysis as research paper
+INSERT INTO public.research_papers (
+  pubmed_id, title, authors, journal, publication_date, abstract, url,
+  summary_nl, summary_en, key_findings_nl, key_findings_en,
+  clinical_relevance_nl, clinical_relevance_en,
+  categories, relevance_score, evidence_level, status, fetch_batch
+) VALUES (
+  'podcast_fmf_144',
+  'How to Slow Joint Degeneration (Aliquot #144)',
+  ARRAY['Dr. Rhonda Patrick', 'Dr. Martin Gibala', 'Dr. Luc van Loon', 'Dr. Brad Schoenfeld'],
+  'FoundMyFitness Podcast',
+  '2026-02-27',
+  'Joint degeneration is often blamed on aging, but most decline is driven by two modifiable forces: mechanical load and chronic inflammation. Together, they shape how cartilage, tendons, and bone adapt over time, influencing pain, mobility, and long-term independence. Osteoarthritis isn''t inevitable, and even after symptoms begin, progression can often be slowed. Topics: weight loss effects, exercise and joint wear, best exercises for knee OA, HIIT with OA, diet and joint degeneration, vitamin K, glucosamine + omega-3 synergy, curcumin vs NSAIDs, BPC-157 evidence, hydrolyzed collagen, recovery and joint resilience.',
+  'https://open.spotify.com/episode/16SFNv38WQQDMbKObFuQnq',
+  'Deze FoundMyFitness podcastaflevering met Dr. Patrick en experts Dr. Gibala, Dr. van Loon en Dr. Schoenfeld bespreekt strategieën om gewrichtsdegeneratie bij artrose te vertragen. De experts benadrukken het belang van gewichtsverlies, zelfs bescheiden gewichtsverlies, voor het verminderen van de belasting op gewrichten. Ze weerleggen de mythe dat beweging gewrichten verslijt en benadrukken dat specifieke oefeningen, met name krachttraining en mogelijk HIIT, de pijn bij knieartrose kunnen verminderen en de functie kunnen verbeteren. Voeding speelt ook een cruciale rol, waarbij voldoende eiwitinname en aandacht voor micronutriënten zoals vitamine K belangrijk zijn. Supplementen zoals glucosamine, omega-3 vetzuren en curcumine worden besproken als potentiële hulpmiddelen voor pijnverlichting en het vertragen van gewrichtsdegeneratie, hoewel de bewijskracht voor sommige supplementen, zoals BPC-157, nog beperkt is. Het belang van voldoende herstel na inspanning wordt ook benadrukt om de veerkracht van gewrichten te bevorderen.',
+  'This FoundMyFitness podcast episode with Dr. Patrick and experts Dr. Gibala, Dr. van Loon, and Dr. Schoenfeld discusses strategies to slow joint degeneration in osteoarthritis. The experts emphasize the importance of weight loss, even modest weight loss, for reducing joint load. They debunk the myth that exercise wears out joints and highlight that specific exercises, particularly resistance training and potentially HIIT, can reduce pain and improve function in knee osteoarthritis. Nutrition also plays a crucial role, with adequate protein intake and attention to micronutrients like vitamin K being important.',
+  ARRAY['Bescheiden gewichtsverlies heeft een onevenredig groot positief effect op de gewrichten', 'Beweging verslijt de gewrichten niet; specifieke oefeningen kunnen de pijn bij artrose verminderen', 'Krachttraining is een effectieve manier om de spieren rond de gewrichten te versterken', 'HIIT kan mogelijk veilig en effectief zijn voor mensen met artrose, mits aangepast', 'Voldoende eiwitinname is cruciaal voor spiermassa en gewrichtsgezondheid', 'Vitamine K-deficiëntie kan gewrichtsdegeneratie versnellen', 'Glucosamine en omega-3 vetzuren kunnen synergetisch werken tegen gewrichtspijn', 'Curcumine kan een natuurlijk alternatief zijn voor NSAIDs bij pijnverlichting', 'Bewijskracht voor BPC-157 bij artrose is nog beperkt', 'Gehydrolyseerd collageen kan mogelijk kraakbeenweefsels bereiken en ondersteunen', 'Voldoende herstel na inspanning is essentieel voor gewrichtsveerkracht'],
+  ARRAY['Modest weight loss has an outsized positive effect on joints', 'Exercise does not wear out joints; specific exercises can reduce OA pain', 'Resistance training effectively strengthens muscles around joints', 'HIIT may be safe and effective for OA when adapted', 'Adequate protein intake is crucial for muscle mass and joint health', 'Vitamin K deficiency can accelerate joint degeneration', 'Glucosamine and omega-3 fatty acids may work synergistically', 'Curcumin may be a natural alternative to NSAIDs', 'Evidence for BPC-157 in OA is still limited', 'Hydrolyzed collagen may reach and support cartilage', 'Adequate recovery after exercise is essential for joint resilience'],
+  'Voor artrose-patiënten betekent dit dat een combinatie van gewichtsverlies (indien nodig), gerichte oefeningen (vooral krachttraining), een eiwitrijk dieet en mogelijk supplementen (glucosamine, omega-3, curcumine) een effectieve strategie kan zijn om de symptomen te beheersen en de progressie van de ziekte te vertragen.',
+  'For OA patients, a combination of weight loss (if needed), targeted exercises (especially resistance training), a protein-rich diet, and supplements (glucosamine, omega-3, curcumin) can be an effective strategy to manage symptoms and slow disease progression.',
+  ARRAY['exercise', 'nutrition', 'supplements', 'pain_management'],
+  95,
+  'expert_opinion',
+  'ready_for_review',
+  'podcast_import'
+) ON CONFLICT (pubmed_id) DO NOTHING;
