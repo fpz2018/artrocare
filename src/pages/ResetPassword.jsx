@@ -16,21 +16,68 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
 
-  // Supabase processes the recovery token from the URL hash automatically.
-  // We wait for an active session before showing the form.
   useEffect(() => {
-    async function checkSession() {
-      // Give Supabase a moment to process the hash token
-      await new Promise(r => setTimeout(r, 600));
+    // Supabase v2 PKCE flow: token_hash comes as query param
+    // Older implicit flow: access_token comes in URL hash
+    // We handle both, plus listen for the PASSWORD_RECOVERY auth event.
+
+    async function tryExchangeToken() {
+      // 1. PKCE flow: ?token_hash=...&type=recovery
+      const params = new URLSearchParams(window.location.search);
+      const tokenHash = params.get('token_hash');
+      const type = params.get('type');
+
+      if (tokenHash && type === 'recovery') {
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        });
+        if (!verifyError) {
+          setSessionReady(true);
+          // Clean up URL
+          window.history.replaceState(null, '', window.location.pathname);
+          return;
+        }
+        setError('Ongeldige of verlopen reset-link. Vraag een nieuwe aan.');
+        return;
+      }
+
+      // 2. Implicit flow or already-processed session: check existing session
+      // Wait briefly for AuthContext to process the hash token first
+      await new Promise(r => setTimeout(r, 800));
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSessionReady(true);
-      } else {
+        return;
+      }
+
+      // 3. If still no session, wait for PASSWORD_RECOVERY event (fired by Supabase)
+      // The listener below will catch it
+    }
+
+    tryExchangeToken();
+
+    // Listen for the PASSWORD_RECOVERY auth event - most reliable method
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setSessionReady(true);
+        setError('');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fallback: if after 5s still no session, show error
+  useEffect(() => {
+    if (sessionReady || success) return;
+    const timer = setTimeout(() => {
+      if (!sessionReady) {
         setError('Ongeldige of verlopen reset-link. Vraag een nieuwe aan via de inlogpagina.');
       }
-    }
-    checkSession();
-  }, []);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [sessionReady, success]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,7 +97,6 @@ export default function ResetPassword() {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
       setSuccess(true);
-      // Sign out so user logs in fresh with new password
       await supabase.auth.signOut();
       setTimeout(() => navigate('/'), 3000);
     } catch (err) {
@@ -95,39 +141,37 @@ export default function ResetPassword() {
                   <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                   <span>{error}</span>
                 </div>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => navigate('/')}
-                >
+                <Button variant="outline" className="w-full" onClick={() => navigate('/')}>
                   Terug naar inloggen
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="password">Nieuw wachtwoord</Label>
+                  <Label htmlFor="new-password">Nieuw wachtwoord</Label>
                   <Input
-                    id="password"
+                    id="new-password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Minimaal 8 tekens"
                     required
                     minLength={8}
+                    autoComplete="new-password"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="passwordConfirm">Wachtwoord bevestigen</Label>
+                  <Label htmlFor="confirm-password">Wachtwoord bevestigen</Label>
                   <Input
-                    id="passwordConfirm"
+                    id="confirm-password"
                     type="password"
                     value={passwordConfirm}
                     onChange={(e) => setPasswordConfirm(e.target.value)}
                     placeholder="Herhaal wachtwoord"
                     required
                     minLength={8}
+                    autoComplete="new-password"
                   />
                 </div>
 
