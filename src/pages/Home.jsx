@@ -25,6 +25,12 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  // Prevent password-manager auto-submit: form is only interactive after 800ms
+  const [formReady, setFormReady] = useState(false);
+  React.useEffect(() => {
+    const t = setTimeout(() => setFormReady(true), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -39,6 +45,7 @@ export default function Home() {
 
   const handleAuth = async (e) => {
     e.preventDefault();
+    if (!formReady) return; // Block auto-submit from password manager extensions
     setError('');
     setRegistrationSuccess(false);
 

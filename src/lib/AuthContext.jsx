@@ -86,8 +86,20 @@ export function AuthProvider({ children }) {
 
     async function initAuth() {
       try {
-        // First, let Supabase process any hash tokens in the URL
-        // This handles the redirect back from email verification
+        // If the user explicitly signed out moments ago, honour that and skip session restore.
+        const signedOutAt = sessionStorage.getItem('artrocare_signed_out');
+        if (signedOutAt && Date.now() - Number(signedOutAt) < 10000) {
+          sessionStorage.removeItem('artrocare_signed_out');
+          // Force-clear any lingering Supabase tokens from localStorage
+          Object.keys(localStorage).forEach(k => {
+            if (k.startsWith('sb-') && k.includes('auth')) localStorage.removeItem(k);
+          });
+          if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
+          return;
+        }
+
+        // Let Supabase process any hash tokens in the URL
+        // (email verification, password recovery)
         const hashParams = window.location.hash;
         const hasAuthTokens = hashParams && (
           hashParams.includes('access_token') ||
@@ -97,7 +109,6 @@ export function AuthProvider({ children }) {
         );
 
         if (hasAuthTokens) {
-          // Wait a bit for Supabase to process the hash
           await new Promise(r => setTimeout(r, 500));
         }
 
@@ -199,24 +210,30 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    // 1. Clear React state immediately
+    setUser(null);
+    setProfile(null);
+    setIsAuthenticated(false);
+    profileFetchedRef.current = false;
+    loadingRef.current = false;
+
+    // 2. Mark signed-out timestamp so initAuth skips session restore on next load
+    sessionStorage.setItem('artrocare_signed_out', String(Date.now()));
+
+    // 3. Clear Supabase tokens from localStorage explicitly
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('sb-') && k.includes('auth')) localStorage.removeItem(k);
+    });
+
+    // 4. Tell Supabase server-side to invalidate the session
     try {
-      // Clear state first so UI updates immediately
-      setUser(null);
-      setProfile(null);
-      setIsAuthenticated(false);
-      profileFetchedRef.current = false;
-
-      // Then sign out from Supabase
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
     } catch (err) {
-      console.error('Sign out error:', err);
-      // State already cleared, so user is effectively logged out
+      // Token already cleared above — safe to continue
     }
 
-    // Force redirect to home page
-    if (typeof window !== 'undefined') {
-      window.location.href = '/';
-    }
+    // 5. Hard redirect so React state is fully reset
+    window.location.href = '/';
   }, []);
 
   const resetPassword = useCallback(async (email) => {
