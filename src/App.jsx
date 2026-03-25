@@ -25,6 +25,7 @@ const Settings = lazy(() => import('@/pages/Settings'));
 const Community = lazy(() => import('@/pages/Community'));
 const ResearchMonitor = lazy(() => import('@/pages/ResearchMonitor'));
 const HOOS12 = lazy(() => import('@/pages/HOOS12'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 
 // Loading spinner component
 function PageLoader() {
@@ -62,13 +63,14 @@ function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Public route */}
+        {/* Public routes */}
         <Route
           path="/"
           element={
             isAuthenticated ? <Navigate to="/dashboard" replace /> : <Home />
           }
         />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

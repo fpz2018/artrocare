@@ -8,15 +8,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Heart, Dumbbell, Apple, BookOpen, TrendingUp, Globe,
-  LogIn, UserPlus, Stethoscope, CheckCircle
+  LogIn, UserPlus, Stethoscope, CheckCircle, Lock
 } from 'lucide-react';
 import { InlineDisclaimer } from '@/components/legal/Disclaimer';
 
 export default function Home() {
   const { t, language, setLanguage } = useI18n();
-  const { signIn, signUp, isAuthenticated } = useAuth();
+  const { signIn, signUp, resetPassword, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'register_therapist'
+  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'register_therapist' | 'forgot_password'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -24,6 +24,7 @@ export default function Home() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -115,6 +116,27 @@ export default function Home() {
     setAuthMode(mode);
     setError('');
     setRegistrationSuccess(false);
+    setResetEmailSent(false);
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError(language === 'nl' ? 'Voer een geldig e-mailadres in' : 'Enter a valid email address');
+      return;
+    }
+    setLoading(true);
+    try {
+      await resetPassword(trimmedEmail);
+      setResetEmailSent(true);
+    } catch (err) {
+      // Always show success to prevent email enumeration
+      setResetEmailSent(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -165,6 +187,8 @@ export default function Home() {
               <CardTitle className="flex items-center gap-2">
                 {authMode === 'login' ? (
                   <><LogIn className="w-5 h-5 text-blue-600" /> {t('login_title')}</>
+                ) : authMode === 'forgot_password' ? (
+                  <><Lock className="w-5 h-5 text-blue-600" /> {language === 'nl' ? 'Wachtwoord vergeten' : 'Forgot password'}</>
                 ) : isTherapist ? (
                   <><Stethoscope className="w-5 h-5 text-green-600" /> {language === 'nl' ? 'Registreer als Therapeut' : 'Register as Therapist'}</>
                 ) : (
@@ -173,7 +197,60 @@ export default function Home() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {registrationSuccess ? (
+              {authMode === 'forgot_password' ? (
+                resetEmailSent ? (
+                  <div className="text-center py-6 space-y-4">
+                    <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {language === 'nl' ? 'E-mail verstuurd!' : 'Email sent!'}
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      {language === 'nl'
+                        ? 'Als dit e-mailadres bij ons bekend is, ontvang je een link om je wachtwoord te resetten.'
+                        : 'If this email is registered, you will receive a password reset link.'}
+                    </p>
+                    <Button variant="outline" onClick={() => switchAuthMode('login')} className="mt-2">
+                      {language === 'nl' ? 'Terug naar inloggen' : 'Back to login'}
+                    </Button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      {language === 'nl'
+                        ? 'Vul je e-mailadres in en we sturen je een link om je wachtwoord te resetten.'
+                        : 'Enter your email address and we\'ll send you a reset link.'}
+                    </p>
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">{t('email')}</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder={t('email')}
+                        required
+                      />
+                    </div>
+                    {error && (
+                      <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>
+                    )}
+                    <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700">
+                      {loading
+                        ? (language === 'nl' ? 'Versturen...' : 'Sending...')
+                        : (language === 'nl' ? 'Reset-link versturen' : 'Send reset link')}
+                    </Button>
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => switchAuthMode('login')}
+                        className="text-sm text-gray-500 hover:text-gray-700 hover:underline"
+                      >
+                        {language === 'nl' ? 'Terug naar inloggen' : 'Back to login'}
+                      </button>
+                    </div>
+                  </form>
+                )
+              ) : registrationSuccess ? (
                 <div className="text-center py-6 space-y-4">
                   <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -235,7 +312,18 @@ export default function Home() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">{t('password')}</Label>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="password">{t('password')}</Label>
+                        {authMode === 'login' && (
+                          <button
+                            type="button"
+                            onClick={() => switchAuthMode('forgot_password')}
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            {t('forgot_password')}
+                          </button>
+                        )}
+                      </div>
                       <Input
                         id="password"
                         type="password"
