@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/api/supabase';
 import { useAuth } from '@/lib/AuthContext';
@@ -43,6 +43,8 @@ function calculateStreak(measurements) {
 export default function Dashboard() {
   const { profile } = useAuth();
   const { t } = useI18n();
+  const navigate = useNavigate();
+  const [latestHOOS12, setLatestHOOS12] = useState(null);
 
   // Fetch measurements for last 30 days
   const { data: measurements = [] } = useQuery({
@@ -61,6 +63,24 @@ export default function Dashboard() {
     },
     enabled: !!profile?.id,
   });
+
+  // Fetch HOOS-12 score
+  useEffect(() => {
+    const fetchHOOS12 = async () => {
+      if (!profile?.id) return;
+      const { data } = await supabase
+        .from('hoos12_scores')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('date', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (data) setLatestHOOS12(data);
+    };
+
+    fetchHOOS12();
+  }, [profile?.id]);
 
   // Fetch lessons for education progress
   const { data: lessons = [] } = useQuery({
@@ -215,6 +235,34 @@ export default function Dashboard() {
             </p>
           </CardContent>
         </Card>
+
+        {/* HOOS-12 Card - Alleen tonen als gebruiker heupartrose heeft */}
+        {profile?.affected_joints?.includes('hip') && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="w-5 h-5 text-pink-600" />
+                <span className="text-xs font-medium text-gray-500">HOOS-12 Score</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">
+                {latestHOOS12 ? `${latestHOOS12.total_score}/100` : '-'}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {latestHOOS12 
+                  ? `Laatste meting: ${new Date(latestHOOS12.date).toLocaleDateString('nl-NL')}`
+                  : 'Nog geen meting'
+                }
+              </p>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-xs mt-2 text-pink-600"
+                onClick={() => navigate('/hoos12')}
+              >
+                {latestHOOS12 ? 'Opnieuw meten' : 'Start meting'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Pain Trend Chart */}

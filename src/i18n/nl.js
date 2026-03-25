@@ -367,6 +367,23 @@ const nl = {
   research_findings: 'Belangrijkste bevindingen',
   research_summary: 'AI Samenvatting',
   research_therapist_only: 'Alleen voor therapeuten',
+// HOOS12
+hoos12_title: 'HOOS-12 Heup Vragenlijst',
+hoos12_subtitle: 'Meet je heupfunctie en pijn',
+hoos12_instructions: 'Beantwoord deze vragen over je heupklachten in de afgelopen week.',
+hoos12_pain: 'Pijn',
+hoos12_symptoms: 'Symptomen',
+hoos12_function_daily: 'Functie Dagelijks Leven',
+hoos12_function_sports: 'Functie Sport/Recreatie',
+hoos12_quality_of_life: 'Kwaliteit van Leven',
+hoos12_result_title: 'Je HOOS-12 Resultaat',
+hoos12_result_subtitle: 'Hier is je persoonlijke score',
+hoos12_minimal: 'Minimale beperkingen',
+hoos12_mild: 'Lichte beperkingen',
+hoos12_moderate: 'Matige beperkingen',
+hoos12_severe: 'Ernstige beperkingen',
+hoos12_interpretation: 'Interpretatie',
+hoos12_next_steps: 'Volgende stappen',
 };
 
 export default nl;
