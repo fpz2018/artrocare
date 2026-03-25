@@ -206,16 +206,55 @@ ALTER TABLE public.exercises ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.supplements ENABLE ROW LEVEL SECURITY;
 
+-- =============================================
+-- SECURITY DEFINER helpers (bypass RLS to avoid recursive policy 500s)
+-- These functions run as the DB owner, so they can read profiles without
+-- triggering the RLS policies that would otherwise cause infinite recursion.
+-- =============================================
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+  SELECT role FROM profiles WHERE id = auth.uid()
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_my_email()
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+  SELECT email FROM profiles WHERE id = auth.uid()
+$$;
+
 CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
-CREATE POLICY "Therapists can view linked patients" ON public.profiles FOR SELECT USING (EXISTS (SELECT 1 FROM public.profiles AS therapist WHERE therapist.id = auth.uid() AND therapist.role = 'therapist' AND public.profiles.therapist_email = therapist.email));
+-- Uses SECURITY DEFINER helpers to avoid recursive self-join on profiles (→ 500 error)
+CREATE POLICY "Therapists can view linked patients" ON public.profiles FOR SELECT
+  USING (
+    public.get_my_role() = 'therapist'
+    AND therapist_email = public.get_my_email()
+  );
 
 CREATE POLICY "Users can view own measurements" ON public.measurements FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "Users can insert own measurements" ON public.measurements FOR INSERT WITH CHECK (user_id = auth.uid());
 CREATE POLICY "Users can update own measurements" ON public.measurements FOR UPDATE USING (user_id = auth.uid());
 CREATE POLICY "Users can delete own measurements" ON public.measurements FOR DELETE USING (user_id = auth.uid());
-CREATE POLICY "Therapists can view patient measurements" ON public.measurements FOR SELECT USING (EXISTS (SELECT 1 FROM public.profiles AS patient JOIN public.profiles AS therapist ON therapist.id = auth.uid() WHERE patient.id = public.measurements.user_id AND therapist.role = 'therapist' AND patient.therapist_email = therapist.email));
+-- Uses SECURITY DEFINER helpers to avoid recursive profile join
+CREATE POLICY "Therapists can view patient measurements" ON public.measurements FOR SELECT
+  USING (
+    public.get_my_role() = 'therapist'
+    AND EXISTS (
+      SELECT 1 FROM public.profiles AS patient
+      WHERE patient.id = public.measurements.user_id
+        AND patient.therapist_email = public.get_my_email()
+    )
+  );
 
 CREATE POLICY "Users can manage own medications" ON public.medications FOR ALL USING (user_id = auth.uid());
 CREATE POLICY "Users can manage own medication logs" ON public.medication_logs FOR ALL USING (user_id = auth.uid());
