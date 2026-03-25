@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const mountedRef = useRef(true);
   const profileFetchedRef = useRef(false);
+  const loadingRef = useRef(true);
 
   // Fetch user profile from profiles table
   const fetchProfile = useCallback(async (userId, retries = 3) => {
@@ -75,9 +76,10 @@ export function AuthProvider({ children }) {
     let timeoutId;
 
     // Safety timeout: never stay loading forever
+    // Uses a ref to avoid stale closure on the loading state value
     timeoutId = setTimeout(() => {
-      if (mountedRef.current && loading) {
-        console.warn('Auth loading timeout - forcing complete');
+      if (mountedRef.current && loadingRef.current) {
+        loadingRef.current = false;
         setLoading(false);
       }
     }, 8000);
@@ -103,7 +105,7 @@ export function AuthProvider({ children }) {
 
         if (error) {
           console.error('Auth session error:', error);
-          if (mountedRef.current) setLoading(false);
+          if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
           return;
         }
 
@@ -124,7 +126,7 @@ export function AuthProvider({ children }) {
       } catch (err) {
         console.error('Auth init error:', err);
       } finally {
-        if (mountedRef.current) setLoading(false);
+        if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
       }
     }
 
@@ -142,6 +144,7 @@ export function AuthProvider({ children }) {
           setProfile(null);
           setIsAuthenticated(false);
           profileFetchedRef.current = false;
+          loadingRef.current = false;
           setLoading(false);
           return;
         }
@@ -164,7 +167,7 @@ export function AuthProvider({ children }) {
             window.history.replaceState(null, '', window.location.pathname);
           }
         }
-        if (mountedRef.current) setLoading(false);
+        if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
       }
     );
 
