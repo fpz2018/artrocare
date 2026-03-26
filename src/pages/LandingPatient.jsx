@@ -154,6 +154,7 @@ export default function LandingPatient() {
             </a>
           </div>
           <p className="text-sm text-gray-400">Gratis voor patiënten · Geen creditcard · AVG-compliant</p>
+          <p className="text-xs text-gray-400 mt-1">Ontworpen door fysiotherapeuten, orthomoleculair therapeuten en leefstijlcoaches</p>
         </div>
 
         {/* 6 pijlers */}

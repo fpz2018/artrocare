@@ -277,6 +277,7 @@ export default function LandingPractice() {
             </a>
           </div>
           <p className="text-sm text-gray-400">Gratis tot 5 patiënten · Geen creditcard nodig · AVG-compliant</p>
+          <p className="text-xs text-gray-400 mt-1">Ontworpen door fysiotherapeuten, orthomoleculair therapeuten en leefstijlcoaches</p>
         </div>
 
         {/* 6 pijlers */}

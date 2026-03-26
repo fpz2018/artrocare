@@ -87,6 +87,7 @@ export default function Home() {
           </div>
 
           {/* Trust strip */}
+          <p className="text-xs text-gray-400">Ontworpen door fysiotherapeuten, orthomoleculair therapeuten en leefstijlcoaches</p>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400 pt-2">
             <span className="flex items-center gap-1.5"><Shield className="w-4 h-4 text-blue-400" /> AVG-compliant · EU-servers</span>
             <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" /> Gratis voor patiënten</span>
