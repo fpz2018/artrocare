@@ -1,52 +1,62 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Heart, CheckCircle, Building2, Users, TrendingUp, BookOpen,
+  Heart, CheckCircle, TrendingUp, BookOpen,
   Dumbbell, Brain, Star, ChevronRight, Menu, X, ArrowRight,
-  Shield, Zap, Globe, BarChart2, MessageSquare, Bell, Lock,
-  Apple, Moon, Sparkles
+  Shield, Zap, Globe, BarChart2, Bell, Lock,
+  Apple, Moon, Pill, RefreshCw, Sparkles, Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 const NAV_LINKS = [
+  { label: 'Aanpak', href: '#aanpak' },
   { label: 'Voordelen', href: '#voordelen' },
   { label: 'Hoe het werkt', href: '#hoe-het-werkt' },
   { label: 'Prijzen', href: '#prijzen' },
   { label: 'FAQ', href: '#faq' },
 ];
 
+const PILLARS = [
+  { icon: Dumbbell, label: 'Bewegen',       color: 'text-blue-600 bg-blue-50' },
+  { icon: BookOpen, label: 'Educatie',      color: 'text-amber-600 bg-amber-50' },
+  { icon: Apple,    label: 'Voeding',       color: 'text-orange-600 bg-orange-50' },
+  { icon: Moon,     label: 'Slaap',         color: 'text-indigo-600 bg-indigo-50' },
+  { icon: Brain,    label: 'Mentaal',       color: 'text-purple-600 bg-purple-50' },
+  { icon: Pill,     label: 'Medicatie & supplementen', color: 'text-rose-600 bg-rose-50' },
+];
+
 const FEATURES = [
   {
     icon: Dumbbell,
-    title: 'Neuromusculair oefenprogramma',
-    desc: 'Gebaseerd op de KNGF-richtlijn én een internationaal erkend oefenprogramma dat in meer dan 30 landen wordt toegepast. Gericht op kracht, balans én pijnreductie.',
+    title: 'Effectief oefenprogramma',
+    desc: 'Gebaseerd op de KNGF-richtlijn én internationaal erkende en effectieve programma\'s die in meer dan 30 landen worden toegepast. Knie, heup en hand — aangepast op niveau van de patiënt.',
     color: 'text-blue-600 bg-blue-50',
+  },
+  {
+    icon: BookOpen,
+    title: 'Patiënteducatie als kernonderdeel',
+    desc: 'Educatie is een bewezen en onmisbaar onderdeel van effectieve artrosezorg. Artrocare integreert begrijpelijke lessen over artrose, pijn en leefstijl direct in het programma.',
+    color: 'text-amber-600 bg-amber-50',
+  },
+  {
+    icon: Apple,
+    title: 'Voeding, slaap & mentaal welzijn',
+    desc: 'Artrocare begeleidt patiënten ook op het gebied van voeding, slaap en mentaal welzijn — want effectieve artrosezorg vraagt om een aanpak die de hele mens ziet.',
+    color: 'text-orange-600 bg-orange-50',
+  },
+  {
+    icon: Pill,
+    title: 'Medicatie & supplementen inzicht',
+    desc: 'Patiënten krijgen feitelijke informatie over veelgebruikte pijnmedicatie en supplementen bij artrose — zodat ze beter geïnformeerd het gesprek met jou kunnen aangaan.',
+    color: 'text-rose-600 bg-rose-50',
   },
   {
     icon: TrendingUp,
     title: 'Real-time patiëntmonitoring',
     desc: 'Bekijk pijnscores, oefentrouw en voortgang van al je artrosepatiënten in één overzicht. Grijp snel in waar nodig.',
     color: 'text-green-600 bg-green-50',
-  },
-  {
-    icon: Apple,
-    title: 'Voeding & leefstijl',
-    desc: 'Patiënten krijgen begrijpelijke adviezen over voeding die ontstekingen beïnvloedt. Omega-3, vitamine D en ontstekingsremmende patronen — praktisch, geen dieet.',
-    color: 'text-orange-600 bg-orange-50',
-  },
-  {
-    icon: Moon,
-    title: 'Slaap & herstel',
-    desc: 'Slechte slaap versterkt pijnbeleving. Artrocare helpt patiënten begrijpen hoe slaap en herstel bijdragen aan minder pijn en meer energie.',
-    color: 'text-indigo-600 bg-indigo-50',
-  },
-  {
-    icon: Brain,
-    title: 'Mentaal welzijn & educatie',
-    desc: 'Pijn is niet alleen lichamelijk. Artrocare besteedt aandacht aan gedachten, stress en stemming — en biedt korte lessen over artrose als onderdeel van effectieve zorg.',
-    color: 'text-purple-600 bg-purple-50',
   },
   {
     icon: BarChart2,
@@ -83,6 +93,13 @@ const HOW_IT_WORKS = [
   },
 ];
 
+const FOR_WHO = [
+  { title: 'Patiënten met milde klachten', desc: 'Vroeg starten met de juiste gewoonten — voorkomt verergering en geeft grip op de aandoening.' },
+  { title: 'Patiënten met langdurige artrose', desc: 'Structuur, inzicht en continue begeleiding voor patiënten die al jaren met artrose leven.' },
+  { title: 'Pre-operatieve begeleiding', desc: 'Een knie- of heupoperatie in zicht? Aantoonbaar betere uitkomsten bij goede voorbereiding.' },
+  { title: 'Post-operatieve nazorg', desc: 'Stap-voor-stap hersteltraject na prothese — gericht op functie, kracht en dagelijks bewegen.' },
+];
+
 const PRICING = [
   {
     name: 'Starter',
@@ -94,13 +111,13 @@ const PRICING = [
     features: [
       '1 therapeut',
       'Tot 5 actieve patiënten',
-      'Basis oefenprogramma\'s',
+      'Volledig oefenprogramma',
       'Patiëntvoortgang bekijken',
       'E-mail support',
     ],
     cta: 'Gratis starten',
-    ctaStyle: 'variant-outline',
     href: '/register-practice',
+    primary: false,
   },
   {
     name: 'Praktijk',
@@ -112,16 +129,16 @@ const PRICING = [
     features: [
       'Onbeperkt therapeuten',
       'Onbeperkt patiënten',
-      'Volledige artrose-protocollen',
+      'Alle 6 pijlers volledig actief',
       'AI-gedreven contentupdates',
       'HOOS-12 uitkomstmaten',
       'Real-time monitoring & alerts',
-      'Patiëntvoorlichting & lessen',
+      'Pre- en postoperatieve trajecten',
       'Prioriteit support',
     ],
     cta: '14 dagen gratis proberen',
-    ctaStyle: 'default',
     href: '/register-practice',
+    primary: true,
   },
   {
     name: 'Kliniek',
@@ -139,8 +156,8 @@ const PRICING = [
       'SLA & prioriteit onboarding',
     ],
     cta: 'Offerte aanvragen',
-    ctaStyle: 'variant-outline',
     href: 'mailto:marc@fysiopraktijkzeist.nl?subject=Kliniek%20plan%20Artrocare',
+    primary: false,
   },
 ];
 
@@ -162,8 +179,8 @@ const FAQS = [
     a: 'Alle data wordt opgeslagen op EU-servers (Supabase/AWS EU-West). Volledig AVG-compliant. Gegevens worden nooit gedeeld met derden.',
   },
   {
-    q: 'Wat als ik meer dan 5 patiënten wil met Starter?',
-    a: 'Je kunt altijd upgraden naar het Praktijk-plan. Bestaande data blijft behouden.',
+    q: 'Hoe vaak wordt het programma bijgewerkt?',
+    a: 'Artrocare volgt actief de nieuwste wetenschappelijke inzichten rondom artrose. Nieuwe onderzoeken worden regelmatig vertaald naar praktische aanpassingen in het programma — jij en je patiënten profiteren daar automatisch van.',
   },
   {
     q: 'Wordt Artrocare vergoed door de zorgverzekeraar?',
@@ -175,7 +192,7 @@ const TESTIMONIALS = [
   {
     name: 'Fysiopraktijk Zeist',
     role: 'Fysiotherapeut & eigenaar',
-    text: 'Met Artrocare houd ik grip op mijn artrosepatiënten zonder extra administratie. De AI-updates van protocollen zijn een game-changer.',
+    text: 'Met Artrocare houd ik grip op mijn artrosepatiënten zonder extra administratie. Dat het programma ook voeding, slaap en mentaal meeneemt maakt het écht compleet.',
     initials: 'FZ',
     color: 'bg-blue-100 text-blue-700',
   },
@@ -194,8 +211,6 @@ export default function LandingPractice() {
             <Heart className="w-6 h-6 text-blue-600" />
             Artrocare
           </Link>
-
-          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map(l => (
               <a key={l.href} href={l.href} className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
@@ -203,9 +218,8 @@ export default function LandingPractice() {
               </a>
             ))}
           </div>
-
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/">
+            <Link to="/login">
               <Button variant="outline" size="sm">Inloggen</Button>
             </Link>
             <Link to="/register-practice">
@@ -214,20 +228,17 @@ export default function LandingPractice() {
               </Button>
             </Link>
           </div>
-
-          {/* Mobile hamburger */}
           <button className="md:hidden p-2" onClick={() => setMobileMenu(v => !v)}>
             {mobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
-
         {mobileMenu && (
           <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-3">
             {NAV_LINKS.map(l => (
               <a key={l.href} href={l.href} className="block text-sm text-gray-700" onClick={() => setMobileMenu(false)}>{l.label}</a>
             ))}
             <div className="flex gap-2 pt-2">
-              <Link to="/" className="flex-1"><Button variant="outline" size="sm" className="w-full">Inloggen</Button></Link>
+              <Link to="/login" className="flex-1"><Button variant="outline" size="sm" className="w-full">Inloggen</Button></Link>
               <Link to="/register-practice" className="flex-1"><Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">Aanmelden</Button></Link>
             </div>
           </div>
@@ -238,14 +249,14 @@ export default function LandingPractice() {
       <section className="bg-gradient-to-br from-sky-50 via-white to-blue-50 pt-16 pb-20 px-4">
         <div className="max-w-5xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
-            <Sparkles className="w-4 h-4" /> Vernieuwend · KNGF-richtlijn · Internationaal erkend oefenprogramma · De hele mens centraal
+            <Sparkles className="w-4 h-4" /> Gebaseerd op Nederlandse en internationaal erkende effectieve programma's
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
             Artrosezorg die verder gaat.<br />
             <span className="text-blue-600">De hele mens centraal.</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Artrocare combineert een internationaal erkend neuromusculair oefenprogramma met aandacht voor voeding, slaap en mentaal welzijn — begeleid door jou als fysiotherapeut.
+            Artrocare is anders dan andere programma's. Wij ondersteunen jou als fysiotherapeut bij het begeleiden van de <em>hele</em> patiënt — bewegen, educatie, voeding, slaap, mentaal welzijn én medicatie. Continu bijgewerkt op basis van de nieuwste onderzoeken.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Link to="/register-practice">
@@ -253,23 +264,18 @@ export default function LandingPractice() {
                 Gratis starten <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <a href="#hoe-het-werkt">
+            <a href="#aanpak">
               <Button size="lg" variant="outline" className="text-base px-8">
-                Bekijk hoe het werkt
+                Bekijk onze aanpak
               </Button>
             </a>
           </div>
           <p className="text-sm text-gray-400">Gratis tot 5 patiënten · Geen creditcard nodig · AVG-compliant</p>
         </div>
 
-        {/* Holistische pijlers */}
-        <div className="max-w-2xl mx-auto mt-10 grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { icon: Dumbbell, label: 'Bewegen', color: 'text-blue-600 bg-blue-50' },
-            { icon: Apple,    label: 'Voeding', color: 'text-orange-600 bg-orange-50' },
-            { icon: Moon,     label: 'Slaap',   color: 'text-indigo-600 bg-indigo-50' },
-            { icon: Brain,    label: 'Mentaal', color: 'text-purple-600 bg-purple-50' },
-          ].map(p => (
+        {/* 6 pijlers */}
+        <div className="max-w-3xl mx-auto mt-12 grid grid-cols-2 md:grid-cols-3 gap-3">
+          {PILLARS.map(p => (
             <div key={p.label} className={`rounded-xl ${p.color} px-4 py-3 flex items-center gap-2 font-medium text-sm`}>
               <p.icon className="w-4 h-4 flex-shrink-0" /> {p.label}
             </div>
@@ -292,20 +298,92 @@ export default function LandingPractice() {
         </div>
       </section>
 
-      {/* VERGELIJKING STRIP */}
-      <section className="bg-blue-600 py-6 px-4">
-        <div className="max-w-5xl mx-auto flex flex-wrap justify-center gap-6 text-white text-sm font-medium">
-          {[
-            'Artrose-specifiek (knie, heup, hand)',
-            'KNGF-richtlijn + internationaal erkend oefenprogramma',
-            'Holistische aanpak: bewegen, voeding, slaap & mentaal',
-            'AI-gedreven protocolupdates',
-          ].map(item => (
-            <div key={item} className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-blue-200 flex-shrink-0" />
-              <span>{item}</span>
-            </div>
-          ))}
+      {/* WAAROM ANDERS */}
+      <section id="aanpak" className="py-20 px-4 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Waarom Artrocare anders is</h2>
+            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">
+              Andere oefenprogramma's richten zich op één onderdeel. Artrocare niet.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="border border-gray-100 bg-gray-50">
+              <CardContent className="p-6 space-y-3">
+                <h3 className="font-semibold text-gray-400 text-sm uppercase tracking-wide">Andere programma's</h3>
+                <ul className="space-y-2">
+                  {['Alleen oefeningen', 'Geen educatie geïntegreerd', 'Geen leefstijlbegeleiding', 'Statisch, zelden bijgewerkt'].map(item => (
+                    <li key={item} className="flex items-center gap-2 text-sm text-gray-400">
+                      <span className="flex-shrink-0">✕</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-blue-500 ring-2 ring-blue-100 relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                Artrocare
+              </div>
+              <CardContent className="p-6 space-y-3 mt-2">
+                <h3 className="font-semibold text-blue-700 text-sm uppercase tracking-wide">De hele mens centraal</h3>
+                <ul className="space-y-2">
+                  {[
+                    'Bewegen + educatie + leefstijl',
+                    'Voeding, slaap & mentaal welzijn',
+                    'Medicatie & supplementen inzicht',
+                    'Pre- én postoperatieve trajecten',
+                    'Altijd begeleid door de fysiotherapeut',
+                  ].map(item => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-blue-100 bg-blue-50/40">
+              <CardContent className="p-6 space-y-3">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-blue-800 text-sm">Altijd up-to-date</h3>
+                </div>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  De wetenschap rondom artrose ontwikkelt zich snel. Artrocare volgt de nieuwste onderzoeken en past het programma continu aan. Jij en je patiënten profiteren altijd van de meest actuele inzichten — automatisch.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* VOOR WIE */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">Voor al je artrosepatiënten</h2>
+            <p className="text-gray-500 mt-3 max-w-xl mx-auto">
+              Van licht naar zwaar. Artrocare past zich aan de situatie van elke patiënt aan.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            {FOR_WHO.map(item => (
+              <div key={item.title} className="flex gap-4 bg-white rounded-xl border border-gray-100 p-5">
+                <CheckCircle className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 p-5 bg-blue-50 rounded-xl border border-blue-100 flex items-start gap-3">
+            <Users className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-blue-800">
+              <strong>Altijd onder jouw begeleiding.</strong> Artrocare is een verlengstuk van jouw zorg — jij behoudt de regie. Patiënten worden uitgenodigd via jou en zijn altijd aan jou als therapeut gekoppeld.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -313,9 +391,9 @@ export default function LandingPractice() {
       <section id="voordelen" className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Meer dan een oefenapp</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Alles wat je nodig hebt</h2>
             <p className="text-gray-500 mt-3 max-w-xl mx-auto">
-              Artrocare is de eerste Nederlandse artrose-app die bewegen, voeding, slaap én mentaal welzijn combineert in één begeleid programma — gebouwd voor fysiotherapeuten.
+              Zes pijlers. Één platform. Gebouwd voor de dagelijkse realiteit van artrosezorg in Nederland.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -398,7 +476,7 @@ export default function LandingPractice() {
             {PRICING.map(plan => (
               <div key={plan.name} className={`bg-white rounded-2xl border-2 ${plan.color} p-6 relative`}>
                 {plan.badge && (
-                  <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${plan.name === 'Praktijk' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'} border-0 px-3`}>
+                  <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${plan.primary ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'} border-0 px-3`}>
                     {plan.badge}
                   </Badge>
                 )}
@@ -424,7 +502,7 @@ export default function LandingPractice() {
                     </a>
                   ) : (
                     <Link to={plan.href}>
-                      <Button className={`w-full ${plan.name === 'Praktijk' ? 'bg-blue-600 hover:bg-blue-700' : ''}`} variant={plan.name !== 'Praktijk' ? 'outline' : 'default'}>
+                      <Button className={`w-full ${plan.primary ? 'bg-blue-600 hover:bg-blue-700' : ''}`} variant={plan.primary ? 'default' : 'outline'}>
                         {plan.cta}
                       </Button>
                     </Link>
@@ -434,7 +512,7 @@ export default function LandingPractice() {
             ))}
           </div>
           <p className="text-center text-sm text-gray-400 mt-6">
-            Vergelijk: Physitrack kost €20.95/therapeut/maand zonder artrose-specialisatie.
+            Vergelijk: Physitrack kost €20.95/therapeut/maand — zonder artrose-specialisatie en zonder holistische aanpak.
           </p>
         </div>
       </section>
@@ -478,7 +556,7 @@ export default function LandingPractice() {
           </Link>
           <p className="text-blue-200 text-sm">
             Al een account?{' '}
-            <Link to="/" className="underline hover:text-white">Inloggen</Link>
+            <Link to="/login" className="underline hover:text-white">Inloggen</Link>
           </p>
         </div>
       </section>
@@ -490,9 +568,9 @@ export default function LandingPractice() {
             <Heart className="w-5 h-5 text-blue-400" />
             Artrocare
           </div>
-          <p>© {new Date().getFullYear()} Artrocare · Fysiopraktijk Zeist · AVG-compliant · EU-servers</p>
+          <p>© {new Date().getFullYear()} Artrocare · AVG-compliant · EU-servers</p>
           <div className="flex gap-4">
-            <Link to="/" className="hover:text-white transition-colors">Inloggen</Link>
+            <Link to="/login" className="hover:text-white transition-colors">Inloggen</Link>
             <Link to="/register-practice" className="hover:text-white transition-colors">Aanmelden</Link>
           </div>
         </div>
