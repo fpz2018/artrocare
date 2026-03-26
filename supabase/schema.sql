@@ -611,14 +611,44 @@ $$;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
+DECLARE
+  v_practice_id uuid;
+  v_role text;
 BEGIN
-  INSERT INTO public.profiles (id, email, full_name, role)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'patient')
-  );
+  v_role := COALESCE(NEW.raw_user_meta_data->>'register_as', NEW.raw_user_meta_data->>'role', 'patient');
+
+  IF v_role = 'practice_admin' THEN
+    INSERT INTO public.practices (name, city, address, postal_code, phone, email, website, status)
+    VALUES (
+      COALESCE(NEW.raw_user_meta_data->>'practice_name', 'Onbekend'),
+      COALESCE(NEW.raw_user_meta_data->>'practice_city', ''),
+      COALESCE(NEW.raw_user_meta_data->>'practice_address', ''),
+      COALESCE(NEW.raw_user_meta_data->>'practice_postal_code', ''),
+      COALESCE(NEW.raw_user_meta_data->>'practice_phone', ''),
+      COALESCE(NEW.raw_user_meta_data->>'practice_email', NEW.email),
+      COALESCE(NEW.raw_user_meta_data->>'practice_website', ''),
+      'pending'
+    )
+    RETURNING id INTO v_practice_id;
+
+    INSERT INTO public.profiles (id, email, full_name, role, practice_id)
+    VALUES (
+      NEW.id,
+      NEW.email,
+      COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+      'practice_admin',
+      v_practice_id
+    );
+  ELSE
+    INSERT INTO public.profiles (id, email, full_name, role)
+    VALUES (
+      NEW.id,
+      NEW.email,
+      COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+      CASE WHEN v_role IN ('patient', 'therapist', 'practice_admin', 'admin') THEN v_role ELSE 'patient' END
+    );
+  END IF;
+
   RETURN NEW;
 END;
 $$;
