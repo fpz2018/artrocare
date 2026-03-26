@@ -22,12 +22,12 @@ const BENEFITS = [
   {
     icon: Dumbbell,
     title: 'Bewegen: effectief oefenprogramma',
-    desc: 'Gebaseerd op de KNGF-richtlijn én internationaal erkende en effectieve programma\'s die in meer dan 30 landen worden toegepast. Gericht op kracht, balans én pijnreductie — aangepast aan jouw niveau.',
+    desc: 'Gebaseerd op de KNGF-richtlijn én internationaal erkende en effectieve programma\'s die in meer dan 30 landen worden toegepast. Gericht op kracht, balans én pijnreductie — aangepast aan uw niveau.',
     color: 'text-blue-600 bg-blue-50',
   },
   {
     icon: BookOpen,
-    title: 'Educatie: begrijp je aandoening',
+    title: 'Educatie: begrijp uw aandoening',
     desc: 'Educatie is een onmisbaar onderdeel van effectieve artrosezorg. Artrocare biedt korte, begrijpelijke lessen over artrose, pijn en leefstijl. Want wie zijn aandoening begrijpt, kan er beter mee omgaan.',
     color: 'text-amber-600 bg-amber-50',
   },
@@ -40,19 +40,19 @@ const BENEFITS = [
   {
     icon: Moon,
     title: 'Slaap & herstel',
-    desc: 'Slechte slaap versterkt pijnbeleving. Artrocare helpt je begrijpen hoe slaap en herstel bijdragen aan minder pijn en meer energie overdag.',
+    desc: 'Slechte slaap versterkt pijnbeleving. Artrocare helpt u begrijpen hoe slaap en herstel bijdragen aan minder pijn en meer energie overdag.',
     color: 'text-indigo-600 bg-indigo-50',
   },
   {
     icon: Brain,
     title: 'Mentaal welzijn',
-    desc: 'Pijn is niet alleen lichamelijk. Artrocare besteedt aandacht aan hoe gedachten, stress en stemming je pijnbeleving beïnvloeden — met praktische handvatten.',
+    desc: 'Pijn is niet alleen lichamelijk. Artrocare besteedt aandacht aan hoe gedachten, stress en stemming uw pijnbeleving beïnvloeden — met praktische handvatten.',
     color: 'text-purple-600 bg-purple-50',
   },
   {
     icon: Pill,
     title: 'Medicatie & supplementen',
-    desc: 'Wat helpt wel, wat helpt niet? Artrocare geeft inzicht in veelgebruikte pijnmedicatie en supplementen bij artrose — zodat je goed geïnformeerd het gesprek aangaat met je arts of therapeut.',
+    desc: 'Wat helpt wel, wat helpt niet? Artrocare geeft inzicht in veelgebruikte pijnmedicatie en supplementen bij artrose — zodat u goed geïnformeerd het gesprek aangaat met uw arts of therapeut.',
     color: 'text-rose-600 bg-rose-50',
   },
 ];
@@ -79,16 +79,16 @@ const TESTIMONIALS = [
 ];
 
 const STEPS = [
-  { step: '1', title: 'Interesse melden', desc: 'Laat je e-mailadres achter — we nemen contact op zodra je therapeut is aangesloten.' },
-  { step: '2', title: 'Uitnodiging ontvangen', desc: 'Je fysiotherapeut stuurt je een persoonlijke uitnodigingslink.' },
-  { step: '3', title: 'Programma starten', desc: 'Jouw programma staat klaar — begeleid door jouw therapeut.' },
+  { step: '1', title: 'Interesse melden', desc: 'Laat uw e-mailadres achter — we nemen contact op zodra uw therapeut is aangesloten.' },
+  { step: '2', title: 'Uitnodiging ontvangen', desc: 'Uw fysiotherapeut stuurt u een persoonlijke uitnodigingslink.' },
+  { step: '3', title: 'Programma starten', desc: 'Uw programma staat klaar — begeleid door uw therapeut.' },
 ];
 
 const FOR_WHO = [
-  { title: 'Milde klachten', desc: 'Net de diagnose artrose of milde klachten? Artrocare helpt je vroeg de juiste gewoonten op te bouwen.' },
+  { title: 'Milde klachten', desc: 'Net de diagnose artrose of milde klachten? Artrocare helpt u vroeg de juiste gewoonten op te bouwen.' },
   { title: 'Langdurige artrose', desc: 'Al jaren last van artrose? Artrocare biedt structuur, inzicht en begeleiding om actief te blijven.' },
   { title: 'Voorbereiding op operatie', desc: 'Een knie- of heupoperatie in zicht? Een goede voorbereiding verbetert aantoonbaar het herstel.' },
-  { title: 'Herstel na operatie', desc: 'Nazorg na een prothese? Artrocare begeleidt je stap voor stap terug naar optimale functie en dagelijks bewegen.' },
+  { title: 'Herstel na operatie', desc: 'Nazorg na een prothese? Artrocare begeleidt u stap voor stap terug naar optimale functie en dagelijks bewegen.' },
 ];
 
 export default function LandingPatient() {
@@ -104,7 +104,7 @@ export default function LandingPatient() {
           </Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <a href="#aanpak" className="hover:text-blue-600">Onze aanpak</a>
-            <a href="#voordelen" className="hover:text-blue-600">Alles wat je krijgt</a>
+            <a href="#voordelen" className="hover:text-blue-600">Alles wat u krijgt</a>
             <a href="#voor-wie" className="hover:text-blue-600">Voor wie</a>
             <a href="#ervaringen" className="hover:text-blue-600">Ervaringen</a>
           </div>
@@ -118,7 +118,7 @@ export default function LandingPatient() {
         {menuOpen && (
           <div className="md:hidden border-t bg-white px-4 py-4 space-y-3">
             <a href="#aanpak" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>Onze aanpak</a>
-            <a href="#voordelen" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>Alles wat je krijgt</a>
+            <a href="#voordelen" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>Alles wat u krijgt</a>
             <a href="#voor-wie" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>Voor wie</a>
             <Link to="/login"><Button size="sm" className="w-full mt-2">Inloggen</Button></Link>
           </div>
@@ -141,12 +141,12 @@ export default function LandingPatient() {
             <span className="text-blue-600">De hele mens centraal.</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Artrocare is anders dan andere programma's. Wij begeleiden je niet alleen bij bewegen — maar ook bij educatie, voeding, slaap, mentaal welzijn en medicatie. Altijd onder begeleiding van een deskundige fysiotherapeut.
+            Artrocare is anders dan andere programma's. Wij begeleiden u niet alleen bij bewegen — maar ook bij educatie, voeding, slaap, mentaal welzijn en medicatie. Altijd onder begeleiding van een deskundige fysiotherapeut.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <a href="#wachtlijst-cta">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base px-8">
-                Meld je interesse <ArrowRight className="w-5 h-5 ml-2" />
+                Meld uw interesse <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </a>
             <a href="#aanpak">
@@ -166,7 +166,7 @@ export default function LandingPatient() {
           ))}
         </div>
         <p className="text-xs text-gray-400 mt-3 max-w-md mx-auto text-center">
-          Artrocare is de eerste Nederlandse artrose-app die al deze pijlers combineert in één programma — begeleid door jouw fysiotherapeut.
+          Artrocare is de eerste Nederlandse artrose-app die al deze pijlers combineert in één programma — begeleid door uw fysiotherapeut.
         </p>
       </section>
 
@@ -205,7 +205,7 @@ export default function LandingPatient() {
                     'Voeding, slaap & mentaal welzijn',
                     'Medicatie & supplementen inzicht',
                     'Continu bijgewerkt op basis van nieuwste onderzoeken',
-                    'Altijd begeleid door jouw fysiotherapeut',
+                    'Altijd begeleid door uw fysiotherapeut',
                   ].map(item => (
                     <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
                       <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /> {item}
@@ -222,7 +222,7 @@ export default function LandingPatient() {
                   <h3 className="font-semibold text-blue-800 text-sm">Altijd up-to-date</h3>
                 </div>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  De wetenschap rondom artrose ontwikkelt zich snel. Artrocare volgt de nieuwste onderzoeken en past het programma continu aan. Jij profiteert altijd van de meest actuele inzichten — zonder dat je daar iets voor hoeft te doen.
+                  De wetenschap rondom artrose ontwikkelt zich snel. Artrocare volgt de nieuwste onderzoeken en past het programma continu aan. U profiteert altijd van de meest actuele inzichten — zonder dat u daar iets voor hoeft te doen.
                 </p>
               </CardContent>
             </Card>
@@ -236,7 +236,7 @@ export default function LandingPatient() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900">Voor iedereen met artroseklachten</h2>
             <p className="text-gray-500 mt-3 max-w-xl mx-auto">
-              Of je nu net de diagnose hebt gekregen of al jaren last hebt — Artrocare past zich aan jouw situatie aan.
+              Of u nu net de diagnose heeft gekregen of al jaren last hebt — Artrocare past zich aan uw situatie aan.
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
@@ -263,7 +263,7 @@ export default function LandingPatient() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900">Alles wat je nodig hebt</h2>
-            <p className="text-gray-500 mt-3 max-w-xl mx-auto">Zes pijlers. Één programma. Begeleid door jouw therapeut.</p>
+            <p className="text-gray-500 mt-3 max-w-xl mx-auto">Zes pijlers. Één programma. Begeleid door uw therapeut.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {BENEFITS.map(b => (
@@ -300,7 +300,7 @@ export default function LandingPatient() {
             ))}
           </div>
           <div className="mt-10 p-4 bg-blue-50 rounded-xl border border-blue-100 text-sm text-blue-800">
-            <strong>Nog geen uitnodiging ontvangen?</strong> Vraag je fysiotherapeut om je toegang te geven tot Artrocare, of{' '}
+            <strong>Nog geen uitnodiging ontvangen?</strong> Vraag uw fysiotherapeut om u toegang te geven tot Artrocare, of{' '}
             <Link to="/voor-fysiotherapeuten" className="underline">laat hem/haar kennismaken met de app</Link>.
           </div>
         </div>
@@ -340,9 +340,9 @@ export default function LandingPatient() {
           <div className="inline-flex items-center gap-1.5 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
             <FlaskConical className="w-3.5 h-3.5" /> Beta 2026
           </div>
-          <h2 className="text-3xl font-bold text-white">Wil je als eerste meedoen?</h2>
+          <h2 className="text-3xl font-bold text-white">Wilt u als eerste meedoen?</h2>
           <p className="text-blue-100">
-            Artrocare is nu in de pilotfase. Laat je e-mailadres achter — we laten je weten zodra jouw fysiotherapeut is aangesloten.
+            Artrocare is nu in de pilotfase. Laat uw e-mailadres achter — we laten u weten zodra uw fysiotherapeut is aangesloten.
           </p>
           <WaitlistForm
             role="patient"

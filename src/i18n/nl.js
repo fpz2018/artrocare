@@ -2,7 +2,7 @@
 const nl = {
   // Common
   app_name: 'Artrocare',
-  tagline: 'Jouw persoonlijke gids bij artrose',
+  tagline: 'Uw persoonlijke gids bij artrose',
   loading: 'Laden...',
   save: 'Opslaan',
   cancel: 'Annuleren',
@@ -59,22 +59,22 @@ const nl = {
   has_account: 'Al een account?',
 
   // Home
-  home_tagline: 'Jouw persoonlijke gids bij artrose',
-  home_description: 'Artrocare helpt je om controle te nemen over je artrose. Met gepersonaliseerde oefeningen, voeding en voorlichting die bewezen effectief is.',
+  home_tagline: 'Uw persoonlijke gids bij artrose',
+  home_description: 'Artrocare helpt u om controle te nemen over uw artrose. Met gepersonaliseerde oefeningen, voeding en voorlichting die bewezen effectief is.',
   home_feature_exercises: 'Gepersonaliseerde Oefeningen',
   home_feature_exercises_desc: 'NEMEX-TJR gebaseerd programma',
   home_feature_nutrition: 'Anti-inflammatoire Voeding',
-  home_feature_nutrition_desc: 'Recepten die bij je passen',
+  home_feature_nutrition_desc: 'Recepten die bij u passen',
   home_feature_education: 'Kennis is Kracht',
-  home_feature_education_desc: 'Begrijp je aandoening',
-  home_feature_tracking: 'Volg je Voortgang',
-  home_feature_tracking_desc: 'Zie hoe je vooruitgaat',
+  home_feature_education_desc: 'Begrijp uw aandoening',
+  home_feature_tracking: 'Volg uw Voortgang',
+  home_feature_tracking_desc: 'Zie hoe u vooruitgaat',
   home_start: 'Begin Nu',
   home_learn_more: 'Meer Informatie',
 
   // Dashboard
   dash_welcome: 'Welkom terug',
-  dash_how_feeling: 'Hoe voel je je vandaag?',
+  dash_how_feeling: 'Hoe voelt u zich vandaag?',
   dash_pain_level: 'Pijnniveau',
   dash_function_score: 'Functiescore',
   dash_streak: 'Streak',
@@ -88,13 +88,13 @@ const nl = {
   dash_pain_trend: 'Pijn & Functie Trend',
   dash_last_30: 'Laatste 30 dagen',
   dash_flare_detected: 'Opvlamming gedetecteerd',
-  dash_flare_message: 'Je pijnscores zijn recent gestegen. Bekijk het opvlammingsprotocol.',
-  dash_therapist_reminder: 'Vergeet niet je therapeut op de hoogte te houden',
+  dash_flare_message: 'Uw pijnscores zijn recent gestegen. Bekijk het opvlammingsprotocol.',
+  dash_therapist_reminder: 'Vergeet niet uw therapeut op de hoogte te houden',
   dash_quick_log: 'Snelle Registratie',
 
   // Onboarding
   onboard_welcome: 'Welkom bij Artrocare',
-  onboard_stage: 'Wat is je artrose stadium?',
+  onboard_stage: 'Wat is uw artrose stadium?',
   onboard_stage_early: 'Beginnend',
   onboard_stage_moderate: 'Matig',
   onboard_stage_advanced: 'Gevorderd',
@@ -106,8 +106,8 @@ const nl = {
   onboard_joint_shoulder: 'Schouder',
   onboard_joint_ankle: 'Enkel',
   onboard_joint_spine: 'Wervelkolom',
-  onboard_replacement: 'Sta je op de wachtlijst voor een gewrichtsvervanging?',
-  onboard_goals: 'Wat zijn je doelen?',
+  onboard_replacement: 'Staat u op de wachtlijst voor een gewrichtsvervanging?',
+  onboard_goals: 'Wat zijn uw doelen?',
   onboard_goal_less_pain: 'Minder pijn',
   onboard_goal_more_mobility: 'Meer mobiliteit',
   onboard_goal_better_sleep: 'Beter slapen',
@@ -173,7 +173,7 @@ const nl = {
 
   // Nutrition
   nutr_title: 'Voeding',
-  nutr_generating: 'Je persoonlijke voedingsplan wordt gegenereerd...',
+  nutr_generating: 'Uw persoonlijke voedingsplan wordt gegenereerd...',
   nutr_today: 'Vandaag',
   nutr_breakfast: 'Ontbijt',
   nutr_lunch: 'Lunch',
@@ -194,7 +194,7 @@ const nl = {
 
   // Supplements
   supp_title: 'Supplementen',
-  supp_safety: 'Raadpleeg altijd je arts voordat je supplementen gebruikt',
+  supp_safety: 'Raadpleeg altijd uw arts voordat u supplementen gebruikt',
   supp_dosage: 'Dosering',
   supp_timing: 'Wanneer innemen',
   supp_benefits: 'Voordelen',
@@ -312,15 +312,15 @@ const nl = {
   pred_refresh: 'Vernieuw',
 
   // Education Progress
-  edu_title: 'Jouw Kennis = Jouw Kracht',
+  edu_title: 'Uw Kennis = Uw Kracht',
   edu_subtitle: 'Start met begrip, dan komt actie',
   edu_lessons_completed: 'lessen voltooid',
-  edu_unlock_program: 'Unlock je Volledige Programma',
+  edu_unlock_program: 'Ontgrendel uw volledige programma',
   edu_unlocked: 'Programma Ontgrendeld!',
   edu_start_lesson: 'Start Les',
   edu_all_complete: 'Alle Basis Lessen Voltooid',
   edu_why: 'Waarom educatie eerst?',
-  edu_why_text: 'Wetenschappelijk onderzoek toont aan dat begrip van je aandoening leidt tot betere resultaten. Door te weten WAAROM beweging en voeding werken, ben je gemotiveerder en consequenter.',
+  edu_why_text: 'Wetenschappelijk onderzoek toont aan dat begrip van uw aandoening leidt tot betere resultaten. Door te weten WAAROM beweging en voeding werken, bent u gemotiveerder en consequenter.',
   edu_core_modules: 'Basis Modules',
   edu_unlock_at: 'Unlock na 3 lessen',
   edu_exercises_nutrition: 'Oefeningen + Voeding',
@@ -328,14 +328,14 @@ const nl = {
   // Disclaimer
   disclaimer_title: 'Medische Disclaimer',
   disclaimer_subtitle: 'Belangrijke informatie',
-  disclaimer_text: 'Artrocare biedt educatieve informatie en oefenprogramma\'s ter ondersteuning van mensen met artrose. Deze app vervangt geen medisch advies, diagnose of behandeling door een gekwalificeerde zorgverlener. Raadpleeg altijd je arts of fysiotherapeut voordat je begint met een nieuw oefenprogramma of je behandeling wijzigt.',
+  disclaimer_text: 'Artrocare biedt educatieve informatie en oefenprogramma\'s ter ondersteuning van mensen met artrose. Deze app vervangt geen medisch advies, diagnose of behandeling door een gekwalificeerde zorgverlener. Raadpleeg altijd uw arts of fysiotherapeut voordat u begint met een nieuw oefenprogramma of uw behandeling wijzigt.',
   disclaimer_short: 'Deze app vervangt geen medisch advies. Raadpleeg altijd je zorgverlener.',
   disclaimer_footer: 'Artrocare is geen vervanging voor professioneel medisch advies.',
-  disclaimer_exercise: 'Stop met oefenen als je ongewone pijn ervaart en raadpleeg je fysiotherapeut.',
+  disclaimer_exercise: 'Stop met oefenen als u ongewone pijn ervaart en raadpleeg uw fysiotherapeut.',
   disclaimer_nutrition: 'Voedingsadvies is gebaseerd op orthomoleculaire richtlijnen. Raadpleeg een orthomoleculair therapeut voor persoonlijk advies.',
-  disclaimer_supplements: 'Raadpleeg altijd je fysiotherapeut, orthomoleculair therapeut of (huis)arts voordat je supplementen gaat gebruiken of wijzigen.',
+  disclaimer_supplements: 'Raadpleeg altijd uw fysiotherapeut, orthomoleculair therapeut of (huis)arts voordat u supplementen gaat gebruiken of wijzigen.',
   disclaimer_ai: 'AI-gegenereerde content is ter ondersteuning en vervangt geen professioneel advies.',
-  disclaimer_medication: 'Wijzig nooit je medicatie zonder overleg met je (huis)arts.',
+  disclaimer_medication: 'Wijzig nooit uw medicatie zonder overleg met uw (huis)arts.',
   disclaimer_agree: 'Ik begrijp het',
   disclaimer_view_full: 'Bekijk volledige voorwaarden',
 
@@ -349,7 +349,7 @@ const nl = {
   // Flare
   flare_title: 'Opvlammingsprotocol',
   flare_active: 'Actieve opvlamming gedetecteerd',
-  flare_advice: 'Tijdelijk minder intensief bewegen, maar blijf wel bewegen. Neem contact op met je therapeut als de klachten aanhouden.',
+  flare_advice: 'Tijdelijk minder intensief bewegen, maar blijf wel bewegen. Neem contact op met uw therapeut als de klachten aanhouden.',
 
   // Research Monitor
   research_title: 'Research Monitor',
@@ -372,8 +372,8 @@ const nl = {
   research_therapist_only: 'Alleen voor therapeuten',
 // HOOS12
 hoos12_title: 'HOOS-12 Heup Vragenlijst',
-hoos12_subtitle: 'Meet je heupfunctie en pijn',
-hoos12_instructions: 'Beantwoord deze vragen over je heupklachten in de afgelopen week.',
+hoos12_subtitle: 'Meet uw heupfunctie en pijn',
+hoos12_instructions: 'Beantwoord deze vragen over uw heupklachten in de afgelopen week.',
 hoos12_pain: 'Pijn',
 hoos12_symptoms: 'Symptomen',
 hoos12_function_daily: 'Functie Dagelijks Leven',

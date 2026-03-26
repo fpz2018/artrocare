@@ -81,21 +81,21 @@ const ROUTE_INFO = {
   A: {
     color: 'green',
     label: 'Route A — Zelfmanagement',
-    description: 'Lichte klachten. Je start met een zelfgeleid programma van 6 weken: dagelijkse oefeningen, educatie en leefstijladvies. Je therapeut monitort je voortgang.',
+    description: 'Lichte klachten. U start met een zelfgeleid programma van 6 weken: dagelijkse oefeningen, educatie en leefstijladvies. Uw therapeut monitort uw voortgang.',
     weeks: 6,
     intensity: 'Laag',
   },
   B: {
     color: 'orange',
     label: 'Route B — Begeleid programma',
-    description: 'Matige klachten. Je volgt een begeleiding van 12 weken met intensievere therapeutcontacten, oefentherapie en leefstijlcoaching.',
+    description: 'Matige klachten. U volgt een begeleiding van 12 weken met intensievere therapeutcontacten, oefentherapie en leefstijlcoaching.',
     weeks: 12,
     intensity: 'Middel',
   },
   C: {
     color: 'red',
     label: 'Route C — Intensief programma',
-    description: 'Ernstige klachten of hoge ziektelast. Je start direct met een intensief 18-weeksprogramma inclusief reguliere consultaties bij je therapeut en eventueel aanvullende zorg.',
+    description: 'Ernstige klachten of hoge ziektelast. U start direct met een intensief 18-weeksprogramma inclusief reguliere consultaties bij uw therapeut en eventueel aanvullende zorg.',
     weeks: 18,
     intensity: 'Hoog',
   },
@@ -498,6 +498,10 @@ export default function DashboardOnboarding() {
 
         <CardContent className="space-y-6">
           {stepComponents[step]}
+
+          {error && step === 5 && (
+            <p className="text-sm text-red-600 bg-red-50 rounded-lg p-3">{error}</p>
+          )}
 
           <div className="flex justify-between pt-2">
             <Button
