@@ -133,7 +133,7 @@ export default function LandingPatient() {
               <Sparkles className="w-4 h-4" /> Gebaseerd op Nederlandse en internationaal erkende effectieve programma's
             </div>
             <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-sm font-semibold px-3 py-1.5 rounded-full border border-amber-200">
-              <FlaskConical className="w-4 h-4" /> Beta · Pilot 2025
+              <FlaskConical className="w-4 h-4" /> Beta 2026
             </div>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
@@ -337,7 +337,7 @@ export default function LandingPatient() {
       <section className="py-20 px-4 bg-blue-600">
         <div className="max-w-xl mx-auto text-center space-y-5">
           <div className="inline-flex items-center gap-1.5 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
-            <FlaskConical className="w-3.5 h-3.5" /> Beta · Pilot 2025
+            <FlaskConical className="w-3.5 h-3.5" /> Beta 2026
           </div>
           <h2 className="text-3xl font-bold text-white">Wil je als eerste meedoen?</h2>
           <p className="text-blue-100">

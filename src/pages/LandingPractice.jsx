@@ -116,8 +116,8 @@ const PRICING = [
       'Patiëntvoortgang bekijken',
       'E-mail support',
     ],
-    cta: 'Gratis starten',
-    href: '/register-practice',
+    cta: 'Interesse melden',
+    href: '#prijzen-cta',
     primary: false,
   },
   {
@@ -137,8 +137,8 @@ const PRICING = [
       'Pre- en postoperatieve trajecten',
       'Prioriteit support',
     ],
-    cta: '14 dagen gratis proberen',
-    href: '/register-practice',
+    cta: 'Doe mee met de pilot',
+    href: '#prijzen-cta',
     primary: true,
   },
   {
@@ -156,8 +156,8 @@ const PRICING = [
       'Dedicated accountmanager',
       'SLA & prioriteit onboarding',
     ],
-    cta: 'Offerte aanvragen',
-    href: 'mailto:marc@fysiopraktijkzeist.nl?subject=Kliniek%20plan%20Artrocare',
+    cta: 'Interesse melden',
+    href: '#prijzen-cta',
     primary: false,
   },
 ];
@@ -223,11 +223,11 @@ export default function LandingPractice() {
             <Link to="/login">
               <Button variant="outline" size="sm">Inloggen</Button>
             </Link>
-            <Link to="/register-practice">
+            <a href="#prijzen-cta">
               <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                Praktijk aanmelden <ChevronRight className="w-4 h-4 ml-1" />
+                Doe mee met pilot <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
-            </Link>
+            </a>
           </div>
           <button className="md:hidden p-2" onClick={() => setMobileMenu(v => !v)}>
             {mobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -240,7 +240,7 @@ export default function LandingPractice() {
             ))}
             <div className="flex gap-2 pt-2">
               <Link to="/login" className="flex-1"><Button variant="outline" size="sm" className="w-full">Inloggen</Button></Link>
-              <Link to="/register-practice" className="flex-1"><Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">Aanmelden</Button></Link>
+              <a href="#prijzen-cta" className="flex-1"><Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">Aanmelden</Button></a>
             </div>
           </div>
         )}
@@ -254,7 +254,7 @@ export default function LandingPractice() {
               <Sparkles className="w-4 h-4" /> Gebaseerd op Nederlandse en internationaal erkende effectieve programma's
             </div>
             <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-sm font-semibold px-3 py-1.5 rounded-full border border-amber-200">
-              <FlaskConical className="w-4 h-4" /> Beta · Pilot 2025
+              <FlaskConical className="w-4 h-4" /> Beta 2026
             </div>
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
@@ -265,11 +265,11 @@ export default function LandingPractice() {
             Artrocare is anders dan andere programma's. Wij ondersteunen jou als fysiotherapeut bij het begeleiden van de <em>hele</em> patiënt — bewegen, educatie, voeding, slaap, mentaal welzijn én medicatie. Continu bijgewerkt op basis van de nieuwste onderzoeken.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-            <Link to="/register-practice">
+            <a href="#prijzen-cta">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base px-8">
-                Gratis starten <ArrowRight className="w-5 h-5 ml-2" />
+                Doe mee met de pilot <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-            </Link>
+            </a>
             <a href="#aanpak">
               <Button size="lg" variant="outline" className="text-base px-8">
                 Bekijk onze aanpak
@@ -502,17 +502,11 @@ export default function LandingPractice() {
                       </li>
                     ))}
                   </ul>
-                  {plan.href.startsWith('mailto') ? (
-                    <a href={plan.href}>
-                      <Button variant="outline" className="w-full">{plan.cta}</Button>
-                    </a>
-                  ) : (
-                    <Link to={plan.href}>
-                      <Button className={`w-full ${plan.primary ? 'bg-blue-600 hover:bg-blue-700' : ''}`} variant={plan.primary ? 'default' : 'outline'}>
-                        {plan.cta}
-                      </Button>
-                    </Link>
-                  )}
+                  <a href={plan.href}>
+                    <Button className={`w-full ${plan.primary ? 'bg-blue-600 hover:bg-blue-700' : ''}`} variant={plan.primary ? 'default' : 'outline'}>
+                      {plan.cta}
+                    </Button>
+                  </a>
                 </div>
               </div>
             ))}
@@ -547,10 +541,10 @@ export default function LandingPractice() {
       </section>
 
       {/* CTA FOOTER — wachtlijst */}
-      <section className="py-20 px-4 bg-blue-600">
+      <section id="prijzen-cta" className="py-20 px-4 bg-blue-600">
         <div className="max-w-xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-1.5 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
-            <FlaskConical className="w-3.5 h-3.5" /> Beta · Pilot 2025
+            <FlaskConical className="w-3.5 h-3.5" /> Beta 2026
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-white">
             Doe mee met de pilot
