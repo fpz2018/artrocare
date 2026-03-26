@@ -456,13 +456,14 @@ export default function DashboardOnboarding() {
     );
   };
 
+  // Aanroepen als functie (niet als component) zodat React niet unmount bij elke re-render
   const stepComponents = [
-    <StepJoint key="joint" />,
-    <StepDemographics key="demo" />,
-    <StepHOOS key="hoos" />,
-    <StepNRS key="nrs" />,
-    null, // step 4 = auto-calculate, never shown
-    <StepResult key="result" />,
+    StepJoint(),
+    StepDemographics(),
+    StepHOOS(),
+    StepNRS(),
+    null,
+    StepResult(),
   ];
 
   const stepLabels = ['Gewricht', 'Gegevens', 'HOOS-12', 'Pijn', '', 'Resultaat'];
