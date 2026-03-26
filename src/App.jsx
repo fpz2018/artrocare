@@ -61,6 +61,9 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
   if (noAdmin && profile?.role === 'practice_admin') {
     return <Navigate to="/practice" replace />;
   }
+  if (noAdmin && profile?.role === 'therapist') {
+    return <Navigate to="/therapist-dashboard" replace />;
+  }
 
   // Role-based access control — redirect to role's home
   if (requiredRole && profile?.role !== requiredRole) {
@@ -68,6 +71,8 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
       ? '/admin/proposals'
       : profile?.role === 'practice_admin'
       ? '/practice'
+      : profile?.role === 'therapist'
+      ? '/therapist-dashboard'
       : '/dashboard';
     return <Navigate to={home} replace />;
   }
@@ -88,6 +93,8 @@ function AppRoutes() {
     ? '/admin/proposals'
     : profile.role === 'practice_admin'
     ? '/practice'
+    : profile.role === 'therapist'
+    ? '/therapist-dashboard'
     : '/dashboard';
 
   return (
