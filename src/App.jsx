@@ -52,9 +52,12 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
   // Wait for profile before checking roles
   if ((requiredRole || noAdmin) && !profile) return <PageLoader />;
 
-  // Redirect admin away from patient-only pages
+  // Redirect admin/practice_admin away from patient-only pages
   if (noAdmin && profile?.role === 'admin') {
     return <Navigate to="/admin/proposals" replace />;
+  }
+  if (noAdmin && profile?.role === 'practice_admin') {
+    return <Navigate to="/admin/practices" replace />;
   }
 
   // Role-based access control — redirect to role's home, not always /dashboard
@@ -77,6 +80,8 @@ function AppRoutes() {
     ? null
     : profile.role === 'admin'
     ? '/admin/proposals'
+    : profile.role === 'practice_admin'
+    ? '/admin/practices'
     : '/dashboard';
 
   return (

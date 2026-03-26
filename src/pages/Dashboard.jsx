@@ -96,8 +96,8 @@ export default function Dashboard() {
     },
   });
 
-  // Check onboarding
-  if (profile && !profile.onboarding_completed) {
+  // Check onboarding (alleen voor patiënten)
+  if (profile && !profile.onboarding_completed && profile.role === 'patient') {
     return <DashboardOnboarding />;
   }
 

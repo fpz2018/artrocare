@@ -54,28 +54,24 @@ export default function RegisterPractice() {
 
     setLoading(true);
     try {
-      // 1. Account aanmaken
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { error: authError } = await supabase.auth.signUp({
         email: account.email,
         password: account.password,
-        options: { data: { full_name: account.full_name } },
+        options: {
+          data: {
+            full_name:            account.full_name,
+            register_as:          'practice_admin',
+            practice_name:        practice.name,
+            practice_city:        practice.city,
+            practice_address:     practice.address,
+            practice_postal_code: practice.postal_code,
+            practice_phone:       practice.phone,
+            practice_email:       practice.email,
+            practice_website:     practice.website,
+          },
+        },
       });
       if (authError) throw authError;
-      if (!authData.user) throw new Error('Account aanmaken mislukt');
-
-      // 2. Praktijk aanmelden + profiel updaten via RPC
-      const { error: rpcError } = await supabase.rpc('register_practice', {
-        p_name:        practice.name,
-        p_city:        practice.city,
-        p_address:     practice.address,
-        p_postal_code: practice.postal_code,
-        p_phone:       practice.phone,
-        p_email:       practice.email,
-        p_website:     practice.website,
-        p_full_name:   account.full_name,
-      });
-      if (rpcError) throw rpcError;
-
       setDone(true);
     } catch (err) {
       setError(err.message || 'Er is iets misgegaan.');
