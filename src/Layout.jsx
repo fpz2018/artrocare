@@ -5,7 +5,7 @@ import { useI18n } from '@/i18n';
 import {
   LayoutDashboard, TrendingUp, Dumbbell, Target, Apple, Pill,
   Stethoscope, BookOpen, Crown, Settings, Users, Menu, X,
-  Globe, LogOut, ChevronRight, Heart, FlaskConical
+  Globe, LogOut, ChevronRight, Heart, FlaskConical, Database
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FooterDisclaimer } from '@/components/legal/Disclaimer';
@@ -30,6 +30,12 @@ const therapistNavItems = [
   { path: '/settings', icon: Settings, labelKey: 'nav_settings' },
 ];
 
+const adminNavItems = [
+  { path: '/admin/proposals', icon: Database, labelKey: 'nav_content_proposals' },
+  { path: '/research', icon: FlaskConical, labelKey: 'nav_research' },
+  { path: '/settings', icon: Settings, labelKey: 'nav_settings' },
+];
+
 export default function Layout({ children }) {
   const { profile, signOut } = useAuth();
   const { t, language, setLanguage } = useI18n();
@@ -37,7 +43,9 @@ export default function Layout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const items = useMemo(() => {
-    return profile?.role === 'therapist' ? therapistNavItems : navItems;
+    if (profile?.role === 'admin') return adminNavItems;
+    if (profile?.role === 'therapist') return therapistNavItems;
+    return navItems;
   }, [profile?.role]);
 
   const isPremium = profile?.subscription_tier === 'premium' || profile?.subscription_tier === 'practice';

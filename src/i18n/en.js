@@ -39,6 +39,7 @@ const en = {
   nav_community: 'Community',
   nav_my_patients: 'My Patients',
   nav_research: 'Research Monitor',
+  nav_content_proposals: 'Content Manager',
   nav_upgrade: 'Upgrade to Premium',
 
   // Auth
