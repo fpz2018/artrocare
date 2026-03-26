@@ -29,6 +29,7 @@ const AdminPractices = lazy(() => import('@/pages/AdminPractices'));
 const PracticeAdmin = lazy(() => import('@/pages/PracticeAdmin'));
 const RegisterPractice = lazy(() => import('@/pages/RegisterPractice'));
 const AcceptInvite = lazy(() => import('@/pages/AcceptInvite'));
+const LandingPractice = lazy(() => import('@/pages/LandingPractice'));
 const HOOS12 = lazy(() => import('@/pages/HOOS12'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 
@@ -113,6 +114,7 @@ function AppRoutes() {
         />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/register-practice" element={<RegisterPractice />} />
+        <Route path="/voor-praktijken" element={<LandingPractice />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
 
         {/* Protected routes */}
