@@ -41,6 +41,7 @@ const en = {
   nav_research: 'Research Monitor',
   nav_content_proposals: 'Content Manager',
   nav_practices: 'Practices',
+  nav_practice: 'My Practice',
   nav_upgrade: 'Upgrade to Premium',
 
   // Auth

@@ -41,6 +41,7 @@ const nl = {
   nav_research: 'Research Monitor',
   nav_content_proposals: 'Content Beheer',
   nav_practices: 'Praktijken',
+  nav_practice: 'Mijn Praktijk',
   nav_upgrade: 'Upgrade naar Premium',
 
   // Auth

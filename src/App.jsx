@@ -26,6 +26,7 @@ const Community = lazy(() => import('@/pages/Community'));
 const ResearchMonitor = lazy(() => import('@/pages/ResearchMonitor'));
 const ContentProposals = lazy(() => import('@/pages/ContentProposals'));
 const AdminPractices = lazy(() => import('@/pages/AdminPractices'));
+const PracticeAdmin = lazy(() => import('@/pages/PracticeAdmin'));
 const RegisterPractice = lazy(() => import('@/pages/RegisterPractice'));
 const HOOS12 = lazy(() => import('@/pages/HOOS12'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
@@ -57,12 +58,16 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
     return <Navigate to="/admin/proposals" replace />;
   }
   if (noAdmin && profile?.role === 'practice_admin') {
-    return <Navigate to="/admin/practices" replace />;
+    return <Navigate to="/practice" replace />;
   }
 
-  // Role-based access control — redirect to role's home, not always /dashboard
+  // Role-based access control — redirect to role's home
   if (requiredRole && profile?.role !== requiredRole) {
-    const home = profile?.role === 'admin' ? '/admin/proposals' : '/dashboard';
+    const home = profile?.role === 'admin'
+      ? '/admin/proposals'
+      : profile?.role === 'practice_admin'
+      ? '/practice'
+      : '/dashboard';
     return <Navigate to={home} replace />;
   }
 
@@ -81,7 +86,7 @@ function AppRoutes() {
     : profile.role === 'admin'
     ? '/admin/proposals'
     : profile.role === 'practice_admin'
-    ? '/admin/practices'
+    ? '/practice'
     : '/dashboard';
 
   return (
@@ -118,6 +123,7 @@ function AppRoutes() {
         <Route path="/research" element={<ProtectedRoute requiredRole="therapist"><ResearchMonitor /></ProtectedRoute>} />
         <Route path="/admin/proposals" element={<ProtectedRoute requiredRole="admin"><ContentProposals /></ProtectedRoute>} />
         <Route path="/admin/practices" element={<ProtectedRoute requiredRole="admin"><AdminPractices /></ProtectedRoute>} />
+        <Route path="/practice" element={<ProtectedRoute requiredRole="practice_admin"><PracticeAdmin /></ProtectedRoute>} />
 
         {/* Therapist-only route */}
         <Route

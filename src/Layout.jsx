@@ -30,6 +30,11 @@ const therapistNavItems = [
   { path: '/settings', icon: Settings, labelKey: 'nav_settings' },
 ];
 
+const practiceAdminNavItems = [
+  { path: '/practice', icon: Building2, labelKey: 'nav_practice' },
+  { path: '/settings', icon: Settings, labelKey: 'nav_settings' },
+];
+
 const adminNavItems = [
   { path: '/admin/proposals', icon: Database, labelKey: 'nav_content_proposals' },
   { path: '/admin/practices', icon: Building2, labelKey: 'nav_practices' },
@@ -45,6 +50,7 @@ export default function Layout({ children }) {
 
   const items = useMemo(() => {
     if (profile?.role === 'admin') return adminNavItems;
+    if (profile?.role === 'practice_admin') return practiceAdminNavItems;
     if (profile?.role === 'therapist') return therapistNavItems;
     return navItems;
   }, [profile?.role]);
