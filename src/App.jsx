@@ -30,6 +30,8 @@ const PracticeAdmin = lazy(() => import('@/pages/PracticeAdmin'));
 const RegisterPractice = lazy(() => import('@/pages/RegisterPractice'));
 const AcceptInvite = lazy(() => import('@/pages/AcceptInvite'));
 const LandingPractice = lazy(() => import('@/pages/LandingPractice'));
+const LandingPatient = lazy(() => import('@/pages/LandingPatient'));
+const Login = lazy(() => import('@/pages/Login'));
 const HOOS12 = lazy(() => import('@/pages/HOOS12'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 
@@ -50,7 +52,7 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
   const { isAuthenticated, loading, profile } = useAuth();
 
   if (loading) return <PageLoader />;
-  if (!isAuthenticated) return <Navigate to="/" replace />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   // Wait for profile before checking roles
   if ((requiredRole || noAdmin) && !profile) return <PageLoader />;
@@ -102,19 +104,22 @@ function AppRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public routes */}
+        <Route path="/" element={<Home />} />
         <Route
-          path="/"
+          path="/login"
           element={
             isAuthenticated
               ? homeRedirect
                 ? <Navigate to={homeRedirect} replace />
                 : <PageLoader />
-              : <Home />
+              : <Login />
           }
         />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/register-practice" element={<RegisterPractice />} />
         <Route path="/voor-praktijken" element={<LandingPractice />} />
+        <Route path="/voor-fysiotherapeuten" element={<Navigate to="/voor-praktijken" replace />} />
+        <Route path="/voor-patienten" element={<LandingPatient />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
 
         {/* Protected routes */}
