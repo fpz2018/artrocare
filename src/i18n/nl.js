@@ -40,6 +40,7 @@ const nl = {
   nav_my_patients: 'Mijn Patienten',
   nav_research: 'Research Monitor',
   nav_content_proposals: 'Content Beheer',
+  nav_practices: 'Praktijken',
   nav_upgrade: 'Upgrade naar Premium',
 
   // Auth

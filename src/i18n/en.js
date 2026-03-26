@@ -40,6 +40,7 @@ const en = {
   nav_my_patients: 'My Patients',
   nav_research: 'Research Monitor',
   nav_content_proposals: 'Content Manager',
+  nav_practices: 'Practices',
   nav_upgrade: 'Upgrade to Premium',
 
   // Auth

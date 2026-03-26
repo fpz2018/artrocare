@@ -25,6 +25,8 @@ const Settings = lazy(() => import('@/pages/Settings'));
 const Community = lazy(() => import('@/pages/Community'));
 const ResearchMonitor = lazy(() => import('@/pages/ResearchMonitor'));
 const ContentProposals = lazy(() => import('@/pages/ContentProposals'));
+const AdminPractices = lazy(() => import('@/pages/AdminPractices'));
+const RegisterPractice = lazy(() => import('@/pages/RegisterPractice'));
 const HOOS12 = lazy(() => import('@/pages/HOOS12'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 
@@ -92,6 +94,7 @@ function AppRoutes() {
           }
         />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/register-practice" element={<RegisterPractice />} />
 
         {/* Protected routes */}
         <Route path="/dashboard" element={<ProtectedRoute noAdmin><Dashboard /></ProtectedRoute>} />
@@ -109,6 +112,7 @@ function AppRoutes() {
         <Route path="/hoos12" element={<ProtectedRoute><HOOS12 /></ProtectedRoute>} />
         <Route path="/research" element={<ProtectedRoute requiredRole="therapist"><ResearchMonitor /></ProtectedRoute>} />
         <Route path="/admin/proposals" element={<ProtectedRoute requiredRole="admin"><ContentProposals /></ProtectedRoute>} />
+        <Route path="/admin/practices" element={<ProtectedRoute requiredRole="admin"><AdminPractices /></ProtectedRoute>} />
 
         {/* Therapist-only route */}
         <Route
