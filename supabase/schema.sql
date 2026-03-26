@@ -408,6 +408,24 @@ CREATE TABLE public.content_sources (
   updated_at        TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ─── WACHTLIJST ───────────────────────────────────────────────────────────────
+
+CREATE TABLE public.waitlist (
+  id         UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  email      TEXT NOT NULL,
+  role       TEXT NOT NULL CHECK (role IN ('patient', 'practice')),
+  name       TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Iedereen mag zich aanmelden" ON public.waitlist
+  FOR INSERT WITH CHECK (true);
+CREATE POLICY "Admin ziet wachtlijst" ON public.waitlist
+  FOR SELECT USING (get_my_role() = 'admin');
+
+-- ─── CONTENT PROPOSALS ────────────────────────────────────────────────────────
+
 CREATE TABLE public.content_proposals (
   id                UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   source_id         UUID REFERENCES public.content_sources(id) ON DELETE SET NULL,

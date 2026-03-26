@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import {
   CheckCircle, XCircle, Clock, Zap, AlertTriangle, Loader2,
   ChevronDown, ChevronUp, FileText, Database, Sparkles,
-  Quote, BarChart3, FolderOpen, RefreshCw
+  Quote, BarChart3, FolderOpen, RefreshCw, Users
 } from 'lucide-react';
 
 // ─── Constanten ─────────────────────────────────────────────────────────────
@@ -356,6 +356,19 @@ export default function ContentProposals() {
     enabled: isAdmin,
   });
 
+  const { data: waitlist = [], isLoading: waitlistLoading } = useQuery({
+    queryKey: ['waitlist'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('waitlist')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: isAdmin,
+  });
+
   const { data: sources = [], isLoading: sourcesLoading } = useQuery({
     queryKey: ['content-sources'],
     queryFn: async () => {
@@ -504,6 +517,10 @@ export default function ContentProposals() {
             <FolderOpen className="w-4 h-4 mr-1" />
             Bronbestanden ({sources.length})
           </TabsTrigger>
+          <TabsTrigger value="waitlist">
+            <Users className="w-4 h-4 mr-1" />
+            Wachtlijst ({waitlist.length})
+          </TabsTrigger>
         </TabsList>
 
         {/* Voorstellen tab */}
@@ -559,6 +576,45 @@ export default function ContentProposals() {
                 isUpdating={isUpdating}
               />
             ))
+          )}
+        </TabsContent>
+
+        {/* Wachtlijst tab */}
+        <TabsContent value="waitlist" className="mt-4">
+          {waitlistLoading ? (
+            <div className="text-center py-12"><Loader2 className="w-8 h-8 text-blue-500 mx-auto animate-spin" /></div>
+          ) : waitlist.length === 0 ? (
+            <Card>
+              <CardContent className="p-10 text-center">
+                <Users className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                <h3 className="font-semibold text-gray-600">Nog geen aanmeldingen</h3>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex gap-4 text-xs font-semibold text-gray-400 px-4 py-2">
+                <span className="w-8">#</span>
+                <span className="flex-1">E-mail</span>
+                <span className="w-28">Naam / Praktijk</span>
+                <span className="w-20">Rol</span>
+                <span className="w-28">Datum</span>
+              </div>
+              {waitlist.map((entry, i) => (
+                <Card key={entry.id}>
+                  <CardContent className="p-3 flex gap-4 items-center text-sm">
+                    <span className="w-8 text-gray-400 text-xs">{i + 1}</span>
+                    <span className="flex-1 font-medium text-gray-900">{entry.email}</span>
+                    <span className="w-28 text-gray-500 truncate">{entry.name || '—'}</span>
+                    <span className={`w-20 text-xs font-semibold px-2 py-0.5 rounded-full ${entry.role === 'practice' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                      {entry.role === 'practice' ? 'Praktijk' : 'Patiënt'}
+                    </span>
+                    <span className="w-28 text-gray-400 text-xs">
+                      {new Date(entry.created_at).toLocaleDateString('nl-NL')}
+                    </span>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </TabsContent>
 

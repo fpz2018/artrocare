@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import {
   Heart, CheckCircle, TrendingUp, BookOpen,
   Dumbbell, Brain, Star, ChevronRight, Menu, X, ArrowRight,
-  Shield, Zap, Globe, BarChart2, Bell, Lock,
-  Apple, Moon, Pill, RefreshCw, Sparkles, Users
+  Shield, Zap, Globe, BarChart2, Lock,
+  Apple, Moon, Pill, RefreshCw, Sparkles, Users, FlaskConical
 } from 'lucide-react';
+import WaitlistForm from '@/components/WaitlistForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -248,8 +249,13 @@ export default function LandingPractice() {
       {/* HERO */}
       <section className="bg-gradient-to-br from-sky-50 via-white to-blue-50 pt-16 pb-20 px-4">
         <div className="max-w-5xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
-            <Sparkles className="w-4 h-4" /> Gebaseerd op Nederlandse en internationaal erkende effectieve programma's
+          <div className="flex flex-wrap justify-center gap-2">
+            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
+              <Sparkles className="w-4 h-4" /> Gebaseerd op Nederlandse en internationaal erkende effectieve programma's
+            </div>
+            <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-sm font-semibold px-3 py-1.5 rounded-full border border-amber-200">
+              <FlaskConical className="w-4 h-4" /> Beta · Pilot 2025
+            </div>
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
             Artrosezorg die verder gaat.<br />
@@ -540,20 +546,23 @@ export default function LandingPractice() {
         </div>
       </section>
 
-      {/* CTA FOOTER */}
+      {/* CTA FOOTER — wachtlijst */}
       <section className="py-20 px-4 bg-blue-600">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
+        <div className="max-w-xl mx-auto text-center space-y-6">
+          <div className="inline-flex items-center gap-1.5 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
+            <FlaskConical className="w-3.5 h-3.5" /> Beta · Pilot 2025
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-white">
-            Klaar om te starten?
+            Doe mee met de pilot
           </h2>
           <p className="text-blue-100 text-lg">
-            Meld je praktijk gratis aan. Geen creditcard, geen contract.
+            Artrocare is nu in de pilotfase. Meld je aan — we nemen contact op zodra we jouw praktijk kunnen onboarden.
           </p>
-          <Link to="/register-practice">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-base px-10">
-              Praktijk aanmelden <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </Link>
+          <WaitlistForm
+            role="practice"
+            showNameField
+            className="max-w-sm mx-auto text-left"
+          />
           <p className="text-blue-200 text-sm">
             Al een account?{' '}
             <Link to="/login" className="underline hover:text-white">Inloggen</Link>

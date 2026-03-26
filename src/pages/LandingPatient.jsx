@@ -2,11 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Heart, CheckCircle, TrendingUp, Dumbbell, BookOpen, Apple,
-  Star, ArrowRight, Shield, Moon, Brain, Menu, X, Sparkles, Pill, RefreshCw
+  Star, ArrowRight, Shield, Moon, Brain, Menu, X, Sparkles, Pill, RefreshCw, FlaskConical
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
+import WaitlistForm from '@/components/WaitlistForm';
 
 const PILLARS = [
   { icon: Dumbbell, label: 'Bewegen',       color: 'text-blue-600 bg-blue-50' },
@@ -127,8 +128,13 @@ export default function LandingPatient() {
       {/* HERO */}
       <section className="bg-gradient-to-br from-sky-50 via-white to-blue-50 pt-16 pb-20 px-4">
         <div className="max-w-3xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
-            <Sparkles className="w-4 h-4" /> Gebaseerd op Nederlandse en internationaal erkende effectieve programma's
+          <div className="flex flex-wrap justify-center gap-2">
+            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
+              <Sparkles className="w-4 h-4" /> Gebaseerd op Nederlandse en internationaal erkende effectieve programma's
+            </div>
+            <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-sm font-semibold px-3 py-1.5 rounded-full border border-amber-200">
+              <FlaskConical className="w-4 h-4" /> Beta · Pilot 2025
+            </div>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
             Artrose aanpakken.<br />
@@ -327,16 +333,24 @@ export default function LandingPatient() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA — wachtlijst */}
       <section className="py-20 px-4 bg-blue-600">
-        <div className="max-w-2xl mx-auto text-center space-y-5">
-          <h2 className="text-3xl font-bold text-white">Klaar om te beginnen?</h2>
-          <p className="text-blue-100">Artrocare is gratis voor patiënten. Je hebt alleen een uitnodiging van je fysiotherapeut nodig.</p>
-          <Link to="/login">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 px-10">
-              Inloggen of registreren <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </Link>
+        <div className="max-w-xl mx-auto text-center space-y-5">
+          <div className="inline-flex items-center gap-1.5 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
+            <FlaskConical className="w-3.5 h-3.5" /> Beta · Pilot 2025
+          </div>
+          <h2 className="text-3xl font-bold text-white">Wil je als eerste meedoen?</h2>
+          <p className="text-blue-100">
+            Artrocare is nu in de pilotfase. Laat je e-mailadres achter — we laten je weten zodra jouw fysiotherapeut is aangesloten.
+          </p>
+          <WaitlistForm
+            role="patient"
+            className="max-w-sm mx-auto"
+          />
+          <p className="text-blue-200 text-sm">
+            Al een uitnodiging ontvangen?{' '}
+            <Link to="/login" className="underline hover:text-white">Direct inloggen</Link>
+          </p>
           <p className="text-blue-200 text-sm">
             Ben je fysiotherapeut?{' '}
             <Link to="/voor-praktijken" className="underline hover:text-white">Bekijk Artrocare voor praktijken</Link>
