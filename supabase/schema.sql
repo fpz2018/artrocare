@@ -856,3 +856,110 @@ CREATE POLICY "Therapeuten lezen patienten assessments"
 INSERT INTO public.protocol_definitions (joint_type, name_nl, name_en, questionnaire)
 VALUES ('hip', 'Heupartrose (Coxarthrose)', 'Hip Osteoarthritis', 'HOOS')
 ON CONFLICT (joint_type) DO NOTHING;
+
+-- ─── BILLING ──────────────────────────────────────────────────────────────────
+-- Model: patiënt betaalt €2/mnd, fysiopraktijk betaalt €2/mnd per actieve patiënt
+-- Actieve patiënt = ≥1 meting in de laatste 30 dagen
+-- Betaalverwerker: Mollie (iDEAL, SEPA incasso, creditcard)
+
+-- Mollie klant-IDs toevoegen aan bestaande tabellen
+ALTER TABLE public.profiles  ADD COLUMN IF NOT EXISTS mollie_customer_id TEXT;
+ALTER TABLE public.practices ADD COLUMN IF NOT EXISTS mollie_customer_id TEXT;
+
+-- Patiënt-abonnementen (€2/mnd via Mollie recurring subscription)
+DROP TABLE IF EXISTS public.billing_subscriptions CASCADE;
+CREATE TABLE public.billing_subscriptions (
+  id                      UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id                 UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  mollie_customer_id      TEXT NOT NULL,
+  mollie_subscription_id  TEXT,
+  mollie_mandate_id       TEXT,
+  status                  TEXT DEFAULT 'pending'
+                            CHECK (status IN ('pending','active','canceled','expired','suspended','failed')),
+  amount                  NUMERIC(10,2) DEFAULT 2.00,
+  interval                TEXT DEFAULT '1 month',
+  next_payment_at         TIMESTAMPTZ,
+  canceled_at             TIMESTAMPTZ,
+  started_at              TIMESTAMPTZ,
+  created_at              TIMESTAMPTZ DEFAULT NOW(),
+  updated_at              TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Praktijk-mandaten (SEPA/creditcard voor variabele maandelijkse incasso)
+DROP TABLE IF EXISTS public.billing_mandates CASCADE;
+CREATE TABLE public.billing_mandates (
+  id                  UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  practice_id         UUID REFERENCES public.practices(id) ON DELETE CASCADE NOT NULL,
+  mollie_customer_id  TEXT NOT NULL,
+  mollie_mandate_id   TEXT,
+  method              TEXT,  -- sepa_direct_debit | creditcard | ideal
+  status              TEXT DEFAULT 'pending'
+                        CHECK (status IN ('pending','valid','invalid')),
+  holder_name         TEXT,
+  account_number      TEXT,  -- IBAN (masked)
+  created_at          TIMESTAMPTZ DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Betalingshistorie (patiënten én praktijken)
+DROP TABLE IF EXISTS public.billing_payments CASCADE;
+CREATE TABLE public.billing_payments (
+  id                    UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  -- Betaler: óf een patiënt (user_id) óf een praktijk (practice_id)
+  user_id               UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  practice_id           UUID REFERENCES public.practices(id) ON DELETE SET NULL,
+  mollie_payment_id     TEXT UNIQUE NOT NULL,
+  amount                NUMERIC(10,2) NOT NULL,
+  description           TEXT,
+  status                TEXT NOT NULL
+                          CHECK (status IN ('open','pending','authorized','expired','canceled','failed','paid')),
+  -- Alleen gevuld bij praktijk-betalingen
+  active_patients_count INTEGER,
+  billing_period_start  DATE,
+  billing_period_end    DATE,
+  paid_at               TIMESTAMPTZ,
+  created_at            TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexen
+CREATE INDEX idx_billing_subscriptions_user   ON public.billing_subscriptions(user_id);
+CREATE INDEX idx_billing_subscriptions_status ON public.billing_subscriptions(status);
+CREATE INDEX idx_billing_mandates_practice    ON public.billing_mandates(practice_id);
+CREATE INDEX idx_billing_payments_user        ON public.billing_payments(user_id);
+CREATE INDEX idx_billing_payments_practice    ON public.billing_payments(practice_id);
+
+-- RLS
+ALTER TABLE public.billing_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.billing_mandates      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.billing_payments      ENABLE ROW LEVEL SECURITY;
+
+-- billing_subscriptions: patiënt ziet eigen abonnement; admin alles
+CREATE POLICY "Patient ziet eigen abonnement"
+  ON public.billing_subscriptions FOR SELECT TO authenticated
+  USING (user_id = auth.uid());
+
+CREATE POLICY "Admin beheert abonnementen"
+  ON public.billing_subscriptions FOR ALL TO authenticated
+  USING (get_my_role() = 'admin');
+
+-- billing_mandates: practice_admin ziet mandaat van eigen praktijk; admin alles
+CREATE POLICY "Praktijkbeheerder ziet eigen mandaat"
+  ON public.billing_mandates FOR SELECT TO authenticated
+  USING (practice_id = get_my_practice_id());
+
+CREATE POLICY "Admin beheert mandaten"
+  ON public.billing_mandates FOR ALL TO authenticated
+  USING (get_my_role() = 'admin');
+
+-- billing_payments: patiënt ziet eigen betalingen; practice_admin ziet praktijk-betalingen; admin alles
+CREATE POLICY "Patient ziet eigen betalingen"
+  ON public.billing_payments FOR SELECT TO authenticated
+  USING (user_id = auth.uid());
+
+CREATE POLICY "Praktijkbeheerder ziet praktijk-betalingen"
+  ON public.billing_payments FOR SELECT TO authenticated
+  USING (practice_id = get_my_practice_id() AND get_my_role() = 'practice_admin');
+
+CREATE POLICY "Admin beheert betalingen"
+  ON public.billing_payments FOR ALL TO authenticated
+  USING (get_my_role() = 'admin');

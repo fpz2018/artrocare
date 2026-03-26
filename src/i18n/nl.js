@@ -257,6 +257,10 @@ const nl = {
   prem_contact: 'Neem Contact Op',
   prem_per_month: '/maand',
   prem_per_year: '/jaar',
+  prem_per_month_short: 'mnd',
+
+  // Nav billing
+  nav_billing: 'Facturering',
 
   // Settings
   set_title: 'Instellingen',

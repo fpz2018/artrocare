@@ -257,6 +257,10 @@ const en = {
   prem_contact: 'Contact Us',
   prem_per_month: '/month',
   prem_per_year: '/year',
+  prem_per_month_short: 'month',
+
+  // Nav billing
+  nav_billing: 'Billing',
 
   // Settings
   set_title: 'Settings',

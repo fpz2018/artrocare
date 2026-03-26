@@ -5,7 +5,7 @@ import { useI18n } from '@/i18n';
 import {
   LayoutDashboard, TrendingUp, Dumbbell, Target, Apple, Pill,
   Stethoscope, BookOpen, Crown, Settings, Users, Menu, X,
-  Globe, LogOut, ChevronRight, Heart, FlaskConical, Database, Building2
+  Globe, LogOut, ChevronRight, Heart, FlaskConical, Database, Building2, CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FooterDisclaimer } from '@/components/legal/Disclaimer';
@@ -21,6 +21,7 @@ const navItems = [
   { path: '/therapist', icon: Stethoscope, labelKey: 'nav_therapist' },
   { path: '/library', icon: BookOpen, labelKey: 'nav_library' },
   { path: '/premium', icon: Crown, labelKey: 'nav_premium' },
+  { path: '/billing', icon: CreditCard, labelKey: 'nav_billing' },
   { path: '/settings', icon: Settings, labelKey: 'nav_settings' },
 ];
 
@@ -32,6 +33,8 @@ const therapistNavItems = [
 
 const practiceAdminNavItems = [
   { path: '/practice', icon: Building2, labelKey: 'nav_practice' },
+  { path: '/premium', icon: Crown, labelKey: 'nav_premium' },
+  { path: '/billing', icon: CreditCard, labelKey: 'nav_billing' },
   { path: '/settings', icon: Settings, labelKey: 'nav_settings' },
 ];
 
@@ -152,12 +155,13 @@ export default function Layout({ children }) {
             })}
           </nav>
 
-          {/* Premium upsell */}
-          {!isPremium && profile?.role !== 'therapist' && (
+          {/* Billing upsell voor patiënten zonder actief abonnement */}
+          {!isPremium && profile?.role === 'patient' && (
             <div className="mx-3 mb-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
-              <Crown className="w-5 h-5 text-blue-600 mb-2" />
+              <CreditCard className="w-5 h-5 text-blue-600 mb-2" />
               <p className="text-sm font-semibold text-gray-900 mb-1">{t('nav_upgrade')}</p>
-              <Link to="/premium">
+              <p className="text-xs text-gray-500 mb-2">€ 2 / {t('prem_per_month_short')}</p>
+              <Link to="/billing">
                 <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
                   {t('prem_upgrade')}
                 </Button>
