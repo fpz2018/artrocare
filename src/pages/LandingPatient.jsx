@@ -79,9 +79,9 @@ const TESTIMONIALS = [
 ];
 
 const STEPS = [
-  { step: '1', title: 'Uitnodiging ontvangen', desc: 'Je fysiotherapeut stuurt je een persoonlijke uitnodigingslink.' },
-  { step: '2', title: 'Account aanmaken', desc: 'In 2 minuten een account — gratis voor patiënten.' },
-  { step: '3', title: 'Programma starten', desc: 'Jouw oefenprogramma staat klaar. Begin vandaag nog.' },
+  { step: '1', title: 'Interesse melden', desc: 'Laat je e-mailadres achter — we nemen contact op zodra je therapeut is aangesloten.' },
+  { step: '2', title: 'Uitnodiging ontvangen', desc: 'Je fysiotherapeut stuurt je een persoonlijke uitnodigingslink.' },
+  { step: '3', title: 'Programma starten', desc: 'Jouw programma staat klaar — begeleid door jouw therapeut.' },
 ];
 
 const FOR_WHO = [
@@ -144,11 +144,11 @@ export default function LandingPatient() {
             Artrocare is anders dan andere programma's. Wij begeleiden je niet alleen bij bewegen — maar ook bij educatie, voeding, slaap, mentaal welzijn en medicatie. Altijd onder begeleiding van een deskundige fysiotherapeut.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-            <Link to="/login">
+            <a href="#wachtlijst-cta">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base px-8">
-                Begin vandaag gratis <ArrowRight className="w-5 h-5 ml-2" />
+                Meld je interesse <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-            </Link>
+            </a>
             <a href="#aanpak">
               <Button size="lg" variant="outline" className="text-base px-8">Bekijk onze aanpak</Button>
             </a>
@@ -334,7 +334,7 @@ export default function LandingPatient() {
       </section>
 
       {/* CTA — wachtlijst */}
-      <section className="py-20 px-4 bg-blue-600">
+      <section id="wachtlijst-cta" className="py-20 px-4 bg-blue-600">
         <div className="max-w-xl mx-auto text-center space-y-5">
           <div className="inline-flex items-center gap-1.5 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
             <FlaskConical className="w-3.5 h-3.5" /> Beta 2026
