@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import {
   Heart, CheckCircle, Building2, Users, TrendingUp, BookOpen,
   Dumbbell, Brain, Star, ChevronRight, Menu, X, ArrowRight,
-  Shield, Zap, Globe, BarChart2, MessageSquare, Bell, Lock
+  Shield, Zap, Globe, BarChart2, MessageSquare, Bell, Lock,
+  Apple, Moon, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,40 +19,40 @@ const NAV_LINKS = [
 
 const FEATURES = [
   {
-    icon: Brain,
-    title: 'AI-gedreven protocollen',
-    desc: 'Nieuwe wetenschappelijke inzichten worden automatisch vertaald naar praktische aanpassingen in oefenprogramma\'s en voorlichting.',
-    color: 'text-purple-600 bg-purple-50',
+    icon: Dumbbell,
+    title: 'Neuromusculair oefenprogramma',
+    desc: 'Gebaseerd op de KNGF-richtlijn én een internationaal erkend oefenprogramma dat in meer dan 30 landen wordt toegepast. Gericht op kracht, balans én pijnreductie.',
+    color: 'text-blue-600 bg-blue-50',
   },
   {
     icon: TrendingUp,
     title: 'Real-time patiëntmonitoring',
     desc: 'Bekijk pijnscores, oefentrouw en voortgang van al je artrosepatiënten in één overzicht. Grijp snel in waar nodig.',
-    color: 'text-blue-600 bg-blue-50',
-  },
-  {
-    icon: Dumbbell,
-    title: 'Artrose-specifieke oefenprogramma\'s',
-    desc: 'Geen generieke oefenbibliotheek, maar programma\'s gebouwd op de KNGF-richtlijn artrose. Knie, heup en hand.',
     color: 'text-green-600 bg-green-50',
   },
   {
-    icon: BookOpen,
-    title: 'Patiëntvoorlichting & educatie',
-    desc: 'Inzichtelijke lessen over artrose, bewegen, voeding en supplementen. Patiënten begrijpen hun aandoening beter.',
-    color: 'text-amber-600 bg-amber-50',
+    icon: Apple,
+    title: 'Voeding & leefstijl',
+    desc: 'Patiënten krijgen begrijpelijke adviezen over voeding die ontstekingen beïnvloedt. Omega-3, vitamine D en ontstekingsremmende patronen — praktisch, geen dieet.',
+    color: 'text-orange-600 bg-orange-50',
+  },
+  {
+    icon: Moon,
+    title: 'Slaap & herstel',
+    desc: 'Slechte slaap versterkt pijnbeleving. Artrocare helpt patiënten begrijpen hoe slaap en herstel bijdragen aan minder pijn en meer energie.',
+    color: 'text-indigo-600 bg-indigo-50',
+  },
+  {
+    icon: Brain,
+    title: 'Mentaal welzijn & educatie',
+    desc: 'Pijn is niet alleen lichamelijk. Artrocare besteedt aandacht aan gedachten, stress en stemming — en biedt korte lessen over artrose als onderdeel van effectieve zorg.',
+    color: 'text-purple-600 bg-purple-50',
   },
   {
     icon: BarChart2,
     title: 'HOOS-12 & uitkomstmaten',
     desc: 'Gevalideerde vragenlijsten automatisch afgenomen op de juiste momenten. Rapportages klaar voor zorgverzekeraar.',
     color: 'text-red-600 bg-red-50',
-  },
-  {
-    icon: Bell,
-    title: 'Slimme herinneringen',
-    desc: 'Patiënten krijgen automatische reminders voor oefeningen en metingen. Minder uitval, betere therapietrouw.',
-    color: 'text-indigo-600 bg-indigo-50',
   },
 ];
 
@@ -236,16 +237,15 @@ export default function LandingPractice() {
       {/* HERO */}
       <section className="bg-gradient-to-br from-sky-50 via-white to-blue-50 pt-16 pb-20 px-4">
         <div className="max-w-5xl mx-auto text-center space-y-6">
-          <Badge className="bg-blue-100 text-blue-700 border-0 text-sm px-3 py-1">
-            🇳🇱 Gebouwd voor Nederlandse fysiotherapeuten
-          </Badge>
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
+            <Sparkles className="w-4 h-4" /> Vernieuwend · KNGF-richtlijn · Internationaal erkend oefenprogramma · De hele mens centraal
+          </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-            De artrose-app voor{' '}
-            <span className="text-blue-600">jouw praktijk</span>
+            Artrosezorg die verder gaat.<br />
+            <span className="text-blue-600">De hele mens centraal.</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Artrocare helpt fysiotherapeuten hun artrosepatiënten beter begeleiden — met slimme monitoring,
-            evidence-based protocollen en AI-gedreven contentupdates.
+            Artrocare combineert een internationaal erkend neuromusculair oefenprogramma met aandacht voor voeding, slaap en mentaal welzijn — begeleid door jou als fysiotherapeut.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Link to="/register-practice">
@@ -262,8 +262,22 @@ export default function LandingPractice() {
           <p className="text-sm text-gray-400">Gratis tot 5 patiënten · Geen creditcard nodig · AVG-compliant</p>
         </div>
 
+        {/* Holistische pijlers */}
+        <div className="max-w-2xl mx-auto mt-10 grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { icon: Dumbbell, label: 'Bewegen', color: 'text-blue-600 bg-blue-50' },
+            { icon: Apple,    label: 'Voeding', color: 'text-orange-600 bg-orange-50' },
+            { icon: Moon,     label: 'Slaap',   color: 'text-indigo-600 bg-indigo-50' },
+            { icon: Brain,    label: 'Mentaal', color: 'text-purple-600 bg-purple-50' },
+          ].map(p => (
+            <div key={p.label} className={`rounded-xl ${p.color} px-4 py-3 flex items-center gap-2 font-medium text-sm`}>
+              <p.icon className="w-4 h-4 flex-shrink-0" /> {p.label}
+            </div>
+          ))}
+        </div>
+
         {/* Social proof strip */}
-        <div className="max-w-4xl mx-auto mt-14 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500">
+        <div className="max-w-4xl mx-auto mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500">
           {[
             { icon: Shield, text: 'AVG-compliant · EU-servers' },
             { icon: Zap, text: 'Live in 5 minuten' },
@@ -283,9 +297,9 @@ export default function LandingPractice() {
         <div className="max-w-5xl mx-auto flex flex-wrap justify-center gap-6 text-white text-sm font-medium">
           {[
             'Artrose-specifiek (knie, heup, hand)',
-            'KNGF-richtlijn aligned',
+            'KNGF-richtlijn + internationaal erkend oefenprogramma',
+            'Holistische aanpak: bewegen, voeding, slaap & mentaal',
             'AI-gedreven protocolupdates',
-            'Minder dan Physitrack',
           ].map(item => (
             <div key={item} className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-blue-200 flex-shrink-0" />
@@ -299,9 +313,9 @@ export default function LandingPractice() {
       <section id="voordelen" className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Alles wat je nodig hebt</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Meer dan een oefenapp</h2>
             <p className="text-gray-500 mt-3 max-w-xl mx-auto">
-              Geen generieke oefenapp. Artrocare is gebouwd rond de dagelijkse realiteit van artrosezorg in Nederland.
+              Artrocare is de eerste Nederlandse artrose-app die bewegen, voeding, slaap én mentaal welzijn combineert in één begeleid programma — gebouwd voor fysiotherapeuten.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

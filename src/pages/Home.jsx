@@ -22,14 +22,14 @@ export default function Home() {
         <div className="max-w-4xl w-full mx-auto text-center space-y-8">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
-              <Shield className="w-4 h-4" /> Gebaseerd op KNGF-richtlijn artrose
+              <Shield className="w-4 h-4" /> KNGF-richtlijn · Internationaal erkend oefenprogramma · De hele mens centraal
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
               Artrose beter begrijpen.<br />
-              <span className="text-blue-600">Beter bewegen.</span>
+              <span className="text-blue-600">Beter leven.</span>
             </h1>
             <p className="text-lg text-gray-500 max-w-xl mx-auto">
-              Artrocare verbindt fysiotherapeuten en patiënten via een slimme, evidence-based app voor artrosezorg.
+              Artrocare combineert bewegen, voeding, slaap en mentaal welzijn in één evidence-based programma — begeleid door jouw fysiotherapeut.
             </p>
           </div>
 
@@ -48,7 +48,7 @@ export default function Home() {
                   </p>
                 </div>
                 <ul className="space-y-1.5">
-                  {['Oefenprogramma op maat', 'Pijnmonitoring', 'Educatieve lessen'].map(f => (
+                  {['Neuromusculair oefenprogramma', 'Bewegen, voeding & slaap', 'Pijnmonitoring'].map(f => (
                     <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
                       <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />{f}
                     </li>
@@ -90,7 +90,7 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400 pt-2">
             <span className="flex items-center gap-1.5"><Shield className="w-4 h-4 text-blue-400" /> AVG-compliant · EU-servers</span>
             <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" /> Gratis voor patiënten</span>
-            <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-400" /> KNGF-richtlijn gevolgd</span>
+            <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-400" /> KNGF + internationaal oefenprogramma</span>
           </div>
         </div>
       </section>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Heart, CheckCircle, TrendingUp, Dumbbell, BookOpen, Apple,
-  Star, ArrowRight, Shield, Bell, ChevronRight, Menu, X
+  Star, ArrowRight, Shield, Bell, Moon, Brain, ChevronRight, Menu, X, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,39 +11,39 @@ import { useState } from 'react';
 const BENEFITS = [
   {
     icon: Dumbbell,
-    title: 'Oefenprogramma op maat',
-    desc: 'Dagelijkse oefeningen afgestemd op jouw artrose — knie, heup of hand. Opgebouwd volgens de KNGF-richtlijn.',
+    title: 'Neuromusculair oefenprogramma',
+    desc: 'Dagelijkse oefeningen gebaseerd op de KNGF-richtlijn én een internationaal erkend oefenprogramma dat in meer dan 30 landen wordt toegepast. Gericht op kracht, balans én pijnreductie.',
     color: 'text-blue-600 bg-blue-50',
+  },
+  {
+    icon: Apple,
+    title: 'Voeding die ontstekingen beïnvloedt',
+    desc: 'Welke voedingspatronen helpen bij artrose? Wat zegt het onderzoek over omega-3, vitamine D en ontstekingsremmende voeding? Praktische adviezen, geen dieet.',
+    color: 'text-orange-600 bg-orange-50',
+  },
+  {
+    icon: Moon,
+    title: 'Slaap & herstel',
+    desc: 'Slechte slaap versterkt pijnbeleving. Artrocare helpt je begrijpen hoe slaap en herstel bijdragen aan minder pijn en meer energie overdag.',
+    color: 'text-indigo-600 bg-indigo-50',
+  },
+  {
+    icon: Brain,
+    title: 'Mentaal welzijn',
+    desc: 'Pijn is niet alleen lichamelijk. Artrocare besteedt aandacht aan hoe gedachten, stress en stemming je pijnbeleving beïnvloeden — met praktische handvatten.',
+    color: 'text-purple-600 bg-purple-50',
   },
   {
     icon: TrendingUp,
     title: 'Volg je voortgang',
-    desc: 'Houd pijnscores, oefentrouw en energieniveau bij. Zie met cijfers dat het beter gaat.',
+    desc: 'Houd pijnscores, oefentrouw en energieniveau bij. Zie met cijfers dat het beter gaat — en deel dat automatisch met je therapeut.',
     color: 'text-green-600 bg-green-50',
   },
   {
     icon: BookOpen,
     title: 'Begrijp je aandoening',
-    desc: 'Korte, begrijpelijke lessen over artrose, bewegen, voeding en wat écht helpt — en wat niet.',
+    desc: 'Korte, begrijpelijke lessen over artrose. Patiënteducatie is een bewezen onderdeel van effectieve artrosezorg.',
     color: 'text-amber-600 bg-amber-50',
-  },
-  {
-    icon: Apple,
-    title: 'Voeding & supplementen',
-    desc: 'Welke voedingspatronen verminderen ontstekingen? Wat zegt het onderzoek over omega-3, vitamine D en curcumine?',
-    color: 'text-orange-600 bg-orange-50',
-  },
-  {
-    icon: Bell,
-    title: 'Dagelijkse herinneringen',
-    desc: 'Zachte reminders zodat je oefeningen niet vergeet. Je therapeut ziet automatisch of het lukt.',
-    color: 'text-purple-600 bg-purple-50',
-  },
-  {
-    icon: Shield,
-    title: 'Privacy & veiligheid',
-    desc: 'Jouw gezondheidsdata blijft in Nederland op EU-servers. AVG-compliant. Nooit gedeeld met derden.',
-    color: 'text-gray-600 bg-gray-100',
   },
 ];
 
@@ -110,14 +110,14 @@ export default function LandingPatient() {
       <section className="bg-gradient-to-br from-sky-50 via-white to-blue-50 pt-16 pb-20 px-4">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
-            <Shield className="w-4 h-4" /> Gebaseerd op KNGF-richtlijn artrose
+            <Sparkles className="w-4 h-4" /> Vernieuwend · KNGF-richtlijn · Internationaal erkend oefenprogramma
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-            Minder pijn.<br />
-            <span className="text-blue-600">Meer beweging.</span>
+            Meer dan oefeningen.<br />
+            <span className="text-blue-600">De hele mens centraal.</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
-            Artrocare helpt je dagelijks bewegen met artrose — met oefenprogramma's, educatie en direct contact met je fysiotherapeut.
+            Artrocare begeleidt je bij bewegen, voeding, slaap én mentaal welzijn — want artrose vraagt om een aanpak die de hele mens ziet, niet alleen het gewricht.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Link to="/login">
@@ -132,19 +132,22 @@ export default function LandingPatient() {
           <p className="text-sm text-gray-400">Gratis voor patiënten · Geen creditcard · AVG-compliant</p>
         </div>
 
-        {/* Stats strip */}
-        <div className="max-w-3xl mx-auto mt-12 grid grid-cols-3 gap-6 text-center">
+        {/* Holistische pijlers */}
+        <div className="max-w-2xl mx-auto mt-12 grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { value: 'KNGF', label: 'Richtlijn gevolgd' },
-            { value: 'EU', label: 'Servers & AVG-compliant' },
-            { value: '🇳🇱', label: 'Volledig in het Nederlands' },
-          ].map(s => (
-            <div key={s.label}>
-              <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{s.label}</p>
+            { icon: Dumbbell, label: 'Bewegen', color: 'text-blue-600 bg-blue-50' },
+            { icon: Apple,    label: 'Voeding', color: 'text-orange-600 bg-orange-50' },
+            { icon: Moon,     label: 'Slaap',   color: 'text-indigo-600 bg-indigo-50' },
+            { icon: Brain,    label: 'Mentaal', color: 'text-purple-600 bg-purple-50' },
+          ].map(p => (
+            <div key={p.label} className={`rounded-xl ${p.color} px-4 py-3 flex items-center gap-2 font-medium text-sm`}>
+              <p.icon className="w-4 h-4 flex-shrink-0" /> {p.label}
             </div>
           ))}
         </div>
+        <p className="text-xs text-gray-400 mt-3 max-w-sm mx-auto">
+          Artrocare is de eerste Nederlandse artrose-app die al deze pijlers combineert in één begeleid programma.
+        </p>
       </section>
 
       {/* VOORDELEN */}
