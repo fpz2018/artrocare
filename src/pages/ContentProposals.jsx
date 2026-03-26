@@ -55,7 +55,7 @@ const FIELD_LABELS = {
   interactions_nl: 'Interacties (NL)', interactions_en: 'Interacties (EN)',
   contraindications_nl: 'Contra-indicaties (NL)',
   evidence_level: 'Bewijs niveau',
-  safety_notes_nl: 'Veiligheidsinfo (NL)', safety_notes_nl: 'Veiligheidsinfo (EN)',
+  safety_notes_nl: 'Veiligheidsinfo (NL)', safety_notes_en: 'Veiligheidsinfo (EN)',
   title_nl: 'Titel (NL)', title_en: 'Titel (EN)',
   instructions_nl: 'Instructies (NL)', instructions_en: 'Instructies (EN)',
   focus_points_nl: 'Aandachtspunten (NL)',

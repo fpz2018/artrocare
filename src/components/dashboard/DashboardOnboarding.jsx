@@ -12,7 +12,7 @@ import { FullDisclaimer } from '@/components/legal/Disclaimer';
 const HOOS12_ITEMS = [
   { id: 'hoos_pain_walking',    domain: 'pain',     question: 'Pijn bij lopen op een vlakke ondergrond' },
   { id: 'hoos_pain_stairs',     domain: 'pain',     question: 'Pijn bij traplopen' },
-  { id: 'hoos_pain_night',      domain: 'pain',     question: 'Pijn in bed 's nachts' },
+  { id: 'hoos_pain_night',      domain: 'pain',     question: "Pijn in bed 's nachts" },
   { id: 'hoos_pain_rest',       domain: 'pain',     question: 'Pijn in rust' },
   { id: 'hoos_sym_morning',     domain: 'symptoms', question: 'Ochtendstijfheid na het wakker worden' },
   { id: 'hoos_sym_later',       domain: 'symptoms', question: 'Stijfheid na zitten, liggen of rusten overdag' },
