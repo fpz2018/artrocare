@@ -47,6 +47,9 @@ function ProtectedRoute({ children, requiredRole }) {
   if (loading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/" replace />;
 
+  // Wacht tot profiel geladen is voordat role wordt gecheckt
+  if (requiredRole && !profile) return <PageLoader />;
+
   // Role-based access control
   if (requiredRole && profile?.role !== requiredRole) {
     return <Navigate to="/dashboard" replace />;
