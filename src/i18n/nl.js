@@ -1,7 +1,7 @@
 // Centralized Dutch translations
 const nl = {
   // Common
-  app_name: 'Artrose Kompas',
+  app_name: 'Artrocare',
   tagline: 'Jouw persoonlijke gids bij artrose',
   loading: 'Laden...',
   save: 'Opslaan',
@@ -60,7 +60,7 @@ const nl = {
 
   // Home
   home_tagline: 'Jouw persoonlijke gids bij artrose',
-  home_description: 'Artrose Kompas helpt je om controle te nemen over je artrose. Met gepersonaliseerde oefeningen, voeding en voorlichting die bewezen effectief is.',
+  home_description: 'Artrocare helpt je om controle te nemen over je artrose. Met gepersonaliseerde oefeningen, voeding en voorlichting die bewezen effectief is.',
   home_feature_exercises: 'Gepersonaliseerde Oefeningen',
   home_feature_exercises_desc: 'NEMEX-TJR gebaseerd programma',
   home_feature_nutrition: 'Anti-inflammatoire Voeding',
@@ -93,7 +93,7 @@ const nl = {
   dash_quick_log: 'Snelle Registratie',
 
   // Onboarding
-  onboard_welcome: 'Welkom bij Artrose Kompas',
+  onboard_welcome: 'Welkom bij Artrocare',
   onboard_stage: 'Wat is je artrose stadium?',
   onboard_stage_early: 'Beginnend',
   onboard_stage_moderate: 'Matig',

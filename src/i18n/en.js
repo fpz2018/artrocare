@@ -1,7 +1,7 @@
 // Centralized English translations
 const en = {
   // Common
-  app_name: 'Artrose Kompas',
+  app_name: 'Artrocare',
   tagline: 'Your personal guide for osteoarthritis',
   loading: 'Loading...',
   save: 'Save',
@@ -60,7 +60,7 @@ const en = {
 
   // Home
   home_tagline: 'Your personal guide for osteoarthritis',
-  home_description: 'Artrose Kompas helps you take control of your osteoarthritis. With personalized exercises, nutrition and education that is proven effective.',
+  home_description: 'Artrocare helps you take control of your osteoarthritis. With personalized exercises, nutrition and education that is proven effective.',
   home_feature_exercises: 'Personalized Exercises',
   home_feature_exercises_desc: 'NEMEX-TJR based program',
   home_feature_nutrition: 'Anti-inflammatory Nutrition',
@@ -93,7 +93,7 @@ const en = {
   dash_quick_log: 'Quick Log',
 
   // Onboarding
-  onboard_welcome: 'Welcome to Artrose Kompas',
+  onboard_welcome: 'Welcome to Artrocare',
   onboard_stage: 'What is your osteoarthritis stage?',
   onboard_stage_early: 'Early',
   onboard_stage_moderate: 'Moderate',
@@ -328,9 +328,9 @@ const en = {
   // Disclaimer
   disclaimer_title: 'Medical Disclaimer',
   disclaimer_subtitle: 'Important information',
-  disclaimer_text: 'Artrose Kompas provides educational information and exercise programs to support people with osteoarthritis. This app does not replace medical advice, diagnosis or treatment by a qualified healthcare provider. Always consult your doctor or physiotherapist before starting a new exercise program or changing your treatment.',
+  disclaimer_text: 'Artrocare provides educational information and exercise programs to support people with osteoarthritis. This app does not replace medical advice, diagnosis or treatment by a qualified healthcare provider. Always consult your doctor or physiotherapist before starting a new exercise program or changing your treatment.',
   disclaimer_short: 'This app does not replace medical advice. Always consult your healthcare provider.',
-  disclaimer_footer: 'Artrose Kompas is not a substitute for professional medical advice.',
+  disclaimer_footer: 'Artrocare is not a substitute for professional medical advice.',
   disclaimer_exercise: 'Stop exercising if you experience unusual pain and consult your therapist.',
   disclaimer_nutrition: 'Nutritional advice is general. Consult a dietitian for personal advice.',
   disclaimer_supplements: 'Always consult your doctor before using supplements.',
