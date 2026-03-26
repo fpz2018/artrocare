@@ -374,7 +374,7 @@ export default function ContentProposals() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status, notes }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('content_proposals')
         .update({
           status,
@@ -383,8 +383,10 @@ export default function ContentProposals() {
           reviewer_notes: notes || null,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select('id');
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error('Update geblokkeerd — controleer RLS-rechten in Supabase.');
     },
     onSuccess: (_, { status }) => {
       queryClient.invalidateQueries({ queryKey: ['content-proposals'] });

@@ -551,7 +551,7 @@ CREATE POLICY "Admin beheert content sources" ON public.content_sources
 CREATE POLICY "Service mag source inserten" ON public.content_sources
   FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admin beheert voorstellen" ON public.content_proposals
-  FOR ALL USING (get_my_role() = 'admin');
+  FOR ALL USING (get_my_role() = 'admin') WITH CHECK (get_my_role() = 'admin');
 CREATE POLICY "Service mag voorstel inserten" ON public.content_proposals
   FOR INSERT WITH CHECK (true);
 
