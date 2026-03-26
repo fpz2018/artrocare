@@ -41,18 +41,24 @@ function PageLoader() {
 }
 
 // Protected route wrapper
-function ProtectedRoute({ children, requiredRole }) {
+function ProtectedRoute({ children, requiredRole, noAdmin }) {
   const { isAuthenticated, loading, profile } = useAuth();
 
   if (loading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/" replace />;
 
-  // Wacht tot profiel geladen is voordat role wordt gecheckt
-  if (requiredRole && !profile) return <PageLoader />;
+  // Wait for profile before checking roles
+  if ((requiredRole || noAdmin) && !profile) return <PageLoader />;
 
-  // Role-based access control
+  // Redirect admin away from patient-only pages
+  if (noAdmin && profile?.role === 'admin') {
+    return <Navigate to="/admin/proposals" replace />;
+  }
+
+  // Role-based access control — redirect to role's home, not always /dashboard
   if (requiredRole && profile?.role !== requiredRole) {
-    return <Navigate to="/dashboard" replace />;
+    const home = profile?.role === 'admin' ? '/admin/proposals' : '/dashboard';
+    return <Navigate to={home} replace />;
   }
 
   return <Layout>{children}</Layout>;
@@ -60,9 +66,16 @@ function ProtectedRoute({ children, requiredRole }) {
 
 // Route configuration
 function AppRoutes() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, profile } = useAuth();
 
   if (loading) return <PageLoader />;
+
+  // Wait for profile before deciding redirect target
+  const homeRedirect = !profile
+    ? null
+    : profile.role === 'admin'
+    ? '/admin/proposals'
+    : '/dashboard';
 
   return (
     <Suspense fallback={<PageLoader />}>
@@ -71,13 +84,17 @@ function AppRoutes() {
         <Route
           path="/"
           element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Home />
+            isAuthenticated
+              ? homeRedirect
+                ? <Navigate to={homeRedirect} replace />
+                : <PageLoader />
+              : <Home />
           }
         />
         <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected routes */}
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute noAdmin><Dashboard /></ProtectedRoute>} />
         <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
         <Route path="/exercises" element={<ProtectedRoute><Exercises /></ProtectedRoute>} />
         <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
