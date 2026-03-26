@@ -824,30 +824,30 @@ ALTER TABLE public.patient_protocols ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.patient_assessments ENABLE ROW LEVEL SECURITY;
 
 -- protocol_definitions: readable by all authenticated users
-CREATE POLICY IF NOT EXISTS "Alle gebruikers lezen protocol definities"
+CREATE POLICY "Alle gebruikers lezen protocol definities"
   ON public.protocol_definitions FOR SELECT
   TO authenticated USING (true);
 
 -- patient_protocols: patients see/edit their own; therapists/admins see all
-CREATE POLICY IF NOT EXISTS "Patienten beheren eigen protocollen"
+CREATE POLICY "Patienten beheren eigen protocollen"
   ON public.patient_protocols FOR ALL
   TO authenticated
   USING (patient_id = auth.uid())
   WITH CHECK (patient_id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "Therapeuten lezen patienten protocollen"
+CREATE POLICY "Therapeuten lezen patienten protocollen"
   ON public.patient_protocols FOR SELECT
   TO authenticated
   USING (get_my_role() IN ('therapist','admin'));
 
 -- patient_assessments: patients see/edit their own; therapists/admins see all
-CREATE POLICY IF NOT EXISTS "Patienten beheren eigen assessments"
+CREATE POLICY "Patienten beheren eigen assessments"
   ON public.patient_assessments FOR ALL
   TO authenticated
   USING (patient_id = auth.uid())
   WITH CHECK (patient_id = auth.uid());
 
-CREATE POLICY IF NOT EXISTS "Therapeuten lezen patienten assessments"
+CREATE POLICY "Therapeuten lezen patienten assessments"
   ON public.patient_assessments FOR SELECT
   TO authenticated
   USING (get_my_role() IN ('therapist','admin'));
