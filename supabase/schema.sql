@@ -608,7 +608,14 @@ BEGIN
 
   FOR col, val IN SELECT * FROM jsonb_each(prop.proposed_values) LOOP
     IF col = ANY(allowed_cols) THEN
-      set_clauses := array_append(set_clauses, format('%I = %L', col, val #>> '{}'));
+      IF jsonb_typeof(val) = 'array' THEN
+        -- JSON array ["a","b"] → PostgreSQL array via subquery
+        set_clauses := array_append(set_clauses,
+          format('%I = (SELECT array_agg(v) FROM jsonb_array_elements_text(%L::jsonb) t(v))',
+                 col, val::text));
+      ELSE
+        set_clauses := array_append(set_clauses, format('%I = %L', col, val #>> '{}'));
+      END IF;
     END IF;
   END LOOP;
 
