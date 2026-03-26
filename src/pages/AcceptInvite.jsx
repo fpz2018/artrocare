@@ -65,20 +65,15 @@ export default function AcceptInvite() {
         password: form.password,
         options: {
           data: {
-            full_name:       form.full_name.trim(),
-            register_as:     'therapist',
-            practice_id:     invitation.practice_id,
+            full_name:        form.full_name.trim(),
+            register_as:      invitation.role,
+            practice_id:      invitation.practice_id,
             invitation_token: token,
           },
         },
       });
       if (authError) throw authError;
-
-      // Uitnodiging markeren als geaccepteerd
-      await supabase
-        .from('invitations')
-        .update({ status: 'accepted' })
-        .eq('token', token);
+      // Trigger handle_new_user markeert uitnodiging als 'accepted' automatisch
 
       setDone(true);
     } catch (err) {

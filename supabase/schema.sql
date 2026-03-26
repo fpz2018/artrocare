@@ -490,6 +490,8 @@ CREATE POLICY "Service mag uitnodiging aanmaken" ON public.invitations
   FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admin beheert alle uitnodigingen" ON public.invitations
   FOR ALL USING (get_my_role() = 'admin');
+CREATE POLICY "Publiek: uitnodiging lezen via token" ON public.invitations
+  FOR SELECT USING (true);
 
 -- PATIENT REQUESTS
 CREATE POLICY "Aanvrager ziet eigen verzoek" ON public.patient_requests
