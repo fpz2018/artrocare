@@ -50,6 +50,24 @@ export default function TherapistDashboard() {
     enabled: !!profile?.id,
   });
 
+  // Actieve protocollen per patiënt
+  const { data: allProtocols = {} } = useQuery({
+    queryKey: ['therapist-protocols', patients.map(p => p.id)],
+    queryFn: async () => {
+      if (patients.length === 0) return {};
+      const { data, error } = await supabase
+        .from('patient_protocols')
+        .select('patient_id, route, joint_type, side, risk_score, current_week, started_at, status')
+        .in('patient_id', patients.map(p => p.id))
+        .eq('status', 'active');
+      if (error) throw error;
+      const map = {};
+      (data || []).forEach(p => { map[p.patient_id] = p; });
+      return map;
+    },
+    enabled: patients.length > 0,
+  });
+
   // Metingen van de afgelopen 7 dagen
   const { data: allMeasurements = {} } = useQuery({
     queryKey: ['therapist-measurements', patients.map(p => p.id)],
@@ -152,10 +170,19 @@ export default function TherapistDashboard() {
     createInvite.mutate(inviteEmail.trim());
   };
 
+  const ROUTE_BADGE_STYLE = {
+    A: 'bg-green-100 text-green-800',
+    B: 'bg-orange-100 text-orange-800',
+    C: 'bg-red-100 text-red-800',
+  };
+
+  const JOINT_LABEL = { hip: 'Heup', knee: 'Knie', hand: 'Hand', shoulder: 'Schouder' };
+
   // Stats per patiënt
   const patientStats = useMemo(() => {
     return patients.map(patient => {
       const measurements = allMeasurements[patient.id] || [];
+      const protocol = allProtocols[patient.id] || null;
       const lastMeasurement = measurements[0];
       const avgPain = measurements.length > 0
         ? (measurements.reduce((sum, m) => sum + (m.pain_level || 0), 0) / measurements.length).toFixed(1)
@@ -164,10 +191,24 @@ export default function TherapistDashboard() {
       const daysAgo = lastMeasurement
         ? differenceInCalendarDays(new Date(), parseISO(lastMeasurement.date))
         : null;
-      const needsAttention = (lastMeasurement?.pain_level >= 7) || (daysAgo !== null && daysAgo > 3);
-      return { ...patient, measurements, avgPain, exerciseDays, daysAgo, needsAttention };
+
+      // Flare = pijn ≥ 7 (rust of beweging)
+      const lastPainRest = lastMeasurement?.pain_rest ?? lastMeasurement?.pain_level;
+      const lastPainActivity = lastMeasurement?.pain_activity ?? lastMeasurement?.pain_level;
+      const isFlare = (lastPainRest >= 7) || (lastPainActivity >= 7);
+      const needsAttention = isFlare || (daysAgo !== null && daysAgo > 3);
+
+      // Huidige week in protocol
+      let currentWeek = null;
+      if (protocol?.started_at) {
+        const days = differenceInCalendarDays(new Date(), parseISO(protocol.started_at));
+        currentWeek = Math.min(Math.floor(days / 7) + 1, protocol.route === 'A' ? 6 : protocol.route === 'B' ? 12 : 18);
+      }
+
+      return { ...patient, measurements, protocol, avgPain, exerciseDays, daysAgo,
+               needsAttention, isFlare, lastPainRest, lastPainActivity, currentWeek };
     });
-  }, [patients, allMeasurements]);
+  }, [patients, allMeasurements, allProtocols]);
 
   const filteredPatients = patientStats.filter(p =>
     (p.full_name || p.email || '').toLowerCase().includes(search.toLowerCase())
@@ -307,22 +348,55 @@ export default function TherapistDashboard() {
           </Card>
         ) : (
           filteredPatients.map(patient => (
-            <Card key={patient.id} className={patient.needsAttention ? 'border-amber-200' : ''}>
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-blue-700">
-                    {(patient.full_name || patient.email || '?')[0].toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">{patient.full_name || patient.email}</p>
-                    <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
-                      <span>{t('td_avg_pain')}: {patient.avgPain}</span>
-                      <span className="flex items-center gap-1"><Dumbbell className="w-3 h-3" />{patient.exerciseDays}x</span>
-                      {patient.daysAgo !== null && <span>{t('td_last_active')}: {patient.daysAgo}d</span>}
+            <Card key={patient.id} className={patient.isFlare ? 'border-red-300 bg-red-50/30' : patient.needsAttention ? 'border-amber-200' : ''}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-blue-700 flex-shrink-0">
+                      {(patient.full_name || patient.email || '?')[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate">{patient.full_name || patient.email}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        {patient.protocol && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROUTE_BADGE_STYLE[patient.protocol.route]}`}>
+                            Route {patient.protocol.route} · {JOINT_LABEL[patient.protocol.joint_type] || patient.protocol.joint_type}
+                            {patient.currentWeek ? ` · wk ${patient.currentWeek}` : ''}
+                          </span>
+                        )}
+                        {!patient.protocol && (
+                          <span className="text-xs text-gray-400 italic">Geen actief protocol</span>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {patient.isFlare && (
+                      <Badge variant="destructive" className="text-xs gap-1">
+                        <AlertTriangle className="w-3 h-3" /> Flare
+                      </Badge>
+                    )}
+                    {!patient.isFlare && patient.daysAgo > 3 && (
+                      <Badge variant="secondary" className="text-xs">{patient.daysAgo}d inactief</Badge>
+                    )}
+                  </div>
                 </div>
-                {patient.needsAttention && <AlertTriangle className="w-5 h-5 text-amber-500" />}
+
+                {/* NRS + stats */}
+                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 pl-13">
+                  {patient.lastPainRest !== undefined && patient.lastPainRest !== null && (
+                    <span className={`font-medium ${patient.lastPainRest >= 7 ? 'text-red-600' : patient.lastPainRest >= 4 ? 'text-orange-500' : 'text-green-600'}`}>
+                      Rust: {patient.lastPainRest}/10
+                    </span>
+                  )}
+                  {patient.lastPainActivity !== undefined && patient.lastPainActivity !== null && (
+                    <span className={`font-medium ${patient.lastPainActivity >= 7 ? 'text-red-600' : patient.lastPainActivity >= 4 ? 'text-orange-500' : 'text-green-600'}`}>
+                      Beweging: {patient.lastPainActivity}/10
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1"><Dumbbell className="w-3 h-3" />{patient.exerciseDays}x/wk</span>
+                  {patient.daysAgo !== null && <span>Actief: {patient.daysAgo === 0 ? 'vandaag' : `${patient.daysAgo}d geleden`}</span>}
+                </div>
               </CardContent>
             </Card>
           ))

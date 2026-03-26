@@ -23,7 +23,8 @@ export default function Progress() {
   const queryClient = useQueryClient();
 
   // Form state
-  const [painLevel, setPainLevel] = useState([5]);
+  const [painRest, setPainRest] = useState([3]);
+  const [painActivity, setPainActivity] = useState([5]);
   const [stiffness, setStiffness] = useState([5]);
   const [functionScore, setFunctionScore] = useState([5]);
   const [sleepQuality, setSleepQuality] = useState([5]);
@@ -33,6 +34,24 @@ export default function Progress() {
   const [mood, setMood] = useState('okay');
   const [notes, setNotes] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Actief protocol ophalen
+  const { data: activeProtocol } = useQuery({
+    queryKey: ['active-protocol', profile?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('patient_protocols')
+        .select('id, route, joint_type, current_week')
+        .eq('patient_id', profile.id)
+        .eq('status', 'active')
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
+    },
+    enabled: !!profile?.id,
+  });
 
   // Fetch measurements
   const { data: measurements = [] } = useQuery({
@@ -56,12 +75,15 @@ export default function Progress() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const today = format(new Date(), 'yyyy-MM-dd');
-      const isFlare = painLevel[0] >= 7;
+      const maxPain = Math.max(painRest[0], painActivity[0]);
+      const isFlare = maxPain >= 7;
 
       const record = {
         user_id: profile.id,
         date: today,
-        pain_level: painLevel[0],
+        pain_level: maxPain,        // backward compat voor grafieken
+        pain_rest: painRest[0],
+        pain_activity: painActivity[0],
         stiffness_level: stiffness[0],
         function_score: functionScore[0],
         sleep_quality: sleepQuality[0],
@@ -71,6 +93,7 @@ export default function Progress() {
         mood,
         notes: sanitizeInput(notes),
         is_flare: isFlare,
+        ...(activeProtocol ? { protocol_id: activeProtocol.id } : {}),
       };
 
       const { data, error } = await supabase
@@ -131,14 +154,37 @@ export default function Progress() {
               <CardTitle>{t('prog_daily')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Pain */}
+              {/* NRS Rust */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="font-medium">{t('prog_pain')}</span>
-                  <span className="text-blue-600 font-bold">{painLevel[0]}</span>
+                  <span className="font-medium">Pijn in rust <span className="text-gray-400 font-normal text-xs">(NRS)</span></span>
+                  <span className={`font-bold ${painRest[0] >= 7 ? 'text-red-600' : painRest[0] >= 4 ? 'text-orange-500' : 'text-green-600'}`}>{painRest[0]}/10</span>
                 </div>
-                <Slider value={painLevel} onValueChange={setPainLevel} max={10} step={1} />
+                <Slider value={painRest} onValueChange={setPainRest} max={10} step={1} />
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>0 — geen pijn</span><span>10 — ergste pijn</span>
+                </div>
               </div>
+
+              {/* NRS Bewegen */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="font-medium">Pijn bij bewegen <span className="text-gray-400 font-normal text-xs">(NRS)</span></span>
+                  <span className={`font-bold ${painActivity[0] >= 7 ? 'text-red-600' : painActivity[0] >= 4 ? 'text-orange-500' : 'text-green-600'}`}>{painActivity[0]}/10</span>
+                </div>
+                <Slider value={painActivity} onValueChange={setPainActivity} max={10} step={1} />
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>0 — geen pijn</span><span>10 — ergste pijn</span>
+                </div>
+              </div>
+
+              {/* Flare-waarschuwing */}
+              {Math.max(painRest[0], painActivity[0]) >= 7 && (
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                  <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">Hoge pijnscore gedetecteerd. Uw therapeut ontvangt een melding. Doe rustig aan en volg het flare-protocol.</p>
+                </div>
+              )}
 
               {/* Stiffness */}
               <div className="space-y-2">

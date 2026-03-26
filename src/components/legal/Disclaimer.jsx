@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useI18n } from '@/i18n';
 import { AlertTriangle, Info, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,19 @@ export function FullDisclaimer({ open, onOpenChange, onAgree }) {
   const { t } = useI18n();
   const [canAgree, setCanAgree] = useState(false);
   const scrollRef = useRef(null);
+
+  // Controleer bij render of scrollen überhaupt nodig is
+  useEffect(() => {
+    if (!open) return;
+    // Kleine timeout zodat de dialog DOM klaar is
+    const timer = setTimeout(() => {
+      const el = scrollRef.current;
+      if (el && el.scrollHeight <= el.clientHeight + 10) {
+        setCanAgree(true);
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [open]);
 
   const handleScroll = () => {
     const el = scrollRef.current;

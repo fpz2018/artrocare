@@ -778,3 +778,81 @@ INSERT INTO public.research_queries (query_name, pubmed_query, category, fetch_f
 ('Artrose supplementen','(osteoarthritis[MeSH]) AND (glucosamine OR omega-3 OR curcumin OR vitamin D OR collagen) AND (randomized controlled trial[pt] OR meta-analysis[pt])','supplements',14,10),
 ('Artrose pijnmanagement','(osteoarthritis[MeSH]) AND (pain management[MeSH] OR central sensitization OR pain neuroscience education) AND (2024[pdat] OR 2025[pdat] OR 2026[pdat])','pain_management',7,15)
 ON CONFLICT DO NOTHING;
+
+-- ─── Protocol Tables ──────────────────────────────────────────────────────────
+-- Run these in Supabase SQL Editor if not yet created
+
+CREATE TABLE IF NOT EXISTS public.protocol_definitions (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  joint_type TEXT NOT NULL UNIQUE,
+  name_nl TEXT NOT NULL,
+  name_en TEXT NOT NULL,
+  questionnaire TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.patient_protocols (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  patient_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  joint_type TEXT NOT NULL,
+  side TEXT CHECK (side IN ('left','right','bilateral')),
+  route TEXT CHECK (route IN ('A','B','C')),
+  risk_score INTEGER,
+  current_week INTEGER DEFAULT 0,
+  current_phase INTEGER DEFAULT 1,
+  status TEXT DEFAULT 'intake',
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.patient_assessments (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  patient_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  protocol_id UUID REFERENCES public.patient_protocols(id) ON DELETE CASCADE,
+  assessment_type TEXT NOT NULL,
+  week INTEGER DEFAULT 0,
+  answers JSONB,
+  scores JSONB,
+  completed_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.protocol_definitions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.patient_protocols ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.patient_assessments ENABLE ROW LEVEL SECURITY;
+
+-- protocol_definitions: readable by all authenticated users
+CREATE POLICY IF NOT EXISTS "Alle gebruikers lezen protocol definities"
+  ON public.protocol_definitions FOR SELECT
+  TO authenticated USING (true);
+
+-- patient_protocols: patients see/edit their own; therapists/admins see all
+CREATE POLICY IF NOT EXISTS "Patienten beheren eigen protocollen"
+  ON public.patient_protocols FOR ALL
+  TO authenticated
+  USING (patient_id = auth.uid())
+  WITH CHECK (patient_id = auth.uid());
+
+CREATE POLICY IF NOT EXISTS "Therapeuten lezen patienten protocollen"
+  ON public.patient_protocols FOR SELECT
+  TO authenticated
+  USING (get_my_role() IN ('therapist','admin'));
+
+-- patient_assessments: patients see/edit their own; therapists/admins see all
+CREATE POLICY IF NOT EXISTS "Patienten beheren eigen assessments"
+  ON public.patient_assessments FOR ALL
+  TO authenticated
+  USING (patient_id = auth.uid())
+  WITH CHECK (patient_id = auth.uid());
+
+CREATE POLICY IF NOT EXISTS "Therapeuten lezen patienten assessments"
+  ON public.patient_assessments FOR SELECT
+  TO authenticated
+  USING (get_my_role() IN ('therapist','admin'));
+
+-- Seed protocol definitions
+INSERT INTO public.protocol_definitions (joint_type, name_nl, name_en, questionnaire)
+VALUES ('hip', 'Heupartrose (Coxarthrose)', 'Hip Osteoarthritis', 'HOOS')
+ON CONFLICT (joint_type) DO NOTHING;

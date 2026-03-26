@@ -11,10 +11,19 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
 } from '@/components/ui/dialog';
 import {
-  Dumbbell, Play, CheckCircle, Lock, Video, Layers
+  Dumbbell, Play, CheckCircle, Lock, Video, Layers, Star
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { InlineDisclaimer } from '@/components/legal/Disclaimer';
+
+// Route A = niveau 1 · Route B = niveau 1-2 · Route C = niveau 1-3
+const ROUTE_MAX_LEVEL = { A: 1, B: 2, C: 3 };
+
+const ROUTE_BADGE = {
+  A: 'bg-green-100 text-green-800',
+  B: 'bg-orange-100 text-orange-800',
+  C: 'bg-red-100 text-red-800',
+};
 
 const circleIcons = {
   warmup: '🔥', strength: '💪', flexibility: '🧘', balance: '⚖️', cooldown: '❄️',
@@ -64,9 +73,29 @@ export default function Exercises() {
   const { t, language } = useI18n();
   const queryClient = useQueryClient();
   const [selectedExercise, setSelectedExercise] = useState(null);
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('programma');
 
   const coreLessonsComplete = (profile?.completed_core_lessons || []).length >= 3;
+
+  // Haal actief protocol op
+  const { data: protocol } = useQuery({
+    queryKey: ['active-protocol', profile?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('patient_protocols')
+        .select('*')
+        .eq('patient_id', profile.id)
+        .eq('status', 'active')
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
+    },
+    enabled: !!profile?.id,
+  });
+
+  const hasProtocol = !!protocol;
 
   // Fetch exercises
   const { data: exercises = [], isLoading } = useQuery({
@@ -126,19 +155,27 @@ export default function Exercises() {
 
   const handleSelect = useCallback((exercise) => setSelectedExercise(exercise), []);
 
-  // Filter exercises by tab
+  // Oefeningen voor mijn programma (route-gefilterd)
+  const programmaExercises = useMemo(() => {
+    if (!protocol) return exercises.filter((e) => e.level === 1);
+    const maxLevel = ROUTE_MAX_LEVEL[protocol.route] || 1;
+    return exercises.filter((e) => e.level <= maxLevel);
+  }, [exercises, protocol]);
+
+  // Filter oefeningen per tab
   const filteredExercises = useMemo(() => {
+    if (activeTab === 'programma') return programmaExercises;
     if (activeTab === 'video') return exercises.filter((e) => e.has_video);
     if (activeTab !== 'all') return exercises.filter((e) => e.circle === activeTab);
     return exercises;
-  }, [exercises, activeTab]);
+  }, [exercises, activeTab, programmaExercises]);
 
   const circles = useMemo(() => {
     return [...new Set(exercises.map((e) => e.circle).filter(Boolean))];
   }, [exercises]);
 
-  // Locked state
-  if (!coreLessonsComplete) {
+  // Vergrendeld alleen als er geen protocol EN geen core lessen zijn
+  if (!coreLessonsComplete && !hasProtocol) {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -170,8 +207,17 @@ export default function Exercises() {
         <p className="text-sm text-gray-500 mt-1">{t('ex_nemex_desc')}</p>
       </div>
 
+      {/* Protocol-badge */}
+      {protocol && (
+        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${ROUTE_BADGE[protocol.route]}`}>
+          <Star className="w-3.5 h-3.5" />
+          Route {protocol.route} — week {protocol.current_week + 1}
+        </div>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="programma">⭐ Mijn programma</TabsTrigger>
           <TabsTrigger value="all">{t('ex_all')}</TabsTrigger>
           <TabsTrigger value="video">{t('ex_video')}</TabsTrigger>
           {circles.map((c) => (

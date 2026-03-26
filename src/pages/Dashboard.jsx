@@ -17,6 +17,7 @@ import DashboardOnboarding from '@/components/dashboard/DashboardOnboarding';
 import PainPrediction from '@/components/dashboard/PainPrediction';
 import { InlineDisclaimer } from '@/components/legal/Disclaimer';
 import ResearchInsights from '@/components/ResearchInsights';
+import ProtocolBanner from '@/components/dashboard/ProtocolBanner';
 
 function calculateStreak(measurements) {
   if (!measurements || measurements.length === 0) return 0;
@@ -133,6 +134,9 @@ export default function Dashboard() {
         </h1>
         <p className="text-gray-500 mt-1">{t('dash_how_feeling')}</p>
       </div>
+
+      {/* Protocol banner */}
+      <ProtocolBanner patientId={profile?.id} />
 
       {/* Flare Alert */}
       {isFlare && (
