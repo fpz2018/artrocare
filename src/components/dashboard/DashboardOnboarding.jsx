@@ -457,13 +457,14 @@ export default function DashboardOnboarding() {
   };
 
   // Aanroepen als functie (niet als component) zodat React niet unmount bij elke re-render
+  // StepResult alleen aanroepen als route bekend is
   const stepComponents = [
     StepJoint(),
     StepDemographics(),
     StepHOOS(),
     StepNRS(),
     null,
-    StepResult(),
+    route ? StepResult() : null,
   ];
 
   const stepLabels = ['Gewricht', 'Gegevens', 'HOOS-12', 'Pijn', '', 'Resultaat'];
