@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Link } from 'react-router-dom';
 import {
   Heart, Dumbbell, Apple, BookOpen, TrendingUp, Globe,
-  LogIn, UserPlus, Stethoscope, CheckCircle, Lock
+  LogIn, UserPlus, Building2, CheckCircle, Lock
 } from 'lucide-react';
 import { InlineDisclaimer } from '@/components/legal/Disclaimer';
 
@@ -16,11 +17,10 @@ export default function Home() {
   const { t, language, setLanguage } = useI18n();
   const { signIn, signUp, resetPassword, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'register_therapist' | 'forgot_password'
+  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'forgot_password'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [practice, setPractice] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -40,8 +40,7 @@ export default function Home() {
 
   if (isAuthenticated) return null;
 
-  const isTherapist = authMode === 'register_therapist';
-  const isRegister = authMode === 'register' || isTherapist;
+  const isRegister = authMode === 'register';
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -68,13 +67,7 @@ export default function Home() {
       if (authMode === 'login') {
         await signIn(trimmedEmail, password);
       } else {
-        const metadata = {
-          full_name: name.trim(),
-          role: isTherapist ? 'therapist' : 'patient',
-        };
-        if (isTherapist && practice.trim()) {
-          metadata.practice = practice.trim();
-        }
+        const metadata = { full_name: name.trim() };
         const result = await signUp(trimmedEmail, password, metadata);
 
         // Check if email confirmation is required
@@ -196,8 +189,6 @@ export default function Home() {
                   <><LogIn className="w-5 h-5 text-blue-600" /> {t('login_title')}</>
                 ) : authMode === 'forgot_password' ? (
                   <><Lock className="w-5 h-5 text-blue-600" /> {language === 'nl' ? 'Wachtwoord vergeten' : 'Forgot password'}</>
-                ) : isTherapist ? (
-                  <><Stethoscope className="w-5 h-5 text-green-600" /> {language === 'nl' ? 'Registreer als Therapeut' : 'Register as Therapist'}</>
                 ) : (
                   <><UserPlus className="w-5 h-5 text-blue-600" /> {t('register_title')}</>
                 )}
@@ -292,20 +283,6 @@ export default function Home() {
                       </div>
                     )}
 
-                    {isTherapist && (
-                      <div className="space-y-2">
-                        <Label htmlFor="practice">
-                          {language === 'nl' ? 'Praktijknaam (optioneel)' : 'Practice name (optional)'}
-                        </Label>
-                        <Input
-                          id="practice"
-                          value={practice}
-                          onChange={(e) => setPractice(e.target.value)}
-                          placeholder={language === 'nl' ? 'Naam van je praktijk' : 'Name of your practice'}
-                        />
-                      </div>
-                    )}
-
                     <div className="space-y-2">
                       <Label htmlFor="email">{t('email')}</Label>
                       <Input
@@ -341,15 +318,6 @@ export default function Home() {
                         minLength={6}
                       />
                     </div>
-
-                    {isTherapist && (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
-                        <Stethoscope className="w-4 h-4 inline mr-1" />
-                        {language === 'nl'
-                          ? 'Als therapeut kun je patiënten koppelen en hun voortgang volgen.'
-                          : 'As a therapist you can link patients and track their progress.'}
-                      </div>
-                    )}
 
                     {error && (
                       <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>
@@ -395,28 +363,14 @@ export default function Home() {
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    {isTherapist ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => switchAuthMode('register')}
-                        className="w-full text-gray-500"
-                      >
-                        <UserPlus className="w-4 h-4 mr-2" />
-                        {language === 'nl' ? 'Registreer als patiënt' : 'Register as patient'}
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => switchAuthMode('register_therapist')}
-                        className="w-full text-gray-500"
-                      >
-                        <Stethoscope className="w-4 h-4 mr-2" />
-                        {language === 'nl' ? 'Registreer als therapeut' : 'Register as therapist'}
-                      </Button>
-                    )}
+                  <div className="mt-4 pt-4 border-t border-gray-200 text-center">
+                    <Link
+                      to="/register-practice"
+                      className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 hover:underline"
+                    >
+                      <Building2 className="w-4 h-4" />
+                      {language === 'nl' ? 'Praktijk aanmelden' : 'Register your practice'}
+                    </Link>
                   </div>
                 </>
               )}
