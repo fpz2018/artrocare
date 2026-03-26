@@ -326,7 +326,7 @@ export default function Home() {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className={`w-full ${isTherapist ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
                     >
                       {loading
                         ? (language === 'nl' ? 'Bezig...' : 'Loading...')
