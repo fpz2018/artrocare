@@ -24,7 +24,7 @@ export function scheduleNotification(title, body, delay = 0) {
       body,
       icon: '/favicon.svg',
       badge: '/favicon.svg',
-      tag: 'artrose-kompas',
+      tag: 'artrocare',
     });
   }, delay);
 }
