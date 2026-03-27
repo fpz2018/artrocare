@@ -5,10 +5,11 @@ import { useI18n } from '@/i18n';
 import {
   LayoutDashboard, TrendingUp, Dumbbell, Target, Apple, Pill,
   Stethoscope, BookOpen, Crown, Settings, Users, Menu, X,
-  Globe, LogOut, ChevronRight, Heart, FlaskConical, Database, Building2
+  Globe, LogOut, ChevronRight, FlaskConical, Database, Building2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FooterDisclaimer } from '@/components/legal/Disclaimer';
+import Logo from '@/components/Logo';
 
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, labelKey: 'nav_dashboard' },
@@ -66,9 +67,8 @@ export default function Layout({ children }) {
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Heart className="w-6 h-6 text-blue-600" />
-            <span className="font-bold text-gray-900">{t('app_name')}</span>
+          <div className="flex items-center">
+            <Logo height={32} />
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={toggleLanguage}>
@@ -123,11 +123,7 @@ export default function Layout({ children }) {
         <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-gray-200 z-40">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-            <Heart className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="font-bold text-gray-900">{t('app_name')}</h1>
-              <p className="text-xs text-gray-500">{t('tagline')}</p>
-            </div>
+            <Logo height={40} />
           </div>
 
           {/* Navigation */}

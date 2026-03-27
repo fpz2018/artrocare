@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Heart, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -109,9 +110,8 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Heart className="w-8 h-8 text-blue-600" />
-          <span className="text-2xl font-bold text-gray-900">Artrocare</span>
+        <div className="flex items-center justify-center mb-8">
+          <Logo height={52} />
         </div>
 
         <Card className="shadow-xl border-blue-100">

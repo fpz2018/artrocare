@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Heart, LogIn, UserPlus, CheckCircle, Lock, Globe, Building2 } from 'lucide-react';
+import { LogIn, UserPlus, CheckCircle, Lock, Globe, Building2 } from 'lucide-react';
+import Logo from '@/components/Logo';
 import { InlineDisclaimer } from '@/components/legal/Disclaimer';
 
 export default function Login() {
@@ -111,8 +112,8 @@ export default function Login() {
 
       <div className="w-full max-w-md space-y-4">
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center gap-2 text-xl font-bold text-gray-900 mb-2">
-            <Heart className="w-6 h-6 text-blue-600" /> Artrocare
+          <Link to="/" className="inline-flex items-center mb-2">
+            <Logo height={48} />
           </Link>
         </div>
 

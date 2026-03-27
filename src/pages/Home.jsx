@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Users, Building2, ArrowRight, CheckCircle, Star, Shield, Sparkles } from 'lucide-react';
+import { Users, Building2, ArrowRight, CheckCircle, Star, Shield, Sparkles } from 'lucide-react';
+import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 
 export default function Home() {
@@ -8,9 +9,8 @@ export default function Home() {
     <div className="min-h-screen bg-white flex flex-col">
       {/* NAV */}
       <nav className="h-16 flex items-center justify-between px-6 border-b border-gray-100">
-        <div className="flex items-center gap-2 font-bold text-gray-900 text-lg">
-          <Heart className="w-6 h-6 text-blue-600" />
-          Artrocare
+        <div className="flex items-center">
+          <Logo height={36} />
         </div>
         <Link to="/login">
           <Button variant="outline" size="sm">Inloggen</Button>

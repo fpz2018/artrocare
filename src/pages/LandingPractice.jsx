@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Heart, CheckCircle, TrendingUp, BookOpen,
+  CheckCircle, TrendingUp, BookOpen,
   Dumbbell, Brain, Star, ChevronRight, Menu, X, ArrowRight,
   Shield, Zap, Globe, BarChart2, Lock,
   Apple, Moon, Pill, RefreshCw, Sparkles, Users, FlaskConical
 } from 'lucide-react';
 import WaitlistForm from '@/components/WaitlistForm';
+import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -208,9 +209,8 @@ export default function LandingPractice() {
       {/* NAV */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-bold text-gray-900 text-lg">
-            <Heart className="w-6 h-6 text-blue-600" />
-            Artrocare
+          <Link to="/">
+            <Logo height={40} />
           </Link>
           <div className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map(l => (

@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Heart, CheckCircle, TrendingUp, Dumbbell, BookOpen, Apple,
+  CheckCircle, TrendingUp, Dumbbell, BookOpen, Apple,
   Star, ArrowRight, Shield, Moon, Brain, Menu, X, Sparkles, Pill, RefreshCw, FlaskConical
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
 import WaitlistForm from '@/components/WaitlistForm';
+import Logo from '@/components/Logo';
 
 const PILLARS = [
   { icon: Dumbbell, label: 'Bewegen',       color: 'text-blue-600 bg-blue-50' },
@@ -99,8 +100,8 @@ export default function LandingPatient() {
       {/* NAV */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-bold text-gray-900">
-            <Heart className="w-5 h-5 text-blue-600" /> Artrocare
+          <Link to="/">
+            <Logo height={36} />
           </Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <a href="#aanpak" className="hover:text-blue-600">Onze aanpak</a>
@@ -362,8 +363,8 @@ export default function LandingPatient() {
       {/* FOOTER */}
       <footer className="bg-gray-900 text-gray-400 py-8 px-4">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-sm">
-          <div className="flex items-center gap-2 text-white font-semibold">
-            <Heart className="w-4 h-4 text-blue-400" /> Artrocare
+          <div className="flex items-center">
+            <Logo height={28} className="brightness-0 invert" />
           </div>
           <p>© {new Date().getFullYear()} Artrocare · AVG-compliant · EU-servers</p>
           <div className="flex gap-4">
