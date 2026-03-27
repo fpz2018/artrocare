@@ -20,102 +20,102 @@ const PILLARS = [
   { icon: Pill,     label: 'Medicatie & supplementen', color: 'text-rose-600 bg-rose-50' },
 ];
 
-const BENEFITS = [
-  {
-    icon: Dumbbell,
-    title: 'Bewegen: effectief oefenprogramma',
-    desc: 'Gebaseerd op de KNGF-richtlijn én internationaal erkende en effectieve programma\'s die in meer dan 30 landen worden toegepast. Gericht op kracht, balans én pijnreductie — aangepast aan uw niveau.',
-    color: 'text-blue-600 bg-blue-50',
-  },
-  {
-    icon: BookOpen,
-    title: 'Educatie: begrijp uw aandoening',
-    desc: 'Educatie is een onmisbaar onderdeel van effectieve artrosezorg. Artrocare biedt korte, begrijpelijke lessen over artrose, pijn en leefstijl. Want wie zijn aandoening begrijpt, kan er beter mee omgaan.',
-    color: 'text-amber-600 bg-amber-50',
-  },
-  {
-    icon: Apple,
-    title: 'Voeding die ontstekingen beïnvloedt',
-    desc: 'Welke voedingspatronen helpen bij artrose? Wat zegt het onderzoek over omega-3, vitamine D en ontstekingsremmende voeding? Praktische adviezen, geen dieet.',
-    color: 'text-orange-600 bg-orange-50',
-  },
-  {
-    icon: Moon,
-    title: 'Slaap & herstel',
-    desc: 'Slechte slaap versterkt pijnbeleving. Artrocare helpt u begrijpen hoe slaap en herstel bijdragen aan minder pijn en meer energie overdag.',
-    color: 'text-indigo-600 bg-indigo-50',
-  },
-  {
-    icon: Brain,
-    title: 'Mentaal welzijn',
-    desc: 'Pijn is niet alleen lichamelijk. Artrocare besteedt aandacht aan hoe gedachten, stress en stemming uw pijnbeleving beïnvloeden — met praktische handvatten.',
-    color: 'text-purple-600 bg-purple-50',
-  },
-  {
-    icon: Pill,
-    title: 'Medicatie & supplementen',
-    desc: 'Wat helpt wel, wat helpt niet? Artrocare geeft inzicht in veelgebruikte pijnmedicatie en supplementen bij artrose — zodat u goed geïnformeerd het gesprek aangaat met uw arts of therapeut.',
-    color: 'text-rose-600 bg-rose-50',
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    text: 'Na drie weken merk ik echt verschil bij het traplopen. De oefeningen zijn uitdagend maar haalbaar.',
-    name: 'Marieke, 58',
-    condition: 'Knieartrose',
-    initials: 'M',
-  },
-  {
-    text: 'Eindelijk een app die uitlegt waaróm ik iets moet doen. Dat motiveert veel meer.',
-    name: 'Hans, 64',
-    condition: 'Heupartrose',
-    initials: 'H',
-  },
-  {
-    text: 'Mijn fysiotherapeut kan nu precies zien hoe het met me gaat. Dat geeft een veilig gevoel.',
-    name: 'Ria, 71',
-    condition: 'Knieartrose',
-    initials: 'R',
-  },
-];
-
-const STEPS = [
-  { step: '1', title: 'Interesse melden', desc: 'Laat uw e-mailadres achter — we nemen contact op zodra uw therapeut is aangesloten.' },
-  { step: '2', title: 'Uitnodiging ontvangen', desc: 'Uw fysiotherapeut stuurt u een persoonlijke uitnodigingslink.' },
-  { step: '3', title: 'Programma starten', desc: 'Uw programma staat klaar — begeleid door uw therapeut.' },
-];
-
-const FOR_WHO = [
-  { title: 'Milde klachten', desc: 'Net de diagnose artrose of milde klachten? Artrocare helpt u vroeg de juiste gewoonten op te bouwen.' },
-  { title: 'Langdurige artrose', desc: 'Al jaren last van artrose? Artrocare biedt structuur, inzicht en begeleiding om actief te blijven.' },
-  { title: 'Voorbereiding op operatie', desc: 'Een knie- of heupoperatie in zicht? Een goede voorbereiding verbetert aantoonbaar het herstel.' },
-  { title: 'Herstel na operatie', desc: 'Nazorg na een prothese? Artrocare begeleidt u stap voor stap terug naar optimale functie en dagelijks bewegen.' },
-];
-
 export default function LandingPatient() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { language, setLanguage } = useI18n();
+  const { language, setLanguage, t } = useI18n();
+
+  const BENEFITS = [
+    {
+      icon: Dumbbell,
+      title: t('lp_exercise_title'),
+      desc: t('lp_exercise_desc'),
+      color: 'text-blue-600 bg-blue-50',
+    },
+    {
+      icon: BookOpen,
+      title: t('lp_education_title'),
+      desc: t('lp_education_desc'),
+      color: 'text-amber-600 bg-amber-50',
+    },
+    {
+      icon: Apple,
+      title: t('lp_nutrition_title'),
+      desc: t('lp_nutrition_desc'),
+      color: 'text-orange-600 bg-orange-50',
+    },
+    {
+      icon: Moon,
+      title: t('lp_sleep_title'),
+      desc: t('lp_sleep_desc'),
+      color: 'text-indigo-600 bg-indigo-50',
+    },
+    {
+      icon: Brain,
+      title: t('lp_mental_title'),
+      desc: t('lp_mental_desc'),
+      color: 'text-purple-600 bg-purple-50',
+    },
+    {
+      icon: Pill,
+      title: t('lp_medication_title'),
+      desc: t('lp_medication_desc'),
+      color: 'text-rose-600 bg-rose-50',
+    },
+  ];
+
+  const TESTIMONIALS = [
+    {
+      text: t('lp_testimonial1_text'),
+      name: t('lp_testimonial1_name'),
+      condition: t('lp_testimonial1_condition'),
+      initials: 'M',
+    },
+    {
+      text: t('lp_testimonial2_text'),
+      name: t('lp_testimonial2_name'),
+      condition: t('lp_testimonial2_condition'),
+      initials: 'H',
+    },
+    {
+      text: t('lp_testimonial3_text'),
+      name: t('lp_testimonial3_name'),
+      condition: t('lp_testimonial3_condition'),
+      initials: 'R',
+    },
+  ];
+
+  const STEPS = [
+    { step: '1', title: t('lp_step1_title'), desc: t('lp_step1_desc') },
+    { step: '2', title: t('lp_step2_title'), desc: t('lp_step2_desc') },
+    { step: '3', title: t('lp_step3_title'), desc: t('lp_step3_desc') },
+  ];
+
+  const FOR_WHO = [
+    { title: t('lp_mild_title'), desc: t('lp_mild_desc') },
+    { title: t('lp_chronic_title'), desc: t('lp_chronic_desc') },
+    { title: t('lp_preop_title'), desc: t('lp_preop_desc') },
+    { title: t('lp_postop_title'), desc: t('lp_postop_desc') },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
       {/* NAV */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 h-24 flex items-center justify-between">
           <Link to="/">
-            <Logo height={64} />
+            <Logo height={88} />
           </Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <a href="#aanpak" className="hover:text-blue-600">Onze aanpak</a>
-            <a href="#voordelen" className="hover:text-blue-600">Alles wat u krijgt</a>
-            <a href="#voor-wie" className="hover:text-blue-600">Voor wie</a>
-            <a href="#ervaringen" className="hover:text-blue-600">Ervaringen</a>
+            <a href="#aanpak" className="hover:text-blue-600">{t('lp_nav_approach')}</a>
+            <a href="#voordelen" className="hover:text-blue-600">{t('lp_nav_benefits')}</a>
+            <a href="#voor-wie" className="hover:text-blue-600">{t('lp_nav_for_who')}</a>
+            <a href="#ervaringen" className="hover:text-blue-600">{t('lp_nav_testimonials')}</a>
           </div>
           <div className="hidden md:flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => setLanguage(language === 'nl' ? 'en' : 'nl')} title={language === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands'}>
               <Globe className="w-5 h-5 text-gray-500" />
             </Button>
-            <Link to="/login"><Button variant="outline" size="sm">Inloggen</Button></Link>
+            <Link to="/login"><Button variant="outline" size="sm">{t('login')}</Button></Link>
           </div>
           <button className="md:hidden p-2" onClick={() => setMenuOpen(v => !v)}>
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -123,10 +123,10 @@ export default function LandingPatient() {
         </div>
         {menuOpen && (
           <div className="md:hidden border-t bg-white px-4 py-4 space-y-3">
-            <a href="#aanpak" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>Onze aanpak</a>
-            <a href="#voordelen" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>Alles wat u krijgt</a>
-            <a href="#voor-wie" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>Voor wie</a>
-            <Link to="/login"><Button size="sm" className="w-full mt-2">Inloggen</Button></Link>
+            <a href="#aanpak" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>{t('lp_nav_approach')}</a>
+            <a href="#voordelen" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>{t('lp_nav_benefits')}</a>
+            <a href="#voor-wie" className="block text-sm text-gray-700" onClick={() => setMenuOpen(false)}>{t('lp_nav_for_who')}</a>
+            <Link to="/login"><Button size="sm" className="w-full mt-2">{t('login')}</Button></Link>
           </div>
         )}
       </nav>
@@ -136,31 +136,31 @@ export default function LandingPatient() {
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <div className="flex flex-wrap justify-center gap-2">
             <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
-              <Sparkles className="w-4 h-4" /> Gebaseerd op Nederlandse en internationaal erkende effectieve programma's
+              <Sparkles className="w-4 h-4" /> {t('lp_badge')}
             </div>
             <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-sm font-semibold px-3 py-1.5 rounded-full border border-amber-200">
-              <FlaskConical className="w-4 h-4" /> Beta 2026
+              <FlaskConical className="w-4 h-4" /> {t('lp_beta_badge')}
             </div>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-            Artrose aanpakken.<br />
-            <span className="text-blue-600">De hele mens centraal.</span>
+            {t('lp_h1_line1')}<br />
+            <span className="text-blue-600">{t('lp_h1_line2')}</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Artrocare is anders dan andere programma's. Wij begeleiden u niet alleen bij bewegen — maar ook bij educatie, voeding, slaap, mentaal welzijn en medicatie. Altijd onder begeleiding van een deskundige fysiotherapeut.
+            {t('lp_description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <a href="#wachtlijst-cta">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base px-8">
-                Meld uw interesse <ArrowRight className="w-5 h-5 ml-2" />
+                {t('lp_cta_primary')} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </a>
             <a href="#aanpak">
-              <Button size="lg" variant="outline" className="text-base px-8">Bekijk onze aanpak</Button>
+              <Button size="lg" variant="outline" className="text-base px-8">{t('lp_cta_secondary')}</Button>
             </a>
           </div>
-          <p className="text-sm text-gray-400">Gratis voor patiënten · Geen creditcard · AVG-compliant</p>
-          <p className="text-xs text-gray-400 mt-1">Ontworpen door fysiotherapeuten, orthomoleculair therapeuten en leefstijlcoaches</p>
+          <p className="text-sm text-gray-400">{t('lp_hero_footer')}</p>
+          <p className="text-xs text-gray-400 mt-1">{t('lp_hero_trust')}</p>
         </div>
 
         {/* 6 pijlers */}
@@ -172,7 +172,7 @@ export default function LandingPatient() {
           ))}
         </div>
         <p className="text-xs text-gray-400 mt-3 max-w-md mx-auto text-center">
-          Artrocare is de eerste Nederlandse artrose-app die al deze pijlers combineert in één programma — begeleid door uw fysiotherapeut.
+          {t('lp_pillars_desc')}
         </p>
       </section>
 
@@ -180,17 +180,22 @@ export default function LandingPatient() {
       <section id="aanpak" className="py-20 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">Waarom Artrocare anders is</h2>
+            <h2 className="text-3xl font-bold text-gray-900">{t('lp_section_why_different')}</h2>
             <p className="text-gray-500 mt-3 max-w-2xl mx-auto">
-              De meeste programma's richten zich op één onderdeel. Artrocare niet.
+              {t('lp_why_intro')}
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="border border-gray-100 bg-gray-50">
               <CardContent className="p-6 space-y-3">
-                <h3 className="font-semibold text-gray-400 text-sm uppercase tracking-wide">Andere programma's</h3>
+                <h3 className="font-semibold text-gray-400 text-sm uppercase tracking-wide">{t('lp_other_programs')}</h3>
                 <ul className="space-y-2">
-                  {['Alleen oefeningen', 'Geen aandacht voor educatie', 'Geen leefstijlbegeleiding', 'Statisch programma'].map(item => (
+                  {[
+                    t('lp_other_only_exercises'),
+                    t('lp_other_no_education'),
+                    t('lp_other_no_lifestyle'),
+                    t('lp_other_static'),
+                  ].map(item => (
                     <li key={item} className="flex items-center gap-2 text-sm text-gray-400">
                       <span className="w-4 h-4 text-gray-300 flex-shrink-0">✕</span> {item}
                     </li>
@@ -204,14 +209,14 @@ export default function LandingPatient() {
                 Artrocare
               </div>
               <CardContent className="p-6 space-y-3 mt-2">
-                <h3 className="font-semibold text-blue-700 text-sm uppercase tracking-wide">De hele mens centraal</h3>
+                <h3 className="font-semibold text-blue-700 text-sm uppercase tracking-wide">{t('lp_artrocare_label')}</h3>
                 <ul className="space-y-2">
                   {[
-                    'Bewegen + educatie + leefstijl',
-                    'Voeding, slaap & mentaal welzijn',
-                    'Medicatie & supplementen inzicht',
-                    'Continu bijgewerkt op basis van nieuwste onderzoeken',
-                    'Altijd begeleid door uw fysiotherapeut',
+                    t('lp_artrocare_feature1'),
+                    t('lp_artrocare_feature2'),
+                    t('lp_artrocare_feature3'),
+                    t('lp_artrocare_feature4'),
+                    t('lp_artrocare_feature5'),
                   ].map(item => (
                     <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
                       <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /> {item}
@@ -225,10 +230,10 @@ export default function LandingPatient() {
               <CardContent className="p-6 space-y-3">
                 <div className="flex items-center gap-2">
                   <RefreshCw className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-semibold text-blue-800 text-sm">Altijd up-to-date</h3>
+                  <h3 className="font-semibold text-blue-800 text-sm">{t('lp_always_uptodate')}</h3>
                 </div>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  De wetenschap rondom artrose ontwikkelt zich snel. Artrocare volgt de nieuwste onderzoeken en past het programma continu aan. U profiteert altijd van de meest actuele inzichten — zonder dat u daar iets voor hoeft te doen.
+                  {t('lp_uptodate_desc')}
                 </p>
               </CardContent>
             </Card>
@@ -240,9 +245,9 @@ export default function LandingPatient() {
       <section id="voor-wie" className="py-20 px-4 bg-gray-50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">Voor iedereen met artroseklachten</h2>
+            <h2 className="text-3xl font-bold text-gray-900">{t('lp_for_everyone')}</h2>
             <p className="text-gray-500 mt-3 max-w-xl mx-auto">
-              Of u nu net de diagnose heeft gekregen of al jaren last hebt — Artrocare past zich aan uw situatie aan.
+              {t('lp_for_everyone_desc')}
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
@@ -258,8 +263,8 @@ export default function LandingPatient() {
           </div>
           <div className="mt-8 p-5 bg-blue-50 rounded-xl border border-blue-100 text-center">
             <Shield className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-            <p className="text-sm text-blue-800 font-medium">Altijd onder begeleiding van een deskundige fysiotherapeut</p>
-            <p className="text-sm text-blue-700 mt-1">Artrocare is geen vervanging voor professionele zorg — het is een versterking ervan. Jouw fysiotherapeut blijft de regie houden.</p>
+            <p className="text-sm text-blue-800 font-medium">{t('lp_guided_note')}</p>
+            <p className="text-sm text-blue-700 mt-1">{t('lp_guided_desc')}</p>
           </div>
         </div>
       </section>
@@ -268,8 +273,8 @@ export default function LandingPatient() {
       <section id="voordelen" className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">Alles wat je nodig hebt</h2>
-            <p className="text-gray-500 mt-3 max-w-xl mx-auto">Zes pijlers. Één programma. Begeleid door uw therapeut.</p>
+            <h2 className="text-3xl font-bold text-gray-900">{t('lp_benefits_title')}</h2>
+            <p className="text-gray-500 mt-3 max-w-xl mx-auto">{t('lp_benefits_desc')}</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {BENEFITS.map(b => (
@@ -290,8 +295,8 @@ export default function LandingPatient() {
       {/* HOE HET WERKT */}
       <section id="hoe-het-werkt" className="py-20 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">Hoe het werkt</h2>
-          <p className="text-gray-500 mb-12">Je bent in drie stappen aan de slag.</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">{t('lp_how_it_works')}</h2>
+          <p className="text-gray-500 mb-12">{t('lp_how_works_desc')}</p>
           <div className="grid md:grid-cols-3 gap-6 text-left">
             {STEPS.map(s => (
               <div key={s.step} className="flex gap-4">
@@ -306,8 +311,8 @@ export default function LandingPatient() {
             ))}
           </div>
           <div className="mt-10 p-4 bg-blue-50 rounded-xl border border-blue-100 text-sm text-blue-800">
-            <strong>Nog geen uitnodiging ontvangen?</strong> Vraag uw fysiotherapeut om u toegang te geven tot Artrocare, of{' '}
-            <Link to="/voor-fysiotherapeuten" className="underline">laat hem/haar kennismaken met de app</Link>.
+            <strong>{t('lp_no_invitation')}</strong> {t('lp_ask_therapist')},{' '}
+            <Link to="/voor-fysiotherapeuten" className="underline">{t('lp_ask_therapist_link')}</Link>.
           </div>
         </div>
       </section>
@@ -315,22 +320,22 @@ export default function LandingPatient() {
       {/* ERVARINGEN */}
       <section id="ervaringen" className="py-20 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Wat anderen zeggen</h2>
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">{t('lp_testimonials_title')}</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(t => (
-              <Card key={t.name} className="border border-gray-100">
+            {TESTIMONIALS.map(testimonial => (
+              <Card key={testimonial.name} className="border border-gray-100">
                 <CardContent className="p-6 space-y-4">
                   <div className="flex gap-0.5">
                     {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
                   </div>
-                  <p className="text-sm text-gray-700 italic leading-relaxed">"{t.text}"</p>
+                  <p className="text-sm text-gray-700 italic leading-relaxed">"{testimonial.text}"</p>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
-                      {t.initials}
+                      {testimonial.initials}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{t.name}</p>
-                      <p className="text-xs text-gray-400">{t.condition}</p>
+                      <p className="text-sm font-medium text-gray-900">{testimonial.name}</p>
+                      <p className="text-xs text-gray-400">{testimonial.condition}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -344,23 +349,23 @@ export default function LandingPatient() {
       <section id="wachtlijst-cta" className="py-20 px-4 bg-blue-600">
         <div className="max-w-xl mx-auto text-center space-y-5">
           <div className="inline-flex items-center gap-1.5 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
-            <FlaskConical className="w-3.5 h-3.5" /> Beta 2026
+            <FlaskConical className="w-3.5 h-3.5" /> {t('lp_beta_badge')}
           </div>
-          <h2 className="text-3xl font-bold text-white">Wilt u als eerste meedoen?</h2>
+          <h2 className="text-3xl font-bold text-white">{t('lp_cta_title')}</h2>
           <p className="text-blue-100">
-            Artrocare is nu in de pilotfase. Laat uw e-mailadres achter — we laten u weten zodra uw fysiotherapeut is aangesloten.
+            {t('lp_cta_desc')}
           </p>
           <WaitlistForm
             role="patient"
             className="max-w-sm mx-auto"
           />
           <p className="text-blue-200 text-sm">
-            Al een uitnodiging ontvangen?{' '}
-            <Link to="/login" className="underline hover:text-white">Direct inloggen</Link>
+            {t('lp_cta_has_invitation')}{' '}
+            <Link to="/login" className="underline hover:text-white">{t('lp_cta_login')}</Link>
           </p>
           <p className="text-blue-200 text-sm">
-            Ben je fysiotherapeut?{' '}
-            <Link to="/voor-praktijken" className="underline hover:text-white">Bekijk Artrocare voor praktijken</Link>
+            {t('lp_cta_therapist')}{' '}
+            <Link to="/voor-praktijken" className="underline hover:text-white">{t('lp_cta_therapist_link')}</Link>
           </p>
         </div>
       </section>
@@ -373,8 +378,8 @@ export default function LandingPatient() {
           </div>
           <p>© {new Date().getFullYear()} Artrocare · AVG-compliant · EU-servers</p>
           <div className="flex gap-4">
-            <Link to="/login" className="hover:text-white">Inloggen</Link>
-            <Link to="/voor-praktijken" className="hover:text-white">Voor fysiotherapeuten</Link>
+            <Link to="/login" className="hover:text-white">{t('login')}</Link>
+            <Link to="/voor-praktijken" className="hover:text-white">{t('lp_footer_therapist')}</Link>
           </div>
         </div>
       </footer>

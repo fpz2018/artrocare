@@ -123,7 +123,7 @@ export default function Layout({ children }) {
         <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-gray-200 z-40">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-            <Logo height={64} />
+            <Logo height={88} />
           </div>
 
           {/* Navigation */}

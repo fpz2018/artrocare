@@ -113,7 +113,7 @@ export default function Login() {
       <div className="w-full max-w-md space-y-4">
         <div className="text-center">
           <Link to="/" className="inline-flex items-center mb-2">
-            <Logo height={64} />
+            <Logo height={100} />
           </Link>
         </div>
 

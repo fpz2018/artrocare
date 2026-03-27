@@ -6,21 +6,21 @@ import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 
 export default function Home() {
-  const { language, setLanguage } = useI18n();
+  const { language, setLanguage, t } = useI18n();
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* NAV */}
-      <nav className="h-16 flex items-center justify-between px-6 border-b border-gray-100">
+      <nav className="h-24 flex items-center justify-between px-6 border-b border-gray-100">
         <div className="flex items-center">
-          <Logo height={64} />
+          <Logo height={88} />
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => setLanguage(language === 'nl' ? 'en' : 'nl')} title={language === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands'}>
             <Globe className="w-5 h-5" />
           </Button>
           <Link to="/login">
-            <Button variant="outline" size="sm">Inloggen</Button>
+            <Button variant="outline" size="sm">{t('login')}</Button>
           </Link>
         </div>
       </nav>
@@ -30,14 +30,14 @@ export default function Home() {
         <div className="max-w-4xl w-full mx-auto text-center space-y-8">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-100">
-              <Sparkles className="w-4 h-4" /> Gebaseerd op Nederlandse en internationaal erkende effectieve programma's
+              <Sparkles className="w-4 h-4" /> {t('home_badge')}
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-              Artrose aanpakken.<br />
-              <span className="text-blue-600">De hele mens centraal.</span>
+              {t('home_h1_line1')}<br />
+              <span className="text-blue-600">{t('home_h1_line2')}</span>
             </h1>
             <p className="text-lg text-gray-500 max-w-xl mx-auto">
-              Artrocare combineert bewegen, educatie, voeding, slaap, mentaal welzijn én medicatie in één programma — altijd begeleid door een deskundige fysiotherapeut.
+              {t('home_description')}
             </p>
           </div>
 
@@ -50,20 +50,20 @@ export default function Home() {
                   <Users className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">Ik ben patiënt</h2>
+                  <h2 className="text-lg font-bold text-gray-900">{t('home_patient_title')}</h2>
                   <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-                    Dagelijkse oefeningen, voortgang bijhouden en inzicht in je artrose — begeleid door jouw therapeut.
+                    {t('home_patient_desc')}
                   </p>
                 </div>
                 <ul className="space-y-1.5">
-                  {['Bewegen, educatie & leefstijl', 'Voeding, slaap & mentaal welzijn', 'Medicatie & pijnmonitoring'].map(f => (
+                  {[t('home_patient_feature1'), t('home_patient_feature2'), t('home_patient_feature3')].map(f => (
                     <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
                       <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
                 <div className="flex items-center gap-1 text-blue-600 font-medium text-sm group-hover:gap-2 transition-all">
-                  Bekijk wat Artrocare voor jou doet <ArrowRight className="w-4 h-4" />
+                  {t('home_patient_cta')} <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
             </Link>
@@ -75,31 +75,31 @@ export default function Home() {
                   <Building2 className="w-6 h-6 text-indigo-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">Ik ben fysiotherapeut</h2>
+                  <h2 className="text-lg font-bold text-gray-900">{t('home_therapist_title')}</h2>
                   <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-                    Beheer je artrosepatiënten, monitor voortgang en blijf automatisch up-to-date met de nieuwste inzichten.
+                    {t('home_therapist_desc')}
                   </p>
                 </div>
                 <ul className="space-y-1.5">
-                  {['Holistische begeleiding van patiënten', 'Continu bijgewerkt op basis van onderzoek', 'Gratis starttier'].map(f => (
+                  {[t('home_therapist_feature1'), t('home_therapist_feature2'), t('home_therapist_feature3')].map(f => (
                     <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
                       <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
                 <div className="flex items-center gap-1 text-indigo-600 font-medium text-sm group-hover:gap-2 transition-all">
-                  Bekijk prijzen en mogelijkheden <ArrowRight className="w-4 h-4" />
+                  {t('home_therapist_cta')} <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
             </Link>
           </div>
 
           {/* Trust strip */}
-          <p className="text-xs text-gray-400">Ontworpen door fysiotherapeuten, orthomoleculair therapeuten en leefstijlcoaches</p>
+          <p className="text-xs text-gray-400">{t('home_trust_designers')}</p>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400 pt-2">
-            <span className="flex items-center gap-1.5"><Shield className="w-4 h-4 text-blue-400" /> AVG-compliant · EU-servers</span>
-            <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" /> Gratis voor patiënten</span>
-            <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-400" /> KNGF + internationaal erkende programma's</span>
+            <span className="flex items-center gap-1.5"><Shield className="w-4 h-4 text-blue-400" /> {t('home_compliant')}</span>
+            <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" /> {t('home_free_for_patients')}</span>
+            <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-400" /> {t('home_certified')}</span>
           </div>
         </div>
       </section>
@@ -107,8 +107,8 @@ export default function Home() {
       {/* FOOTER */}
       <footer className="h-12 flex items-center justify-center border-t border-gray-100 text-xs text-gray-400 gap-4 px-4">
         <span>© {new Date().getFullYear()} Artrocare</span>
-        <Link to="/login" className="hover:text-gray-700">Inloggen</Link>
-        <Link to="/register-practice" className="hover:text-gray-700">Praktijk aanmelden</Link>
+        <Link to="/login" className="hover:text-gray-700">{t('login')}</Link>
+        <Link to="/register-practice" className="hover:text-gray-700">{t('home_register_practice')}</Link>
       </footer>
     </div>
   );
