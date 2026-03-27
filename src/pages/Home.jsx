@@ -1,20 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Building2, ArrowRight, CheckCircle, Star, Shield, Sparkles } from 'lucide-react';
+import { Users, Building2, ArrowRight, CheckCircle, Star, Shield, Sparkles, Globe } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n';
 
 export default function Home() {
+  const { language, setLanguage } = useI18n();
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* NAV */}
       <nav className="h-16 flex items-center justify-between px-6 border-b border-gray-100">
         <div className="flex items-center">
-          <Logo height={36} />
+          <Logo height={52} />
         </div>
-        <Link to="/login">
-          <Button variant="outline" size="sm">Inloggen</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => setLanguage(language === 'nl' ? 'en' : 'nl')} title={language === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands'}>
+            <Globe className="w-5 h-5" />
+          </Button>
+          <Link to="/login">
+            <Button variant="outline" size="sm">Inloggen</Button>
+          </Link>
+        </div>
       </nav>
 
       {/* HERO */}

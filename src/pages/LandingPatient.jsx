@@ -101,7 +101,7 @@ export default function LandingPatient() {
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/">
-            <Logo height={36} />
+            <Logo height={52} />
           </Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <a href="#aanpak" className="hover:text-blue-600">Onze aanpak</a>
@@ -364,7 +364,7 @@ export default function LandingPatient() {
       <footer className="bg-gray-900 text-gray-400 py-8 px-4">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-sm">
           <div className="flex items-center">
-            <Logo height={28} className="brightness-0 invert" />
+            <Logo height={40} className="brightness-0 invert" />
           </div>
           <p>© {new Date().getFullYear()} Artrocare · AVG-compliant · EU-servers</p>
           <div className="flex gap-4">

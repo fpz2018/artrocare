@@ -210,7 +210,7 @@ export default function LandingPractice() {
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/">
-            <Logo height={40} />
+            <Logo height={52} />
           </Link>
           <div className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map(l => (
