@@ -2,13 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   CheckCircle, TrendingUp, Dumbbell, BookOpen, Apple,
-  Star, ArrowRight, Shield, Moon, Brain, Menu, X, Sparkles, Pill, RefreshCw, FlaskConical
+  Star, ArrowRight, Shield, Moon, Brain, Menu, X, Sparkles, Pill, RefreshCw, FlaskConical, Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
 import WaitlistForm from '@/components/WaitlistForm';
 import Logo from '@/components/Logo';
+import { useI18n } from '@/i18n';
 
 const PILLARS = [
   { icon: Dumbbell, label: 'Bewegen',       color: 'text-blue-600 bg-blue-50' },
@@ -94,6 +95,7 @@ const FOR_WHO = [
 
 export default function LandingPatient() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { language, setLanguage } = useI18n();
 
   return (
     <div className="min-h-screen bg-white">
@@ -101,7 +103,7 @@ export default function LandingPatient() {
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/">
-            <Logo height={52} />
+            <Logo height={64} />
           </Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <a href="#aanpak" className="hover:text-blue-600">Onze aanpak</a>
@@ -110,6 +112,9 @@ export default function LandingPatient() {
             <a href="#ervaringen" className="hover:text-blue-600">Ervaringen</a>
           </div>
           <div className="hidden md:flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setLanguage(language === 'nl' ? 'en' : 'nl')} title={language === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands'}>
+              <Globe className="w-5 h-5 text-gray-500" />
+            </Button>
             <Link to="/login"><Button variant="outline" size="sm">Inloggen</Button></Link>
           </div>
           <button className="md:hidden p-2" onClick={() => setMenuOpen(v => !v)}>

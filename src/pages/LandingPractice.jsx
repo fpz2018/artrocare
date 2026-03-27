@@ -9,6 +9,7 @@ import {
 import WaitlistForm from '@/components/WaitlistForm';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -203,6 +204,7 @@ const TESTIMONIALS = [
 export default function LandingPractice() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const { language, setLanguage } = useI18n();
 
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -210,7 +212,7 @@ export default function LandingPractice() {
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/">
-            <Logo height={52} />
+            <Logo height={64} />
           </Link>
           <div className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map(l => (
@@ -220,6 +222,9 @@ export default function LandingPractice() {
             ))}
           </div>
           <div className="hidden md:flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setLanguage(language === 'nl' ? 'en' : 'nl')} title={language === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands'}>
+              <Globe className="w-5 h-5 text-gray-500" />
+            </Button>
             <Link to="/login">
               <Button variant="outline" size="sm">Inloggen</Button>
             </Link>
@@ -568,9 +573,8 @@ export default function LandingPractice() {
       {/* FOOTER */}
       <footer className="bg-gray-900 text-gray-400 py-10 px-4">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
-          <div className="flex items-center gap-2 text-white font-semibold">
-            <Heart className="w-5 h-5 text-blue-400" />
-            Artrocare
+          <div className="flex items-center gap-2">
+            <Logo height={32} className="brightness-0 invert" />
           </div>
           <p>© {new Date().getFullYear()} Artrocare · AVG-compliant · EU-servers</p>
           <div className="flex gap-4">

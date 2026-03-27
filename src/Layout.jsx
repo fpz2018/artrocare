@@ -68,7 +68,7 @@ export default function Layout({ children }) {
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Logo height={44} />
+            <Logo height={56} />
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={toggleLanguage}>
@@ -123,7 +123,7 @@ export default function Layout({ children }) {
         <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-gray-200 z-40">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-            <Logo height={52} />
+            <Logo height={64} />
           </div>
 
           {/* Navigation */}

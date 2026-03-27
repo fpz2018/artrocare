@@ -13,7 +13,7 @@ export default function Home() {
       {/* NAV */}
       <nav className="h-16 flex items-center justify-between px-6 border-b border-gray-100">
         <div className="flex items-center">
-          <Logo height={52} />
+          <Logo height={64} />
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => setLanguage(language === 'nl' ? 'en' : 'nl')} title={language === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands'}>
