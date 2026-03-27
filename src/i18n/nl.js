@@ -388,6 +388,14 @@ hoos12_severe: 'Ernstige beperkingen',
 hoos12_interpretation: 'Interpretatie',
 hoos12_next_steps: 'Volgende stappen',
 
+  // Landing - Pillars (shared)
+  pillar_movement: 'Bewegen',
+  pillar_education: 'Educatie',
+  pillar_nutrition: 'Voeding',
+  pillar_sleep: 'Slaap',
+  pillar_mental: 'Mentaal',
+  pillar_medication: 'Medicatie & supplementen',
+
   // Landing - Home
   home_badge: 'Gebaseerd op Nederlandse en internationaal erkende effectieve programma\'s',
   home_h1_line1: 'Artrose aanpakken.',

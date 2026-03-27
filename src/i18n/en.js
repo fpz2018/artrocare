@@ -371,6 +371,14 @@ const en = {
   research_summary: 'AI Summary',
   research_therapist_only: 'Therapists only',
 
+  // Landing - Pillars (shared)
+  pillar_movement: 'Movement',
+  pillar_education: 'Education',
+  pillar_nutrition: 'Nutrition',
+  pillar_sleep: 'Sleep',
+  pillar_mental: 'Mental wellbeing',
+  pillar_medication: 'Medication & supplements',
+
   // Landing - Home
   home_badge: 'Based on Dutch and internationally recognized effective programs',
   home_h1_line1: 'Take on osteoarthritis.',

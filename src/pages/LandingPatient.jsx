@@ -11,18 +11,18 @@ import WaitlistForm from '@/components/WaitlistForm';
 import Logo from '@/components/Logo';
 import { useI18n } from '@/i18n';
 
-const PILLARS = [
-  { icon: Dumbbell, label: 'Bewegen',       color: 'text-blue-600 bg-blue-50' },
-  { icon: BookOpen, label: 'Educatie',      color: 'text-amber-600 bg-amber-50' },
-  { icon: Apple,    label: 'Voeding',       color: 'text-orange-600 bg-orange-50' },
-  { icon: Moon,     label: 'Slaap',         color: 'text-indigo-600 bg-indigo-50' },
-  { icon: Brain,    label: 'Mentaal',       color: 'text-purple-600 bg-purple-50' },
-  { icon: Pill,     label: 'Medicatie & supplementen', color: 'text-rose-600 bg-rose-50' },
-];
-
 export default function LandingPatient() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { language, setLanguage, t } = useI18n();
+
+  const PILLARS = [
+    { icon: Dumbbell, label: t('pillar_movement'),   color: 'text-blue-600 bg-blue-50' },
+    { icon: BookOpen, label: t('pillar_education'),  color: 'text-amber-600 bg-amber-50' },
+    { icon: Apple,    label: t('pillar_nutrition'),  color: 'text-orange-600 bg-orange-50' },
+    { icon: Moon,     label: t('pillar_sleep'),      color: 'text-indigo-600 bg-indigo-50' },
+    { icon: Brain,    label: t('pillar_mental'),     color: 'text-purple-600 bg-purple-50' },
+    { icon: Pill,     label: t('pillar_medication'), color: 'text-rose-600 bg-rose-50' },
+  ];
 
   const BENEFITS = [
     {
