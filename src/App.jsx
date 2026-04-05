@@ -52,13 +52,16 @@ function PageLoader() {
 
 // Protected route wrapper
 function ProtectedRoute({ children, requiredRole, noAdmin }) {
-  const { isAuthenticated, loading, profile } = useAuth();
+  const { isAuthenticated, loading, profile, profileLoaded } = useAuth();
 
   if (loading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Wait for profile before checking roles
-  if ((requiredRole || noAdmin) && !profile) return <PageLoader />;
+  // Wait for profile fetch to complete before checking roles
+  if ((requiredRole || noAdmin) && !profileLoaded) return <PageLoader />;
+
+  // Profile fetch completed but no profile found — let the user through
+  // (they'll see the app without role-based restrictions)
 
   // Redirect admin/practice_admin away from patient-only pages
   if (noAdmin && profile?.role === 'admin') {

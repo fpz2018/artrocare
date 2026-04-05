@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const mountedRef = useRef(true);
   const profileFetchedRef = useRef(false);
   const loadingRef = useRef(true);
@@ -81,6 +82,7 @@ export function AuthProvider({ children }) {
       if (mountedRef.current && loadingRef.current) {
         loadingRef.current = false;
         setLoading(false);
+        setProfileLoaded(true);
       }
     }, 8000);
 
@@ -127,6 +129,7 @@ export function AuthProvider({ children }) {
           if (mountedRef.current) {
             setProfile(prof);
             profileFetchedRef.current = true;
+            setProfileLoaded(true);
           }
 
           // Clean up URL hash after successful auth
@@ -155,6 +158,7 @@ export function AuthProvider({ children }) {
           setProfile(null);
           setIsAuthenticated(false);
           profileFetchedRef.current = false;
+          setProfileLoaded(false);
           loadingRef.current = false;
           setLoading(false);
           return;
@@ -170,6 +174,7 @@ export function AuthProvider({ children }) {
             if (mountedRef.current) {
               setProfile(prof);
               profileFetchedRef.current = true;
+              setProfileLoaded(true);
             }
           }
 
@@ -215,6 +220,7 @@ export function AuthProvider({ children }) {
     setProfile(null);
     setIsAuthenticated(false);
     profileFetchedRef.current = false;
+    setProfileLoaded(false);
     loadingRef.current = false;
 
     // 2. Mark signed-out timestamp so initAuth skips session restore on next load
@@ -248,6 +254,7 @@ export function AuthProvider({ children }) {
     user,
     profile,
     loading,
+    profileLoaded,
     isAuthenticated,
     signUp,
     signIn,
