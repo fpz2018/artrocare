@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/api/supabase';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Dumbbell } from 'lucide-react';
+import { ArrowRight, Dumbbell, UserCheck } from 'lucide-react';
+import { useI18n } from '@/i18n';
 
 const ROUTE_CONFIG = {
   A: {
@@ -49,6 +50,7 @@ const SIDE_LABEL = {
 };
 
 export default function ProtocolBanner({ patientId }) {
+  const { t } = useI18n();
   const { data: protocol, isLoading } = useQuery({
     queryKey: ['active-protocol', patientId],
     queryFn: async () => {
@@ -87,7 +89,6 @@ export default function ProtocolBanner({ patientId }) {
             <p className="text-xs text-gray-500 mt-0.5">
               {JOINT_LABEL[protocol.joint_type] || protocol.joint_type}
               {protocol.side ? ` · ${SIDE_LABEL[protocol.side] || protocol.side}` : ''}
-              {' · '}Risicoscore: {protocol.risk_score}/20
             </p>
           </div>
         </div>
@@ -98,6 +99,12 @@ export default function ProtocolBanner({ patientId }) {
             <ArrowRight className="w-3.5 h-3.5 ml-1" />
           </Button>
         </Link>
+      </div>
+
+      {/* Ingesteld door therapeut */}
+      <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-500">
+        <UserCheck className="w-3.5 h-3.5 flex-shrink-0" />
+        <span>{t('protocol_set_by_therapist')}</span>
       </div>
 
       {/* Voortgangsbalk */}

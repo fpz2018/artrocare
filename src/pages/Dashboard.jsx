@@ -130,7 +130,7 @@ export default function Dashboard() {
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          {t('dash_welcome')}, {profile?.full_name || 'Patient'}
+          {t('dash_welcome')}, {profile?.full_name || 'Deelnemer'}
         </h1>
         <p className="text-gray-500 mt-1">{t('dash_how_feeling')}</p>
       </div>

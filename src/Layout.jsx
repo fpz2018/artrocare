@@ -5,7 +5,7 @@ import { useI18n } from '@/i18n';
 import {
   LayoutDashboard, TrendingUp, Dumbbell, Target, Apple, Pill,
   Stethoscope, BookOpen, Crown, Settings, Users, Menu, X,
-  Globe, LogOut, ChevronRight, FlaskConical, Database, Building2
+  Globe, LogOut, ChevronRight, FlaskConical, Database, Building2, ChefHat
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FooterDisclaimer } from '@/components/legal/Disclaimer';
@@ -17,6 +17,7 @@ const navItems = [
   { path: '/exercises', icon: Dumbbell, labelKey: 'nav_exercises' },
   { path: '/goals', icon: Target, labelKey: 'nav_goals' },
   { path: '/nutrition', icon: Apple, labelKey: 'nav_nutrition' },
+  { path: '/recipes', icon: ChefHat, labelKey: 'nav_recipes' },
   { path: '/supplements', icon: Pill, labelKey: 'nav_supplements' },
   { path: '/medication', icon: Pill, labelKey: 'nav_medication' },
   { path: '/therapist', icon: Stethoscope, labelKey: 'nav_therapist' },

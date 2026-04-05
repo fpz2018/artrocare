@@ -606,7 +606,7 @@ export default function ContentProposals() {
                     <span className="flex-1 font-medium text-gray-900">{entry.email}</span>
                     <span className="w-28 text-gray-500 truncate">{entry.name || '—'}</span>
                     <span className={`w-20 text-xs font-semibold px-2 py-0.5 rounded-full ${entry.role === 'practice' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                      {entry.role === 'practice' ? 'Praktijk' : 'Patiënt'}
+                      {entry.role === 'practice' ? 'Praktijk' : 'Deelnemer'}
                     </span>
                     <span className="w-28 text-gray-400 text-xs">
                       {new Date(entry.created_at).toLocaleDateString('nl-NL')}

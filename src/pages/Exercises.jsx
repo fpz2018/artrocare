@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { InlineDisclaimer } from '@/components/legal/Disclaimer';
+import ExerciseAnimation, { hasAnimation } from '@/components/exercises/ExerciseAnimation';
 
 // Route A = niveau 1 · Route B = niveau 1-2 · Route C = niveau 1-3
 const ROUTE_MAX_LEVEL = { A: 1, B: 2, C: 3 };
@@ -262,6 +263,15 @@ export default function Exercises() {
             </DialogHeader>
 
             <div className="space-y-4">
+              {hasAnimation(selectedExercise) && (
+                <ExerciseAnimation
+                  exercise={selectedExercise}
+                  sets={selectedExercise.sets}
+                  reps={selectedExercise.reps}
+                  duration={selectedExercise.duration_minutes}
+                />
+              )}
+
               <div className="flex gap-2 flex-wrap">
                 <Badge>{t('ex_level')}: {selectedExercise.level}</Badge>
                 <Badge variant="secondary">{selectedExercise.sets}x {selectedExercise.reps}</Badge>

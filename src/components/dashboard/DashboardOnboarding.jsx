@@ -88,14 +88,14 @@ const ROUTE_INFO = {
   B: {
     color: 'orange',
     label: 'Route B — Begeleid programma',
-    description: 'Matige klachten. U volgt een begeleiding van 12 weken met intensievere therapeutcontacten, oefentherapie en leefstijlcoaching.',
+    description: 'Matige klachten. U volgt een begeleidingsprogramma van 12 weken met intensievere contactmomenten, bewegingsschema\'s en leefstijlcoaching.',
     weeks: 12,
     intensity: 'Middel',
   },
   C: {
     color: 'red',
     label: 'Route C — Intensief programma',
-    description: 'Ernstige klachten of hoge ziektelast. U start direct met een intensief 18-weeksprogramma inclusief reguliere consultaties bij uw therapeut en eventueel aanvullende zorg.',
+    description: 'Ernstige klachten. U start direct met een intensief 18-weeksprogramma inclusief reguliere contactmomenten met uw fysiotherapeut en aanvullende begeleiding.',
     weeks: 18,
     intensity: 'Hoog',
   },
@@ -349,12 +349,12 @@ export default function DashboardOnboarding() {
       </div>
 
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-2">Eerdere behandeling voor deze klachten?</label>
+        <label className="text-sm font-medium text-gray-700 block mb-2">Eerdere begeleiding voor deze klachten?</label>
         <div className="grid grid-cols-1 gap-2">
           {[
-            { v: 'none',         l: 'Nee, dit is mijn eerste behandeling' },
-            { v: 'physio_only',  l: 'Ja, eerder fysiotherapie' },
-            { v: 'multiple',     l: 'Ja, meerdere behandelingen (fysio, injecties, etc.)' },
+            { v: 'none',         l: 'Nee, dit is de eerste keer' },
+            { v: 'physio_only',  l: 'Ja, eerder fysiotherapie gehad' },
+            { v: 'multiple',     l: 'Ja, meerdere trajecten (fysio, injecties, etc.)' },
           ].map((o) => (
             <button key={o.v} onClick={() => setPrevTreatment(o.v)}
               className={`p-3 rounded-lg border-2 text-sm text-left transition-all ${prevTreatment === o.v ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}>

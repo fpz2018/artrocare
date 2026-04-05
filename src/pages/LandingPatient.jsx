@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   CheckCircle, TrendingUp, Dumbbell, BookOpen, Apple,
-  Star, ArrowRight, Shield, Moon, Brain, Menu, X, Sparkles, Pill, RefreshCw, FlaskConical, Globe
+  Star, ArrowRight, Shield, Moon, Brain, Menu, X, Sparkles, Pill, RefreshCw, FlaskConical, Globe, Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -159,6 +159,9 @@ export default function LandingPatient() {
               <Button size="lg" variant="outline" className="text-base px-8">{t('lp_cta_secondary')}</Button>
             </a>
           </div>
+          <Link to="/beweegplan" className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium mt-2">
+            <Download className="w-4 h-4" /> {t('lp_lead_magnet')}
+          </Link>
           <p className="text-sm text-gray-400">{t('lp_hero_footer')}</p>
           <p className="text-xs text-gray-400 mt-1">{t('lp_hero_trust')}</p>
         </div>

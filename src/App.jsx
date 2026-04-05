@@ -7,6 +7,7 @@ import { I18nProvider } from '@/i18n';
 import { Toaster } from 'sonner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Layout from '@/Layout';
+import InstallPrompt from '@/components/InstallPrompt';
 
 // Lazy load all pages for code splitting
 const Home = lazy(() => import('@/pages/Home'));
@@ -34,6 +35,8 @@ const LandingPatient = lazy(() => import('@/pages/LandingPatient'));
 const Login = lazy(() => import('@/pages/Login'));
 const HOOS12 = lazy(() => import('@/pages/HOOS12'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+const Recipes = lazy(() => import('@/pages/Recipes'));
+const Beweegplan = lazy(() => import('@/pages/Beweegplan'));
 
 // Loading spinner component
 function PageLoader() {
@@ -121,6 +124,7 @@ function AppRoutes() {
         <Route path="/voor-fysiotherapeuten" element={<Navigate to="/voor-praktijken" replace />} />
         <Route path="/voor-patienten" element={<LandingPatient />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
+        <Route path="/beweegplan" element={<Beweegplan />} />
 
         {/* Protected routes */}
         <Route path="/dashboard" element={<ProtectedRoute noAdmin><Dashboard /></ProtectedRoute>} />
@@ -135,6 +139,7 @@ function AppRoutes() {
         <Route path="/premium" element={<ProtectedRoute><Premium /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+        <Route path="/recipes" element={<ProtectedRoute><Recipes /></ProtectedRoute>} />
         <Route path="/hoos12" element={<ProtectedRoute><HOOS12 /></ProtectedRoute>} />
         <Route path="/research" element={<ProtectedRoute requiredRole="therapist"><ResearchMonitor /></ProtectedRoute>} />
         <Route path="/admin/proposals" element={<ProtectedRoute requiredRole="admin"><ContentProposals /></ProtectedRoute>} />
@@ -168,6 +173,7 @@ export default function App() {
               <AppRoutes />
             </Router>
             <Toaster position="top-center" richColors closeButton />
+              <InstallPrompt />
           </AuthProvider>
         </I18nProvider>
       </QueryClientProvider>

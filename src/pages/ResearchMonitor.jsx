@@ -35,14 +35,14 @@ const EVIDENCE_LABELS = {
 };
 
 const CATEGORY_LABELS = {
-  exercise: { nl: 'Oefentherapie', en: 'Exercise', color: 'bg-green-100 text-green-700' },
+  exercise: { nl: 'Bewegen', en: 'Exercise', color: 'bg-green-100 text-green-700' },
   nutrition: { nl: 'Voeding', en: 'Nutrition', color: 'bg-orange-100 text-orange-700' },
   supplements: { nl: 'Supplementen', en: 'Supplements', color: 'bg-yellow-100 text-yellow-700' },
   pain_management: { nl: 'Pijnmanagement', en: 'Pain management', color: 'bg-red-100 text-red-700' },
   surgery: { nl: 'Chirurgie', en: 'Surgery', color: 'bg-pink-100 text-pink-700' },
   rehabilitation: { nl: 'Revalidatie', en: 'Rehabilitation', color: 'bg-indigo-100 text-indigo-700' },
-  treatment: { nl: 'Behandeling', en: 'Treatment', color: 'bg-blue-100 text-blue-700' },
-  diagnosis: { nl: 'Diagnose', en: 'Diagnosis', color: 'bg-cyan-100 text-cyan-700' },
+  treatment: { nl: 'Begeleiding', en: 'Treatment', color: 'bg-blue-100 text-blue-700' },
+  diagnosis: { nl: 'Inzicht', en: 'Diagnosis', color: 'bg-cyan-100 text-cyan-700' },
   prevention: { nl: 'Preventie', en: 'Prevention', color: 'bg-emerald-100 text-emerald-700' },
 };
 
@@ -140,7 +140,7 @@ function PaperCard({ paper, language, onApprove, onReject, onResummarize, isUpda
             {relevance && (
               <div className="bg-blue-50 p-3 rounded-lg">
                 <h4 className="text-sm font-semibold text-blue-800 mb-1">
-                  {lang === 'nl' ? 'Klinische relevantie' : 'Clinical Relevance'}
+                  {lang === 'nl' ? 'Praktische relevantie' : 'Practical Relevance'}
                 </h4>
                 <p className="text-sm text-blue-700">{relevance}</p>
               </div>

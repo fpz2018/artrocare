@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
   Users, Activity, AlertTriangle, TrendingUp, Search,
-  Copy, Check, ShieldAlert, Dumbbell, UserPlus, Trash2, Loader2
+  Copy, Check, ShieldAlert, Dumbbell, UserPlus, Trash2, Loader2, ClipboardCheck
 } from 'lucide-react';
 import { format, subDays, differenceInCalendarDays, parseISO } from 'date-fns';
 import { toast } from 'sonner';
@@ -91,6 +91,25 @@ export default function TherapistDashboard() {
     enabled: patients.length > 0,
   });
 
+  // Protocol accordering — meest recente per patiënt
+  const { data: approvals = {} } = useQuery({
+    queryKey: ['protocol-approvals', profile?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('protocol_approvals')
+        .select('patient_id, approved_at')
+        .eq('therapist_id', profile.id)
+        .order('approved_at', { ascending: false });
+      if (error) throw error;
+      const map = {};
+      (data || []).forEach(a => {
+        if (!map[a.patient_id]) map[a.patient_id] = a.approved_at;
+      });
+      return map;
+    },
+    enabled: !!profile?.id,
+  });
+
   // Openstaande uitnodigingen
   const { data: invitations = [] } = useQuery({
     queryKey: ['therapist-invitations', profile?.id],
@@ -136,6 +155,20 @@ export default function TherapistDashboard() {
       queryClient.invalidateQueries({ queryKey: ['therapist-invitations', profile.id] });
       setInviteEmail('');
       toast.success('Uitnodiging aangemaakt');
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const approveProtocol = useMutation({
+    mutationFn: async ({ patientId }) => {
+      const { error } = await supabase
+        .from('protocol_approvals')
+        .insert({ therapist_id: profile.id, patient_id: patientId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['protocol-approvals', profile.id] });
+      toast.success(t('td_approve_success'));
     },
     onError: (err) => toast.error(err.message),
   });
@@ -276,7 +309,7 @@ export default function TherapistDashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <UserPlus className="w-4 h-4 text-gray-400" /> Patiënt uitnodigen
+            <UserPlus className="w-4 h-4 text-gray-400" /> Deelnemer uitnodigen
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0 space-y-3">
@@ -343,7 +376,7 @@ export default function TherapistDashboard() {
           <Card className="bg-gray-50">
             <CardContent className="p-8 text-center text-gray-500">
               <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <p>{language === 'nl' ? 'Nog geen patiënten.' : 'No patients yet.'}</p>
+              <p>{language === 'nl' ? 'Nog geen deelnemers.' : 'No participants yet.'}</p>
             </CardContent>
           </Card>
         ) : (
@@ -365,7 +398,7 @@ export default function TherapistDashboard() {
                           </span>
                         )}
                         {!patient.protocol && (
-                          <span className="text-xs text-gray-400 italic">Geen actief protocol</span>
+                          <span className="text-xs text-gray-400 italic">Geen actief schema</span>
                         )}
                       </div>
                     </div>
@@ -397,6 +430,32 @@ export default function TherapistDashboard() {
                   <span className="flex items-center gap-1"><Dumbbell className="w-3 h-3" />{patient.exerciseDays}x/wk</span>
                   {patient.daysAgo !== null && <span>Actief: {patient.daysAgo === 0 ? 'vandaag' : `${patient.daysAgo}d geleden`}</span>}
                 </div>
+
+                {/* Review & Bevestig — human-in-the-loop accordering */}
+                {patient.protocol && (
+                  <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+                    <span className="text-xs text-gray-500">{t('td_approve_protocol')}</span>
+                    {approvals[patient.id] ? (
+                      <span className="text-xs text-green-600 flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5" />
+                        {t('td_approved')} · {format(parseISO(approvals[patient.id]), 'dd/MM')}
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-50"
+                        onClick={() => approveProtocol.mutate({ patientId: patient.id })}
+                        disabled={approveProtocol.isPending}
+                      >
+                        {approveProtocol.isPending
+                          ? <Loader2 className="w-3 h-3 animate-spin" />
+                          : <ClipboardCheck className="w-3 h-3" />}
+                        {t('td_approve_confirm')}
+                      </Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))

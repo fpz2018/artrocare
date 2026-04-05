@@ -1,128 +1,146 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/i18n';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Check, Mail, Zap, Shield, Star, ToggleLeft, ToggleRight } from 'lucide-react';
+import {
+  Crown, Check, Mail, Dumbbell, ChefHat, Pill, Stethoscope, Users, Sparkles, Shield,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-const plans = [
-  {
-    id: 'free', priceMonthly: 0, priceYearly: 0,
-    features: ['basic_exercises', 'daily_tracking', 'core_lessons', 'pain_prediction', 'basic_nutrition'],
-  },
-  {
-    id: 'premium', priceMonthly: 9.99, priceYearly: 89.99,
-    features: ['all_exercises', 'daily_tracking', 'all_lessons', 'advanced_prediction', 'personalized_nutrition', 'supplements_guide', 'therapist_sharing', 'priority_support'],
-  },
-  {
-    id: 'practice', priceMonthly: 49.99, priceYearly: 449.99,
-    features: ['everything_premium', 'therapist_dashboard', 'patient_management', 'analytics', 'branding', 'api_access'],
-  },
-];
+const FOUNDING_PRICE = 97;
+const REGULAR_PRICE = 197;
+const FOUNDING_LIMIT = 50;
 
 export default function Premium() {
   const { profile } = useAuth();
   const { t, language } = useI18n();
-  const [yearly, setYearly] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const currentTier = profile?.subscription_tier || 'free';
+  const isPremium = profile?.subscription_tier === 'premium' || profile?.subscription_tier === 'practice';
 
-  const featureLabels = {
-    nl: {
-      basic_exercises: 'Basis oefeningen', daily_tracking: 'Dagelijkse tracking', core_lessons: '3 kernlessen',
-      pain_prediction: 'Pijnvoorspelling', basic_nutrition: 'Basis voedingstips', all_exercises: 'Alle oefeningen (NEMEX-TJR)',
-      all_lessons: 'Alle lessen', advanced_prediction: 'Geavanceerde voorspelling', personalized_nutrition: 'Persoonlijk voedingsplan',
-      supplements_guide: 'Supplementengids', therapist_sharing: 'Therapeut-deling', priority_support: 'Prioriteit support',
-      everything_premium: 'Alles van Premium', therapist_dashboard: 'Therapeut dashboard', patient_management: 'Patient management',
-      analytics: 'Analytics', branding: 'Eigen branding', api_access: 'API toegang',
-    },
-    en: {
-      basic_exercises: 'Basic exercises', daily_tracking: 'Daily tracking', core_lessons: '3 core lessons',
-      pain_prediction: 'Pain prediction', basic_nutrition: 'Basic nutrition tips', all_exercises: 'All exercises (NEMEX-TJR)',
-      all_lessons: 'All lessons', advanced_prediction: 'Advanced prediction', personalized_nutrition: 'Personalized nutrition plan',
-      supplements_guide: 'Supplements guide', therapist_sharing: 'Therapist sharing', priority_support: 'Priority support',
-      everything_premium: 'Everything in Premium', therapist_dashboard: 'Therapist dashboard', patient_management: 'Patient management',
-      analytics: 'Analytics', branding: 'Custom branding', api_access: 'API access',
-    },
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: profile.id,
+          email: profile.email,
+          locale: language,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || t('error'));
+      }
+    } catch {
+      toast.error(t('error'));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const labels = featureLabels[language] || featureLabels.nl;
+  const features = [
+    { icon: Dumbbell, key: 'fm_feature_program' },
+    { icon: Stethoscope, key: 'fm_feature_checkins' },
+    { icon: ChefHat, key: 'fm_feature_recipes' },
+    { icon: Pill, key: 'fm_feature_supplements' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-        <Crown className="w-7 h-7 text-amber-500" />
-        {t('prem_title')}
-      </h1>
+    <div className="space-y-8 max-w-2xl mx-auto">
+      {/* Header */}
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 text-sm font-medium px-3 py-1.5 rounded-full border border-amber-200">
+          <Sparkles className="w-4 h-4" /> {t('fm_badge')}
+        </div>
+        <h1 className="text-3xl font-bold text-gray-900">{t('fm_title')}</h1>
+        <p className="text-gray-500 max-w-md mx-auto">{t('fm_subtitle')}</p>
+      </div>
 
-      {/* Billing toggle */}
-      <div className="flex items-center justify-center gap-3">
-        <span className={`text-sm ${!yearly ? 'font-semibold' : 'text-gray-500'}`}>{t('prem_monthly')}</span>
-        <button onClick={() => setYearly(!yearly)} className="relative w-12 h-6">
-          <div className={`w-12 h-6 rounded-full transition-colors ${yearly ? 'bg-blue-500' : 'bg-gray-300'}`}>
-            <div className={`w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-transform ${yearly ? 'translate-x-6' : 'translate-x-0.5'}`} />
+      {/* Price card */}
+      <Card className="border-2 border-amber-300 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+          {t('fm_limited')}
+        </div>
+        <CardContent className="p-8 space-y-6">
+          {/* Price */}
+          <div className="text-center space-y-1">
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-2xl text-gray-400 line-through">{REGULAR_PRICE}</span>
+              <span className="text-5xl font-bold text-gray-900">{FOUNDING_PRICE}</span>
+            </div>
+            <p className="text-sm text-gray-500">{t('fm_price_note')}</p>
           </div>
-        </button>
-        <span className={`text-sm ${yearly ? 'font-semibold' : 'text-gray-500'}`}>{t('prem_yearly')}</span>
-        {yearly && <Badge className="bg-green-100 text-green-700 text-xs">-25%</Badge>}
-      </div>
 
-      {/* Plans */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {plans.map((plan) => {
-          const isCurrent = currentTier === plan.id;
-          const price = yearly ? plan.priceYearly : plan.priceMonthly;
+          {/* Features */}
+          <ul className="space-y-3">
+            {features.map(({ icon: Icon, key }) => (
+              <li key={key} className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-4 h-4 text-blue-600" />
+                </div>
+                <span className="text-sm text-gray-700">{t(key)}</span>
+              </li>
+            ))}
+          </ul>
 
-          return (
-            <Card
-              key={plan.id}
-              className={`relative ${isCurrent ? 'border-blue-500 shadow-xl ring-2 ring-blue-200' : ''} ${plan.id === 'premium' ? 'border-amber-300' : ''}`}
+          {/* CTA */}
+          {isPremium ? (
+            <div className="flex items-center justify-center gap-2 py-3 bg-green-50 rounded-lg">
+              <Check className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-semibold text-green-700">{t('fm_already_member')}</span>
+            </div>
+          ) : (
+            <Button
+              size="lg"
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white text-base font-semibold py-6"
+              onClick={handleCheckout}
+              disabled={loading}
             >
-              {plan.id === 'premium' && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-amber-500 text-white"><Star className="w-3 h-3 mr-1" />{language === 'nl' ? 'Populair' : 'Popular'}</Badge>
-                </div>
+              {loading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+              ) : (
+                <>
+                  <Crown className="w-5 h-5 mr-2" />
+                  {t('fm_cta')}
+                </>
               )}
-              <CardHeader className="text-center">
-                <CardTitle className="flex items-center justify-center gap-2">
-                  {plan.id === 'free' && <Zap className="w-5 h-5 text-gray-500" />}
-                  {plan.id === 'premium' && <Crown className="w-5 h-5 text-amber-500" />}
-                  {plan.id === 'practice' && <Shield className="w-5 h-5 text-purple-500" />}
-                  {t(`prem_${plan.id}`)}
-                </CardTitle>
-                <div className="mt-2">
-                  <span className="text-3xl font-bold">{price === 0 ? (language === 'nl' ? 'Gratis' : 'Free') : `€${price}`}</span>
-                  {price > 0 && <span className="text-gray-500 text-sm">{yearly ? t('prem_per_year') : t('prem_per_month')}</span>}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 mb-4">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm">
-                      <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      {labels[f] || f}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  className={`w-full ${isCurrent ? 'bg-gray-200 text-gray-700' : plan.id === 'premium' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-600 hover:bg-blue-700'}`}
-                  disabled={isCurrent}
-                >
-                  {isCurrent ? t('prem_current') : price === 0 ? t('prem_current') : t('prem_upgrade')}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+            </Button>
+          )}
+
+          {/* Trust signals */}
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-400 pt-2">
+            <span className="flex items-center gap-1"><Shield className="w-3.5 h-3.5" /> {t('fm_trust_secure')}</span>
+            <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {t('fm_trust_limit')}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* What you get details */}
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <h2 className="font-semibold text-lg">{t('fm_what_you_get')}</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-600">{t(`fm_benefit_${i}`)}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Contact */}
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="p-4 text-center">
-          <p className="text-sm text-gray-700 mb-2">
-            {language === 'nl' ? 'Vragen over Premium? Neem contact met ons op.' : 'Questions about Premium? Contact us.'}
-          </p>
+          <p className="text-sm text-gray-700 mb-2">{t('fm_questions')}</p>
           <Button variant="outline" size="sm">
             <Mail className="w-4 h-4 mr-2" />{t('prem_contact')}
           </Button>

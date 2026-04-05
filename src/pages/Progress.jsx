@@ -182,7 +182,7 @@ export default function Progress() {
               {Math.max(painRest[0], painActivity[0]) >= 7 && (
                 <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3">
                   <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-700">Hoge pijnscore gedetecteerd. Uw therapeut ontvangt een melding. Doe rustig aan en volg het opvlammingsprotocol.</p>
+                  <p className="text-sm text-red-700">{t('flare_high_pain_advice')}</p>
                 </div>
               )}
 
@@ -316,11 +316,7 @@ export default function Progress() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-600">
-                  {t('language') === 'nl'
-                    ? 'Geen actieve opvlammingen gedetecteerd. Goed bezig!'
-                    : 'No active flares detected. Keep it up!'}
-                </p>
+                <p className="text-sm text-gray-600">{t('flare_no_active')}</p>
               )}
               <InlineDisclaimer type="general" />
             </CardContent>

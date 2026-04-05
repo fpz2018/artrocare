@@ -43,7 +43,7 @@ export default function Home() {
 
           {/* Twee paden */}
           <div className="grid md:grid-cols-2 gap-5 max-w-2xl mx-auto pt-4">
-            {/* Patiënt */}
+            {/* Deelnemer */}
             <Link to="/voor-patienten" className="group">
               <div className="bg-white rounded-2xl border-2 border-gray-100 group-hover:border-blue-400 group-hover:shadow-lg transition-all p-6 text-left space-y-4">
                 <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">

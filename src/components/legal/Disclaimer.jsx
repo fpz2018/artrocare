@@ -33,7 +33,9 @@ export function FooterDisclaimer() {
     <footer className="border-t border-gray-200 bg-gray-50 px-4 py-4 mt-8">
       <div className="max-w-5xl mx-auto flex items-start gap-2 text-xs text-gray-500">
         <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
-        <p>{t('disclaimer_footer')}</p>
+        <span>{t('disclaimer_footer')}</span>
+        <span className="mx-1">·</span>
+        <span>{t('disclaimer_footer_mdr')}</span>
       </div>
     </footer>
   );
@@ -83,7 +85,7 @@ export function FullDisclaimer({ open, onOpenChange, onAgree }) {
         >
           <p>{t('disclaimer_text')}</p>
           <div className="space-y-2">
-            <p className="font-semibold text-gray-900">Specifieke waarschuwingen:</p>
+            <p className="font-semibold text-gray-900">Goed om te weten:</p>
             <ul className="list-disc list-inside space-y-1 text-xs">
               <li>{t('disclaimer_exercise')}</li>
               <li>{t('disclaimer_nutrition')}</li>
@@ -103,7 +105,7 @@ export function FullDisclaimer({ open, onOpenChange, onAgree }) {
         </Button>
         {!canAgree && (
           <p className="text-xs text-center text-gray-500">
-            Scroll naar beneden om akkoord te gaan
+            Scroll naar beneden om verder te gaan
           </p>
         )}
       </DialogContent>
