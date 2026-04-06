@@ -37,6 +37,7 @@ const HOOS12 = lazy(() => import('@/pages/HOOS12'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 const Recipes = lazy(() => import('@/pages/Recipes'));
 const Beweegplan = lazy(() => import('@/pages/Beweegplan'));
+const AdminChecklist = lazy(() => import('@/pages/AdminChecklist'));
 
 // Loading spinner component
 function PageLoader() {
@@ -144,6 +145,7 @@ function AppRoutes() {
         <Route path="/research" element={<ProtectedRoute requiredRole="therapist"><ResearchMonitor /></ProtectedRoute>} />
         <Route path="/admin/proposals" element={<ProtectedRoute requiredRole="admin"><ContentProposals /></ProtectedRoute>} />
         <Route path="/admin/practices" element={<ProtectedRoute requiredRole="admin"><AdminPractices /></ProtectedRoute>} />
+        <Route path="/admin/checklist" element={<ProtectedRoute requiredRole="admin"><AdminChecklist /></ProtectedRoute>} />
         <Route path="/practice" element={<ProtectedRoute requiredRole="practice_admin"><PracticeAdmin /></ProtectedRoute>} />
 
         {/* Therapist-only route */}
