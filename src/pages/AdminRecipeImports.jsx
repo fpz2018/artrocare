@@ -405,6 +405,7 @@ export default function AdminRecipeImports() {
   const importMutation = useMutation({
     mutationFn: async (url) => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Sessie verlopen — log opnieuw in');
       const res = await fetch('/.netlify/functions/import-recipes', {
         method: 'POST',
         headers: {
@@ -414,8 +415,10 @@ export default function AdminRecipeImports() {
         body: JSON.stringify({ action: 'process_single', url }),
       });
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Import mislukt');
+        const text = await res.text();
+        let msg = 'Import mislukt';
+        try { msg = JSON.parse(text).error || msg; } catch { msg = text || msg; }
+        throw new Error(msg);
       }
       return res.json();
     },
@@ -430,6 +433,7 @@ export default function AdminRecipeImports() {
   const runPipelineMutation = useMutation({
     mutationFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Sessie verlopen — log opnieuw in');
       const res = await fetch('/.netlify/functions/import-recipes', {
         method: 'POST',
         headers: {
@@ -439,8 +443,10 @@ export default function AdminRecipeImports() {
         body: JSON.stringify({}),
       });
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Pipeline mislukt');
+        const text = await res.text();
+        let msg = 'Pipeline mislukt';
+        try { msg = JSON.parse(text).error || msg; } catch { msg = text || msg; }
+        throw new Error(msg);
       }
       return res.json();
     },

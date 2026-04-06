@@ -344,7 +344,7 @@ async function processImports(env) {
 
 // ─── Env loader ───────────────────────────────────────────
 
-function loadEnv() {
+function loadEnv({ requireSheetId = false } = {}) {
   const GEMINI_KEY = process.env.GEMINI_API_KEY;
   const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
   const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -353,7 +353,7 @@ function loadEnv() {
   if (!GEMINI_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     throw new Error('Missing env vars (GEMINI_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)');
   }
-  if (!SHEET_ID) {
+  if (requireSheetId && !SHEET_ID) {
     throw new Error('Missing RECIPE_SHEET_ID environment variable');
   }
 
@@ -383,10 +383,10 @@ export default async function handler(req) {
   }
 
   try {
-    const env = loadEnv();
     const body = await req.json().catch(() => ({}));
 
     if (body.action === 'process_single') {
+      const env = loadEnv({ requireSheetId: false });
       // Process a single URL on-demand
       const { url } = body;
       if (!url) return Response.json({ error: 'URL required' }, { status: 400 });
@@ -433,6 +433,7 @@ export default async function handler(req) {
     }
 
     // Default: run full pipeline
+    const env = loadEnv({ requireSheetId: true });
     const result = await processImports(env);
     return Response.json({ success: true, ...result }, {
       headers: { 'Access-Control-Allow-Origin': '*' },
@@ -452,7 +453,7 @@ export { parseCsvLine, fetchSheetUrls, fetchPageHtml, extractRecipeSection, extr
 export const scheduledHandler = schedule('0 3 * * *', async () => {
   console.log('Scheduled recipe import started:', new Date().toISOString());
   try {
-    const env = loadEnv();
+    const env = loadEnv({ requireSheetId: true });
     const result = await processImports(env);
     console.log('Scheduled recipe import complete:', JSON.stringify(result));
   } catch (err) {
