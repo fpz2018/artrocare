@@ -93,9 +93,9 @@ function AppRoutes() {
 
   if (loading) return <PageLoader />;
 
-  // Wait for profile before deciding redirect target
+  // Redirect based on role, default to /dashboard while profile loads
   const homeRedirect = !profile
-    ? null
+    ? '/dashboard'
     : profile.role === 'admin'
     ? '/admin/proposals'
     : profile.role === 'practice_admin'
