@@ -443,6 +443,10 @@ export default async function handler(req) {
   }
 }
 
+// ─── Exported for testing ────────────────────────────────
+
+export { parseCsvLine, fetchSheetUrls, fetchPageHtml, extractRecipeSection, extractRecipeWithGemini };
+
 // ─── Scheduled handler (04:00 CET = 03:00 UTC) ───────────
 
 export const scheduledHandler = schedule('0 3 * * *', async () => {
