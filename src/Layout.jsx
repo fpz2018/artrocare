@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/i18n';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/api/supabase';
 import {
   LayoutDashboard, TrendingUp, Dumbbell, Target, Apple, Pill,
   Stethoscope, BookOpen, Crown, Settings, Users, Menu, X,
@@ -59,6 +61,22 @@ export default function Layout({ children }) {
 
   const isPremium = profile?.subscription_tier === 'premium' || profile?.subscription_tier === 'practice';
 
+  // Fetch pending notification count for admins
+  const { data: pendingNotifications = 0 } = useQuery({
+    queryKey: ['pending-notifications', profile?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('pending_notifications')
+        .eq('id', profile.id)
+        .single();
+      if (error) return 0;
+      return data?.pending_notifications || 0;
+    },
+    enabled: profile?.role === 'admin',
+    refetchInterval: 60000, // Poll every minute
+  });
+
   const toggleLanguage = () => {
     setLanguage(language === 'nl' ? 'en' : 'nl');
   };
@@ -91,6 +109,7 @@ export default function Layout({ children }) {
             {items.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
+              const showBadge = item.path === '/admin/proposals' && pendingNotifications > 0;
               return (
                 <Link
                   key={item.path}
@@ -104,7 +123,12 @@ export default function Layout({ children }) {
                 >
                   <Icon className="w-5 h-5" />
                   {t(item.labelKey)}
-                  {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                  {showBadge && (
+                    <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {pendingNotifications > 9 ? '9+' : pendingNotifications}
+                    </span>
+                  )}
+                  {isActive && !showBadge && <ChevronRight className="w-4 h-4 ml-auto" />}
                 </Link>
               );
             })}
@@ -132,6 +156,7 @@ export default function Layout({ children }) {
             {items.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
+              const showBadge = item.path === '/admin/proposals' && pendingNotifications > 0;
               return (
                 <Link
                   key={item.path}
@@ -144,6 +169,11 @@ export default function Layout({ children }) {
                 >
                   <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
                   {t(item.labelKey)}
+                  {showBadge && (
+                    <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {pendingNotifications > 9 ? '9+' : pendingNotifications}
+                    </span>
+                  )}
                 </Link>
               );
             })}

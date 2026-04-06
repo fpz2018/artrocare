@@ -340,6 +340,18 @@ export default function ContentProposals() {
 
   const isAdmin = profile?.role === 'admin';
 
+  // Reset notificatie-teller wanneer admin deze pagina bezoekt
+  React.useEffect(() => {
+    if (!isAdmin || !user?.id) return;
+    supabase
+      .from('profiles')
+      .update({ pending_notifications: 0 })
+      .eq('id', user.id)
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['pending-notifications'] });
+      });
+  }, [isAdmin, user?.id, queryClient]);
+
   // ── Data ophalen ──────────────────────────────────────────────────────────
 
   const { data: proposals = [], isLoading: proposalsLoading } = useQuery({
