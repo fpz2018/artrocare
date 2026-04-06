@@ -5,17 +5,13 @@ import MovementTrail from './MovementTrail';
 
 /**
  * ExerciseScene — The full 3D scene: Canvas + lighting + camera + model + trail.
- * Receives normalizedTime (0–1) and exerciseData from the composition.
  */
 export default function ExerciseScene({ exerciseData, normalizedTime, muscleIntensities }) {
   const [trailPoints, setTrailPoints] = useState([]);
   const lastTimeRef = useRef(-1);
 
-  // Collect ankle positions for the trail
   const handleJointPosition = useCallback((jointName, position) => {
     if (jointName !== exerciseData.trail?.joint) return;
-
-    // Only add a new point when time actually advances
     const t = Math.round(normalizedTime * 1000);
     if (t === lastTimeRef.current) return;
     lastTimeRef.current = t;
@@ -31,7 +27,7 @@ export default function ExerciseScene({ exerciseData, normalizedTime, muscleInte
 
   return (
     <Canvas
-      dpr={[1, 1.5]}
+      dpr={[1, 2]}
       camera={{
         position: cam.position,
         fov: cam.fov,
@@ -39,18 +35,42 @@ export default function ExerciseScene({ exerciseData, normalizedTime, muscleInte
         far: 50,
       }}
       shadows={false}
-      style={{ background: '#ffffff' }}
-      gl={{ antialias: true, alpha: false }}
+      style={{ background: 'linear-gradient(180deg, #fafaf9 0%, #f0efed 100%)' }}
+      gl={{ antialias: true, alpha: false, toneMapping: 3 }}
     >
-      {/* Set camera look-at target */}
       <CameraLookAt target={cam.lookAt} />
 
-      {/* Lighting */}
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[3, 5, 4]} intensity={0.8} color="#ffffff" />
-      <directionalLight position={[-2, 3, -1]} intensity={0.3} color="#e0e7ff" />
+      {/* Ambient: soft overall illumination */}
+      <ambientLight intensity={0.5} color="#fff5ee" />
 
-      {/* Human model */}
+      {/* Key light: warm, from upper-right-front */}
+      <directionalLight
+        position={[3, 5, 4]}
+        intensity={1.0}
+        color="#fff8f0"
+      />
+
+      {/* Fill light: cooler, from left to soften shadows */}
+      <directionalLight
+        position={[-3, 3, 2]}
+        intensity={0.4}
+        color="#e8eef5"
+      />
+
+      {/* Rim light: subtle backlight for depth */}
+      <directionalLight
+        position={[0, 3, -4]}
+        intensity={0.3}
+        color="#f0e8ff"
+      />
+
+      {/* Ground bounce light */}
+      <hemisphereLight
+        color="#ffeedd"
+        groundColor="#d4c8bb"
+        intensity={0.3}
+      />
+
       <HumanModel
         exerciseData={exerciseData}
         normalizedTime={normalizedTime}
@@ -58,7 +78,6 @@ export default function ExerciseScene({ exerciseData, normalizedTime, muscleInte
         onJointPosition={handleJointPosition}
       />
 
-      {/* Movement trail */}
       {exerciseData.trail && (
         <MovementTrail
           points={trailPoints}
@@ -70,7 +89,6 @@ export default function ExerciseScene({ exerciseData, normalizedTime, muscleInte
   );
 }
 
-// ─── Helper: point camera at target on mount ───────────────────────────────
 function CameraLookAt({ target }) {
   const { camera } = useThree();
   React.useEffect(() => {
