@@ -40,7 +40,9 @@ const en = {
   nav_my_patients: 'My Participants',
   nav_research: 'Research Monitor',
   nav_content_proposals: 'Content Manager',
+  nav_recipe_imports: 'Recipe Import',
   nav_practices: 'Practices',
+  nav_checklist: 'Checklist',
   nav_practice: 'My Practice',
   nav_upgrade: 'Upgrade to Premium',
 

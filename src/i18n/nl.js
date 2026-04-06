@@ -40,7 +40,9 @@ const nl = {
   nav_my_patients: 'Mijn Deelnemers',
   nav_research: 'Research Monitor',
   nav_content_proposals: 'Content Beheer',
+  nav_recipe_imports: 'Recept Import',
   nav_practices: 'Praktijken',
+  nav_checklist: 'Checklist',
   nav_practice: 'Mijn Praktijk',
   nav_upgrade: 'Upgrade naar Premium',
 

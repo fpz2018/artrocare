@@ -8,10 +8,14 @@
   # Required env vars (set in Netlify dashboard, NOT here):
   # STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_SERVICE_ROLE_KEY
   # GEMINI_API_KEY, SERPAPI_KEY (optional, for Google Scholar)
+  # RECIPE_SHEET_ID (Google Sheet ID voor recept-import)
 
-# Scheduled function: research-monitor runs every night at 02:00 UTC (03:00 CET)
+# Scheduled functions
 [functions.research-monitor]
   schedule = "0 2 * * *"
+
+[functions.import-recipes]
+  schedule = "0 3 * * *"
 
 # SPA redirect for client-side routing (must be AFTER functions)
 
