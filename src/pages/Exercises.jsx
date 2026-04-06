@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, Suspense, lazy } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/api/supabase';
 import { useAuth } from '@/lib/AuthContext';
@@ -11,11 +11,43 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
 } from '@/components/ui/dialog';
 import {
-  Dumbbell, Play, CheckCircle, Lock, Video, Layers, Star
+  Dumbbell, Play, CheckCircle, Lock, Video, Layers, Star, Eye, Check, Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import { InlineDisclaimer } from '@/components/legal/Disclaimer';
 import ExerciseAnimation, { hasAnimation } from '@/components/exercises/ExerciseAnimation';
+
+// Lazy-load the 3D player for concept previews
+const ExercisePlayer = lazy(() => import('@/components/exercises/3d/ExercisePlayer'));
+
+// Import concept exercise data
+import SeatedKneeExtensionData from '@/components/exercises/3d/exercises/SeatedKneeExtension';
+
+// ─── Concept exercises awaiting approval ───────────────────────────────────
+const CONCEPT_EXERCISES = [
+  {
+    animationData: SeatedKneeExtensionData,
+    db: {
+      title_nl: 'Zittend knie-extensie',
+      title_en: 'Seated Knee Extension',
+      description_nl: 'Zittend op een stoel het been strekken om de quadriceps te versterken. Een basis NEMEX-oefening voor knieartrose.',
+      description_en: 'Seated on a chair, extend the leg to strengthen the quadriceps. A core NEMEX exercise for knee arthrosis.',
+      instructions_nl: 'Ga rechtop zitten op een stevige stoel. Strek langzaam uw rechter onderbeen tot het been bijna gestrekt is. Houd 2 seconden vast en laat langzaam zakken. Wissel na de set van been.',
+      instructions_en: 'Sit upright on a sturdy chair. Slowly extend your right lower leg until nearly straight. Hold for 2 seconds and slowly lower. Switch legs after the set.',
+      focus_points_nl: ['Houd je rug recht tegen de stoelleuning', 'Strek je been langzaam en gecontroleerd', 'Houd je voet in een ontspannen positie'],
+      focus_points_en: ['Keep your back straight against the chair', 'Extend your leg slowly and controlled', 'Keep your foot in a relaxed position'],
+      circle: 'strength',
+      level: 1,
+      sets: 3,
+      reps: '10-15',
+      duration_minutes: 5,
+      is_nemex: true,
+      has_video: false,
+      sort_order: 10,
+    },
+  },
+];
 
 // Route A = niveau 1 · Route B = niveau 1-2 · Route C = niveau 1-3
 const ROUTE_MAX_LEVEL = { A: 1, B: 2, C: 3 };
@@ -218,35 +250,50 @@ export default function Exercises() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1">
-          <TabsTrigger value="programma">⭐ Mijn programma</TabsTrigger>
+          <TabsTrigger value="programma">Mijn programma</TabsTrigger>
           <TabsTrigger value="all">{t('ex_all')}</TabsTrigger>
           <TabsTrigger value="video">{t('ex_video')}</TabsTrigger>
           {circles.map((c) => (
             <TabsTrigger key={c} value={c}>
-              {circleIcons[c] || '🏋️'} {c}
+              {circleIcons[c] || ''} {c}
             </TabsTrigger>
           ))}
+          {profile?.role === 'admin' && (
+            <TabsTrigger value="concept" className="text-amber-700 data-[state=active]:bg-amber-100">
+              Concept 3D
+            </TabsTrigger>
+          )}
         </TabsList>
 
-        <TabsContent value={activeTab} className="mt-4">
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-            </div>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {filteredExercises.map((exercise) => (
-                <ExerciseCard
-                  key={exercise.id}
-                  exercise={exercise}
-                  lang={language}
-                  isCompleted={completedToday.includes(exercise.id)}
-                  onSelect={handleSelect}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
+        {/* Concept tab — admin only */}
+        {activeTab === 'concept' && profile?.role === 'admin' && (
+          <TabsContent value="concept" className="mt-4">
+            <ConceptExercisesTab language={language} queryClient={queryClient} />
+          </TabsContent>
+        )}
+
+        {/* Regular exercise tabs */}
+        {activeTab !== 'concept' && (
+          <TabsContent value={activeTab} className="mt-4">
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {filteredExercises.map((exercise) => (
+                  <ExerciseCard
+                    key={exercise.id}
+                    exercise={exercise}
+                    lang={language}
+                    isCompleted={completedToday.includes(exercise.id)}
+                    onSelect={handleSelect}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* Exercise Detail Dialog */}
@@ -320,6 +367,147 @@ export default function Exercises() {
       </Dialog>
 
       <InlineDisclaimer type="exercise" />
+    </div>
+  );
+}
+
+// ─── Concept Exercises Tab (admin only) ────────────────────────────────────
+
+function ConceptExercisesTab({ language, queryClient }) {
+  const [previewExercise, setPreviewExercise] = useState(null);
+  const [approvingId, setApprovingId] = useState(null);
+  const [approvedIds, setApprovedIds] = useState(new Set());
+
+  const handleApprove = async (concept) => {
+    const id = concept.animationData.id;
+    setApprovingId(id);
+    try {
+      const { error } = await supabase.from('exercises').insert({
+        title_nl: concept.db.title_nl,
+        title_en: concept.db.title_en,
+        description_nl: concept.db.description_nl,
+        description_en: concept.db.description_en,
+        instructions_nl: concept.db.instructions_nl,
+        instructions_en: concept.db.instructions_en,
+        focus_points_nl: concept.db.focus_points_nl,
+        focus_points_en: concept.db.focus_points_en,
+        circle: concept.db.circle,
+        level: concept.db.level,
+        sets: concept.db.sets,
+        reps: concept.db.reps,
+        duration_minutes: concept.db.duration_minutes,
+        is_nemex: concept.db.is_nemex,
+        has_video: concept.db.has_video,
+        sort_order: concept.db.sort_order,
+      });
+      if (error) throw error;
+
+      setApprovedIds(prev => new Set([...prev, id]));
+      queryClient.invalidateQueries({ queryKey: ['exercises'] });
+      toast.success(
+        language === 'nl'
+          ? `"${concept.db.title_nl}" is gepubliceerd!`
+          : `"${concept.db.title_en}" has been published!`
+      );
+    } catch (err) {
+      toast.error(language === 'nl' ? `Fout: ${err.message}` : `Error: ${err.message}`);
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <p className="text-sm text-amber-800">
+          {language === 'nl'
+            ? 'Bekijk de 3D-oefeningen hieronder. Klik op "3D Bekijken" om de animatie te zien. Keur goed om de oefening te publiceren naar de Oefeningen-pagina.'
+            : 'Preview the 3D exercises below. Click "3D Preview" to see the animation. Approve to publish to the Exercises page.'}
+        </p>
+      </div>
+
+      {CONCEPT_EXERCISES.map((concept) => {
+        const db = concept.db;
+        const id = concept.animationData.id;
+        const title = language === 'nl' ? db.title_nl : db.title_en;
+        const desc = language === 'nl' ? db.description_nl : db.description_en;
+        const tips = language === 'nl' ? db.focus_points_nl : db.focus_points_en;
+        const isApproved = approvedIds.has(id);
+
+        return (
+          <Card key={id} className={isApproved ? 'bg-green-50 border-green-300' : ''}>
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="font-semibold">{title}</h3>
+                  <p className="text-sm text-gray-600 mt-0.5">{desc}</p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Badge variant="secondary" className="text-xs">Lv. {db.level}</Badge>
+                  <Badge variant="secondary" className="text-xs">{db.sets}x {db.reps}</Badge>
+                  <Badge className="bg-emerald-100 text-emerald-700 text-xs">NEMEX</Badge>
+                </div>
+              </div>
+
+              {/* Focus points */}
+              <ul className="text-xs text-gray-600 space-y-0.5">
+                {tips.map((tip, i) => (
+                  <li key={i} className="flex items-start gap-1.5">
+                    <span className="text-emerald-500">-</span> {tip}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 pt-1">
+                <Button variant="outline" size="sm" onClick={() => setPreviewExercise(concept)} className="gap-1.5">
+                  <Eye className="w-3.5 h-3.5" />
+                  3D Bekijken
+                </Button>
+                {isApproved ? (
+                  <Badge className="bg-green-100 text-green-700 gap-1">
+                    <Check className="w-3.5 h-3.5" />
+                    {language === 'nl' ? 'Gepubliceerd' : 'Published'}
+                  </Badge>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => handleApprove(concept)}
+                    disabled={approvingId === id}
+                    className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    {approvingId === id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    {language === 'nl' ? 'Goedkeuren & Publiceren' : 'Approve & Publish'}
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+
+      {/* 3D Preview Dialog */}
+      <Dialog open={!!previewExercise} onOpenChange={() => setPreviewExercise(null)}>
+        <DialogContent className="max-w-2xl w-[95vw] p-0 overflow-hidden">
+          <DialogHeader className="px-4 pt-4 pb-0">
+            <DialogTitle>
+              {previewExercise && (language === 'nl' ? previewExercise.db.title_nl : previewExercise.db.title_en)}
+            </DialogTitle>
+            <DialogDescription>3D-animatie preview</DialogDescription>
+          </DialogHeader>
+          <div className="px-4 pb-4">
+            {previewExercise && (
+              <Suspense fallback={
+                <div className="flex items-center justify-center aspect-[4/3] bg-gray-50 rounded-lg">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+              }>
+                <ExercisePlayer exerciseData={previewExercise.animationData} />
+              </Suspense>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
