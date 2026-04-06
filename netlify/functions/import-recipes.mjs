@@ -385,6 +385,57 @@ export default async function handler(req) {
   try {
     const body = await req.json().catch(() => ({}));
 
+    if (body.action === 'generate_exercise') {
+      const env = loadEnv({ requireSheetId: false });
+      const { joint = 'knie', level = 1 } = body;
+      const prompt = `Maak een fysiotherapie-oefening voor artrose. Gewricht: ${joint}. Level: ${level} (1=licht, 2=gemiddeld, 3=intensief).
+
+Geef terug als JSON (geen markdown, alleen valid JSON):
+{
+  "title_nl": "Nederlandse titel",
+  "title_en": "English title",
+  "description_nl": "Korte beschrijving in het Nederlands",
+  "description_en": "Short description in English",
+  "instructions_nl": "Stap 1: ...\\nStap 2: ...\\nStap 3: ...",
+  "instructions_en": "Step 1: ...\\nStep 2: ...\\nStep 3: ...",
+  "focus_points_nl": ["focuspunt 1", "focuspunt 2"],
+  "focus_points_en": ["focus point 1", "focus point 2"],
+  "sets": 3,
+  "reps": 10,
+  "duration_minutes": 5
+}
+
+Richtlijnen:
+- Geschikt voor artrose-patiënten met ${joint}klachten
+- Level ${level}: ${level === 1 ? 'zachte, eenvoudige bewegingen' : level === 2 ? 'gemiddelde belasting, meer herhalingen' : 'intensievere oefeningen voor gevorderden'}
+- Duidelijke, stapsgewijze instructies
+- Focus op pijnvermindering, mobiliteit en krachtsopbouw
+- Antwoord ALLEEN in valid JSON`;
+
+      const res = await fetch(`${GEMINI_API_URL}?key=${env.GEMINI_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.3, maxOutputTokens: 2000 },
+        }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Gemini API error ${res.status}: ${errText}`);
+      }
+
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON found in Gemini response');
+
+      return Response.json({ success: true, data: JSON.parse(jsonMatch[0]) }, {
+        headers: { 'Access-Control-Allow-Origin': '*' },
+      });
+    }
+
     if (body.action === 'process_single') {
       const env = loadEnv({ requireSheetId: false });
       // Process a single URL on-demand

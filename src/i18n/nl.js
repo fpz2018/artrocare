@@ -42,6 +42,7 @@ const nl = {
   nav_content_proposals: 'Content Beheer',
   nav_recipe_imports: 'Recept Import',
   nav_practices: 'Praktijken',
+  nav_exercises_admin: 'Oefeningen',
   nav_checklist: 'Checklist',
   nav_practice: 'Mijn Praktijk',
   nav_upgrade: 'Upgrade naar Premium',

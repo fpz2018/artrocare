@@ -42,6 +42,7 @@ const en = {
   nav_content_proposals: 'Content Manager',
   nav_recipe_imports: 'Recipe Import',
   nav_practices: 'Practices',
+  nav_exercises_admin: 'Exercises',
   nav_checklist: 'Checklist',
   nav_practice: 'My Practice',
   nav_upgrade: 'Upgrade to Premium',

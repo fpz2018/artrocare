@@ -42,6 +42,7 @@ const practiceAdminNavItems = [
 const adminNavItems = [
   { path: '/admin/proposals', icon: Database, labelKey: 'nav_content_proposals' },
   { path: '/admin/recipe-imports', icon: ChefHat, labelKey: 'nav_recipe_imports' },
+  { path: '/admin/exercises', icon: Dumbbell, labelKey: 'nav_exercises_admin' },
   { path: '/admin/practices', icon: Building2, labelKey: 'nav_practices' },
   { path: '/admin/checklist', icon: ClipboardList, labelKey: 'nav_checklist' },
   { path: '/research', icon: FlaskConical, labelKey: 'nav_research' },
