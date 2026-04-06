@@ -24,6 +24,8 @@ export default defineConfig({
           ],
           'chart-vendor': ['recharts'],
           'supabase': ['@supabase/supabase-js'],
+          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+          'remotion-vendor': ['remotion', '@remotion/player'],
         },
       },
     },

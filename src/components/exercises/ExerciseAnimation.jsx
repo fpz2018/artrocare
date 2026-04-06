@@ -1,9 +1,24 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
 import { motion, useAnimationControls } from 'framer-motion';
-import { Play, Pause, Gauge } from 'lucide-react';
+import { Play, Pause, Gauge, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useI18n } from '@/i18n';
+
+// ─── Lazy-load 3D components (heavy: three.js + remotion) ──────────────────
+const ExercisePlayer = lazy(() => import('./3d/ExercisePlayer'));
+
+// ─── 3D NEMEX exercise registry ────────────────────────────────────────────
+import SeatedKneeExtensionData from './3d/exercises/SeatedKneeExtension';
+
+const EXERCISES_3D = {
+  seated_knee_extension: SeatedKneeExtensionData,
+};
+
+// Match exercise titles to 3D exercise data
+const TITLE_MATCHERS_3D = [
+  { key: 'seated_knee_extension', patterns: ['seated knee extension', 'zittend knie-extensie', 'zittend knie extensie', 'knie-extensie zittend'] },
+];
 
 // ─── Colors ─────────────────────────────────────────────────────────────────
 
@@ -594,8 +609,16 @@ export function getAnimationKey(exercise) {
   return null;
 }
 
+function get3DExerciseData(exercise) {
+  const titleLower = `${exercise.title_en || ''} ${exercise.title_nl || ''}`.toLowerCase();
+  for (const { key, patterns } of TITLE_MATCHERS_3D) {
+    if (patterns.some(p => titleLower.includes(p))) return EXERCISES_3D[key];
+  }
+  return null;
+}
+
 export function hasAnimation(exercise) {
-  return !!getAnimationKey(exercise);
+  return !!getAnimationKey(exercise) || !!get3DExerciseData(exercise);
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────
@@ -606,9 +629,27 @@ export default function ExerciseAnimation({ exercise, sets, reps, duration }) {
   const [speedIdx, setSpeedIdx] = useState(1); // index into SPEEDS
   const speed = SPEEDS[speedIdx];
 
+  // Check for 3D exercise first, then fall back to SVG
+  const exerciseData3D = useMemo(() => get3DExerciseData(exercise), [exercise]);
   const animKey = useMemo(() => getAnimationKey(exercise), [exercise]);
   const AnimComponent = animKey ? ANIMATIONS[animKey] : null;
 
+  // Render 3D player for NEMEX exercises
+  if (exerciseData3D) {
+    return (
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center aspect-[4/3] bg-gray-50 rounded-xl border border-gray-100">
+            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+          </div>
+        }
+      >
+        <ExercisePlayer exerciseData={exerciseData3D} />
+      </Suspense>
+    );
+  }
+
+  // Fall back to SVG animation
   if (!AnimComponent) return null;
 
   const cycleSpeed = () => setSpeedIdx((i) => (i + 1) % SPEEDS.length);

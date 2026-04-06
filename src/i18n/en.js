@@ -712,6 +712,18 @@ const en = {
   // Lead magnet
   lp_lead_magnet: 'Download free 7-Day Movement Plan (PDF)',
 
+  // NEMEX 3D Exercises
+  nemex_seated_knee_extension_title: 'Seated Knee Extension',
+  nemex_seated_knee_extension_muscles: 'Quadriceps (front of thigh)',
+  nemex_seated_knee_extension_tip1: 'Keep your back straight against the chair',
+  nemex_seated_knee_extension_tip2: 'Extend your leg slowly and controlled',
+  nemex_seated_knee_extension_tip3: 'Keep your foot in a relaxed position',
+
+  // Exercise controls
+  ex_ctrl_step_back: 'Step back',
+  ex_ctrl_step_forward: 'Step forward',
+  ex_ctrl_reset: 'Reset',
+
   // PWA Install
   pwa_install_title: 'Install ArtroCare',
   pwa_install_desc: 'Install the app on your phone for the best experience',

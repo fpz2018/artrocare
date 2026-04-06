@@ -729,6 +729,18 @@ hoos12_next_steps: 'Volgende stappen',
   // Lead magnet
   lp_lead_magnet: 'Download gratis 7-Dagen Beweegplan (PDF)',
 
+  // NEMEX 3D Exercises
+  nemex_seated_knee_extension_title: 'Zittend knie-extensie',
+  nemex_seated_knee_extension_muscles: 'Quadriceps (voorkant bovenbeen)',
+  nemex_seated_knee_extension_tip1: 'Houd je rug recht tegen de stoelleuning',
+  nemex_seated_knee_extension_tip2: 'Strek je been langzaam en gecontroleerd',
+  nemex_seated_knee_extension_tip3: 'Houd je voet in een ontspannen positie',
+
+  // Exercise controls
+  ex_ctrl_step_back: 'Stap terug',
+  ex_ctrl_step_forward: 'Stap vooruit',
+  ex_ctrl_reset: 'Opnieuw',
+
   // PWA Install
   pwa_install_title: 'Installeer ArtroCare',
   pwa_install_desc: 'Installeer de app op je telefoon voor de beste ervaring',
