@@ -34,8 +34,6 @@ export function FooterDisclaimer() {
       <div className="max-w-5xl mx-auto flex items-start gap-2 text-xs text-gray-500">
         <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
         <span>{t('disclaimer_footer')}</span>
-        <span className="mx-1">·</span>
-        <span>{t('disclaimer_footer_mdr')}</span>
       </div>
     </footer>
   );
