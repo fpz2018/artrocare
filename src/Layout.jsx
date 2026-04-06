@@ -7,7 +7,7 @@ import { supabase } from '@/api/supabase';
 import {
   LayoutDashboard, TrendingUp, Dumbbell, Target, Apple, Pill,
   Stethoscope, BookOpen, Crown, Settings, Users, Menu, X,
-  Globe, LogOut, ChevronRight, FlaskConical, Database, Building2, ChefHat, ClipboardList
+  Globe, LogOut, ChevronRight, FlaskConical, Database, Building2, ChefHat, ClipboardList, Film
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FooterDisclaimer } from '@/components/legal/Disclaimer';
@@ -43,6 +43,7 @@ const adminNavItems = [
   { path: '/admin/proposals', icon: Database, labelKey: 'nav_content_proposals' },
   { path: '/admin/recipe-imports', icon: ChefHat, labelKey: 'nav_recipe_imports' },
   { path: '/admin/exercises', icon: Dumbbell, labelKey: 'nav_exercises_admin' },
+  { path: '/admin/video-generator', icon: Film, labelKey: 'nav_video_generator' },
   { path: '/admin/practices', icon: Building2, labelKey: 'nav_practices' },
   { path: '/admin/checklist', icon: ClipboardList, labelKey: 'nav_checklist' },
   { path: '/research', icon: FlaskConical, labelKey: 'nav_research' },

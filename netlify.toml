@@ -9,6 +9,8 @@
   # STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_SERVICE_ROLE_KEY
   # GEMINI_API_KEY, SERPAPI_KEY (optional, for Google Scholar)
   # RECIPE_SHEET_ID (Google Sheet ID voor recept-import)
+  # N8N_VIDEO_WEBHOOK_URL (n8n webhook URL voor video pipeline)
+  # VIDEO_WEBHOOK_SECRET (shared secret voor video webhooks)
 
 # Scheduled functions
 [functions.research-monitor]
@@ -16,6 +18,9 @@
 
 [functions.import-recipes]
   schedule = "0 3 * * *"
+
+[functions.generate-video]
+  schedule = "0 4 * * *"
 
 # SPA redirect for client-side routing (must be AFTER functions)
 

@@ -41,6 +41,7 @@ const AdminChecklist = lazy(() => import('@/pages/AdminChecklist'));
 const AdminRecipeImports = lazy(() => import('@/pages/AdminRecipeImports'));
 const AdminExercises = lazy(() => import('@/pages/AdminExercises'));
 const ConceptExercises = lazy(() => import('@/pages/ConceptExercises'));
+const AdminVideoGenerator = lazy(() => import('@/pages/AdminVideoGenerator'));
 
 // Loading spinner component
 function PageLoader() {
@@ -152,6 +153,7 @@ function AppRoutes() {
         <Route path="/admin/recipe-imports" element={<ProtectedRoute requiredRole="admin"><AdminRecipeImports /></ProtectedRoute>} />
         <Route path="/admin/exercises" element={<ProtectedRoute requiredRole="admin"><AdminExercises /></ProtectedRoute>} />
         <Route path="/admin/concept-oefeningen" element={<ProtectedRoute requiredRole="admin"><ConceptExercises /></ProtectedRoute>} />
+        <Route path="/admin/video-generator" element={<ProtectedRoute requiredRole="admin"><AdminVideoGenerator /></ProtectedRoute>} />
         <Route path="/practice" element={<ProtectedRoute requiredRole="practice_admin"><PracticeAdmin /></ProtectedRoute>} />
 
         {/* Therapist-only route */}
