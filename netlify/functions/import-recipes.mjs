@@ -137,8 +137,8 @@ Geef terug als JSON (geen markdown, alleen valid JSON):
 Richtlijnen:
 - Vertaal ALLES naar zowel NL als EN
 - Focus op anti-inflammatoire en gewrichtsvriendelijke eigenschappen bij beschrijving en tags
-- Gebruik metrische eenheden (g, ml, el, tl)
-- Categoriseer ingrediënten (groente, fruit, vlees, vis, zuivel, granen, kruiden, overig)
+- Gebruik UITSLUITEND deze eenheden voor unit: g, ml, stuks, el, tl, snuf, plak, teen, tak, blik, zakje — GEEN andere waarden (bijv. kg → converteer naar g, liter → ml, eetlepel → el, theelepel → tl, stuk → stuks)
+- Categoriseer ingrediënten met ALLEEN: groente, fruit, vlees, vis, zuivel, granen, kruiden, overig
 - Als er geen afbeelding gevonden kan worden, zet image_url op null
 - Antwoord ALLEEN in valid JSON
 

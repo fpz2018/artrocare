@@ -1,49 +1,8 @@
--- Recipe Imports Pipeline Schema
--- Automatische import van recepten via Google Sheets URLs
+-- =============================================
+-- Migration 004: Fix approve_recipe_import unit/category/difficulty mapping
+-- Gemini kan units teruggeven die niet in de check constraint passen
+-- =============================================
 
--- 1. Tabel voor recept-imports
-CREATE TABLE IF NOT EXISTS recipe_imports (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  source_url TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'fetching', 'extracted', 'approved', 'rejected', 'error')),
-  title TEXT,
-  raw_html TEXT,
-  extracted_data JSONB,
-  error_message TEXT,
-  approved_by UUID REFERENCES auth.users(id),
-  approved_at TIMESTAMPTZ,
-  recipe_id UUID REFERENCES recipes(id),
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_recipe_imports_source_url ON recipe_imports(source_url);
-
-ALTER TABLE recipe_imports ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Admin beheert recipe imports" ON recipe_imports
-  FOR ALL USING (get_my_role() = 'admin')
-  WITH CHECK (get_my_role() = 'admin');
-
-CREATE POLICY "Service mag recipe imports inserten" ON recipe_imports
-  FOR INSERT WITH CHECK (true);
-
--- 2. Storage bucket
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES ('recipe-images', 'recipe-images', true, 5242880,
-  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-ON CONFLICT (id) DO NOTHING;
-
-CREATE POLICY "Iedereen kan recept-afbeeldingen zien" ON storage.objects
-  FOR SELECT USING (bucket_id = 'recipe-images');
-CREATE POLICY "Service kan recept-afbeeldingen uploaden" ON storage.objects
-  FOR INSERT WITH CHECK (bucket_id = 'recipe-images');
-CREATE POLICY "Admin kan recept-afbeeldingen verwijderen" ON storage.objects
-  FOR DELETE USING (bucket_id = 'recipe-images'
-    AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
-
--- 3. Approve functie
 CREATE OR REPLACE FUNCTION approve_recipe_import(
   import_id UUID, admin_id UUID, edited_data JSONB DEFAULT NULL
 )
@@ -105,7 +64,7 @@ BEGIN
         WHEN LOWER(COALESCE(ing->>'unit', '')) IN ('l', 'liter') THEN (ing->>'amount')::NUMERIC * 1000
         ELSE (ing->>'amount')::NUMERIC
       END,
-      -- Map unit naar toegestane waarden
+      -- Map unit naar toegestane waarden (g, ml, stuks, el, tl, snuf, plak, teen, tak, blik, zakje)
       CASE LOWER(COALESCE(ing->>'unit', ''))
         WHEN 'g' THEN 'g'
         WHEN 'gram' THEN 'g'
@@ -114,6 +73,7 @@ BEGIN
         WHEN 'ml' THEN 'ml'
         WHEN 'l' THEN 'ml'
         WHEN 'liter' THEN 'ml'
+        WHEN 'dl' THEN 'ml'
         WHEN 'el' THEN 'el'
         WHEN 'eetlepel' THEN 'el'
         WHEN 'eetlepels' THEN 'el'
@@ -138,6 +98,7 @@ BEGIN
         WHEN '' THEN NULL
         ELSE NULL
       END,
+      -- Map category naar toegestane waarden
       CASE LOWER(COALESCE(ing->>'category', 'overig'))
         WHEN 'groente' THEN 'groente'
         WHEN 'groenten' THEN 'groente'
