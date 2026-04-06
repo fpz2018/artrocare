@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, Suspense, lazy } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/api/supabase';
 import { useAuth } from '@/lib/AuthContext';
@@ -18,8 +18,30 @@ import {
 import { toast } from 'sonner';
 import {
   Dumbbell, Plus, Search, Loader2, Trash2, Pencil, Video, Image as ImageIcon,
-  Upload, Sparkles, FileUp, X, AlertTriangle, GripVertical, Play,
+  Upload, Sparkles, FileUp, X, AlertTriangle, GripVertical, Play, Eye, Check,
 } from 'lucide-react';
+
+// Lazy-load 3D player for concept previews
+const ExercisePlayer = lazy(() => import('@/components/exercises/3d/ExercisePlayer'));
+import SeatedKneeExtensionData from '@/components/exercises/3d/exercises/SeatedKneeExtension';
+
+const CONCEPT_EXERCISES = [
+  {
+    animationData: SeatedKneeExtensionData,
+    db: {
+      title_nl: 'Zittend knie-extensie',
+      title_en: 'Seated Knee Extension',
+      description_nl: 'Zittend op een stoel het been strekken om de quadriceps te versterken. Een basis NEMEX-oefening voor knieartrose.',
+      description_en: 'Seated on a chair, extend the leg to strengthen the quadriceps. A core NEMEX exercise for knee arthrosis.',
+      instructions_nl: 'Ga rechtop zitten op een stevige stoel. Strek langzaam uw rechter onderbeen tot het been bijna gestrekt is. Houd 2 seconden vast en laat langzaam zakken. Wissel na de set van been.',
+      instructions_en: 'Sit upright on a sturdy chair. Slowly extend your right lower leg until nearly straight. Hold for 2 seconds and slowly lower. Switch legs after the set.',
+      focus_points_nl: ['Houd je rug recht tegen de stoelleuning', 'Strek je been langzaam en gecontroleerd', 'Houd je voet in een ontspannen positie'],
+      focus_points_en: ['Keep your back straight against the chair', 'Extend your leg slowly and controlled', 'Keep your foot in a relaxed position'],
+      circle: 'strength', level: 1, sets: 3, reps: '10-15',
+      duration_minutes: 5, is_nemex: true, has_video: false, sort_order: 10,
+    },
+  },
+];
 
 const CIRCLES = ['warmup', 'strength', 'flexibility', 'balance', 'cooldown'];
 const LEVELS = [1, 2, 3];
@@ -566,6 +588,138 @@ function BulkImportDialog({ open, onOpenChange, onImported }) {
 
 // ─── Hoofdpagina ─────────────────────────────────────────
 
+// ─── Concept 3D Exercises Section ──────────────────────────────────────────
+
+function ConceptSection({ queryClient }) {
+  const [previewExercise, setPreviewExercise] = useState(null);
+  const [approvingId, setApprovingId] = useState(null);
+  const [approvedIds, setApprovedIds] = useState(new Set());
+
+  const handleApprove = async (concept) => {
+    const id = concept.animationData.id;
+    setApprovingId(id);
+    try {
+      const { error } = await supabase.from('exercises').insert({
+        title_nl: concept.db.title_nl,
+        title_en: concept.db.title_en,
+        description_nl: concept.db.description_nl,
+        description_en: concept.db.description_en,
+        instructions_nl: concept.db.instructions_nl,
+        instructions_en: concept.db.instructions_en,
+        focus_points_nl: concept.db.focus_points_nl,
+        focus_points_en: concept.db.focus_points_en,
+        circle: concept.db.circle,
+        level: concept.db.level,
+        sets: concept.db.sets,
+        reps: concept.db.reps,
+        duration_minutes: concept.db.duration_minutes,
+        is_nemex: concept.db.is_nemex,
+        has_video: concept.db.has_video,
+        sort_order: concept.db.sort_order,
+      });
+      if (error) throw error;
+      setApprovedIds(prev => new Set([...prev, id]));
+      queryClient.invalidateQueries({ queryKey: ['admin-exercises'] });
+      toast.success(`"${concept.db.title_nl}" is gepubliceerd!`);
+    } catch (err) {
+      toast.error(`Fout: ${err.message}`);
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  // Don't show section if all concepts are approved
+  const remaining = CONCEPT_EXERCISES.filter(c => !approvedIds.has(c.animationData.id));
+  if (remaining.length === 0 && approvedIds.size > 0) return null;
+
+  return (
+    <>
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-amber-600" />
+          <h2 className="font-semibold text-amber-900">Concept 3D Oefeningen</h2>
+          <Badge className="bg-amber-100 text-amber-700 text-xs">{CONCEPT_EXERCISES.length} nieuw</Badge>
+        </div>
+        <p className="text-sm text-amber-700">
+          Bekijk de 3D-animaties en keur goed om ze als oefening te publiceren.
+        </p>
+
+        {CONCEPT_EXERCISES.map((concept) => {
+          const db = concept.db;
+          const id = concept.animationData.id;
+          const isApproved = approvedIds.has(id);
+
+          return (
+            <Card key={id} className={isApproved ? 'bg-green-50 border-green-300' : 'bg-white'}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="flex-1 min-w-[200px]">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold">{db.title_nl}</h3>
+                      <Badge className={LEVEL_COLORS[db.level] + ' text-xs'}>Lv. {db.level}</Badge>
+                      <Badge className={CIRCLE_COLORS[db.circle] + ' text-xs'}>{db.circle}</Badge>
+                      <Badge className="bg-emerald-100 text-emerald-700 text-xs">NEMEX</Badge>
+                    </div>
+                    <p className="text-sm text-gray-600">{db.description_nl}</p>
+                    <p className="text-xs text-gray-400 mt-1">{db.sets}x {db.reps} · {db.duration_minutes} min</p>
+                    <ul className="text-xs text-gray-500 mt-2 space-y-0.5">
+                      {db.focus_points_nl.map((tip, i) => (
+                        <li key={i}>- {tip}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setPreviewExercise(concept)} className="gap-1.5">
+                      <Eye className="w-4 h-4" /> 3D Bekijken
+                    </Button>
+                    {isApproved ? (
+                      <Badge className="bg-green-100 text-green-700 gap-1 justify-center py-1.5">
+                        <Check className="w-4 h-4" /> Gepubliceerd
+                      </Badge>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => handleApprove(concept)}
+                        disabled={approvingId === id}
+                        className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+                      >
+                        {approvingId === id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                        Goedkeuren
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* 3D Preview Dialog */}
+      <Dialog open={!!previewExercise} onOpenChange={() => setPreviewExercise(null)}>
+        <DialogContent className="max-w-2xl w-[95vw] p-0 overflow-hidden">
+          <DialogHeader className="px-4 pt-4 pb-0">
+            <DialogTitle>{previewExercise?.db.title_nl}</DialogTitle>
+            <DialogDescription>3D-animatie preview</DialogDescription>
+          </DialogHeader>
+          <div className="px-4 pb-4">
+            {previewExercise && (
+              <Suspense fallback={
+                <div className="flex items-center justify-center aspect-[4/3] bg-gray-50 rounded-lg">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+              }>
+                <ExercisePlayer exerciseData={previewExercise.animationData} />
+              </Suspense>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 export default function AdminExercises() {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
@@ -704,6 +858,9 @@ export default function AdminExercises() {
           ))}
         </div>
       </div>
+
+      {/* Concept 3D Exercises */}
+      <ConceptSection queryClient={queryClient} />
 
       {/* Grid */}
       {isLoading ? (
