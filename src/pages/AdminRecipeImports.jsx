@@ -452,7 +452,19 @@ export default function AdminRecipeImports() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['recipe-imports'] });
-      toast.success(`Pipeline klaar: ${data.extracted || 0} recepten geëxtraheerd`);
+      const { sheet_urls = 0, already_done = 0, processed = 0, extracted = 0, errors = 0, error_details = [] } = data;
+      if (sheet_urls === 0) {
+        toast.info('Sheet is leeg — geen URLs met status leeg of "new" gevonden.');
+      } else if (processed === 0) {
+        toast.success(`Sheet klaar: alle ${already_done} URLs al verwerkt.`);
+      } else if (errors > 0) {
+        const firstError = error_details[0]?.message || '';
+        toast.warning(
+          `Verwerkt ${processed}, geslaagd ${extracted}, mislukt ${errors}. ${firstError ? `Eerste fout: ${firstError}` : ''}`
+        );
+      } else {
+        toast.success(`Pipeline klaar: ${extracted} recepten geëxtraheerd (${already_done} al bekend).`);
+      }
     },
     onError: (err) => toast.error(`Fout: ${err.message}`),
   });
