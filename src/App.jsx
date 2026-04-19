@@ -56,14 +56,18 @@ function PageLoader() {
 
 // Protected route wrapper
 function ProtectedRoute({ children, requiredRole, noAdmin }) {
-  const { isAuthenticated, loading, profile } = useAuth();
+  const { isAuthenticated, loading, profile, profileLoaded } = useAuth();
 
   if (loading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Render immediately without waiting for profile. Role-based redirects
-  // only fire once the profile is loaded, so a patient never spins and
-  // an admin/therapist sees at most a brief flash before redirect.
+  // Wait for the profile before rendering any role-gated page. Otherwise
+  // an admin who opens /dashboard directly (bookmark, PWA home screen)
+  // renders the patient dashboard while the fetch is in flight, which is
+  // what made Marc see "Welkom terug, deelnemer". profileLoaded flips true
+  // within ~2s via the AuthContext safety timeout, so the worst case is
+  // a short spinner — much better than a wrong landing page.
+  if (!profileLoaded) return <PageLoader />;
 
   if (noAdmin && profile?.role === 'admin') {
     return <Navigate to="/admin/proposals" replace />;
