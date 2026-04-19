@@ -75,6 +75,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     mountedRef.current = true;
     let timeoutId;
+    let profileTimeoutId;
 
     // Safety timeout: never stay loading forever
     // Uses a ref to avoid stale closure on the loading state value
@@ -84,6 +85,15 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     }, 8000);
+
+    // Safety net for the profile fetch: if it stalls (bad network, RLS,
+    // missing row), unblock protected routes after 3s rather than spinning.
+    profileTimeoutId = setTimeout(() => {
+      if (mountedRef.current && !profileFetchedRef.current) {
+        console.warn('Profile fetch timed out; rendering without profile.');
+        setProfileLoaded(true);
+      }
+    }, 3000);
 
     async function initAuth() {
       try {
@@ -176,7 +186,16 @@ export function AuthProvider({ children }) {
       async (event, session) => {
         if (!mountedRef.current) return;
 
-        console.log('Auth event:', event);
+        // INITIAL_SESSION fires right after the subscription is set up;
+        // initAuth already handles page load, so skip to avoid a duplicate
+        // profile fetch that re-triggers the spinner.
+        if (event === 'INITIAL_SESSION') return;
+
+        // TOKEN_REFRESHED: user/session are unchanged, no need to refetch profile.
+        if (event === 'TOKEN_REFRESHED') {
+          if (session?.user && mountedRef.current) setUser(session.user);
+          return;
+        }
 
         if (event === 'SIGNED_OUT' || !session?.user) {
           setUser(null);
@@ -192,10 +211,16 @@ export function AuthProvider({ children }) {
         if (session?.user) {
           setUser(session.user);
           setIsAuthenticated(true);
+          loadingRef.current = false;
+          setLoading(false);
 
-          // Fetch profile on sign-in or if we haven't fetched it yet
-          if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || !profileFetchedRef.current) {
-            setProfileLoaded(false);
+          // Fetch profile on sign-in / user update. If we already have the
+          // profile for this user, don't refetch — avoids a spinner flash.
+          const needsFetch =
+            event === 'SIGNED_IN' ||
+            event === 'USER_UPDATED' ||
+            !profileFetchedRef.current;
+          if (needsFetch) {
             const prof = await fetchProfile(session.user.id);
             if (mountedRef.current) {
               setProfile(prof);
@@ -209,13 +234,13 @@ export function AuthProvider({ children }) {
             window.history.replaceState(null, '', window.location.pathname);
           }
         }
-        if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
       }
     );
 
     return () => {
       mountedRef.current = false;
       clearTimeout(timeoutId);
+      clearTimeout(profileTimeoutId);
       subscription.unsubscribe();
     };
   }, [fetchProfile]);

@@ -56,17 +56,15 @@ function PageLoader() {
 
 // Protected route wrapper
 function ProtectedRoute({ children, requiredRole, noAdmin }) {
-  const { isAuthenticated, loading, profile, profileLoaded } = useAuth();
+  const { isAuthenticated, loading, profile } = useAuth();
 
   if (loading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Wait until the profile fetch has completed (success or failure).
-  // Once profileLoaded is true, continue even if profile is null so the
-  // user isn't stuck on an infinite spinner when the row is missing.
-  if ((requiredRole || noAdmin) && !profileLoaded) return <PageLoader />;
+  // Render immediately without waiting for profile. Role-based redirects
+  // only fire once the profile is loaded, so a patient never spins and
+  // an admin/therapist sees at most a brief flash before redirect.
 
-  // Redirect admin/practice_admin away from patient-only pages
   if (noAdmin && profile?.role === 'admin') {
     return <Navigate to="/admin/proposals" replace />;
   }
@@ -77,13 +75,15 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
     return <Navigate to="/therapist-dashboard" replace />;
   }
 
-  // Role-based access control — redirect to role's home
-  if (requiredRole && profile?.role !== requiredRole) {
-    const home = profile?.role === 'admin'
+  // Role-based access control — only redirect when profile is loaded and
+  // the role is wrong. Without the `profile &&` guard we would bounce to
+  // /dashboard during the profile fetch and flash content.
+  if (requiredRole && profile && profile.role !== requiredRole) {
+    const home = profile.role === 'admin'
       ? '/admin/proposals'
-      : profile?.role === 'practice_admin'
+      : profile.role === 'practice_admin'
       ? '/practice'
-      : profile?.role === 'therapist'
+      : profile.role === 'therapist'
       ? '/therapist-dashboard'
       : '/dashboard';
     return <Navigate to={home} replace />;
