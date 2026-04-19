@@ -96,6 +96,18 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
 function AppRoutes() {
   const { isAuthenticated, loading, profile } = useAuth();
 
+  // Prefetch the most likely post-auth chunk as soon as we know the user
+  // is authenticated. This runs once per role change so the landing page
+  // is cached before the user navigates there.
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+    const role = profile?.role;
+    if (role === 'admin') import('@/pages/ContentProposals');
+    else if (role === 'practice_admin') import('@/pages/PracticeAdmin');
+    else if (role === 'therapist') import('@/pages/TherapistDashboard');
+    else import('@/pages/Dashboard');
+  }, [isAuthenticated, profile?.role]);
+
   if (loading) return <PageLoader />;
 
   // Redirect based on role, default to /dashboard while profile loads

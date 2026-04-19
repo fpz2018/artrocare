@@ -97,15 +97,8 @@ export default function Dashboard() {
     },
   });
 
-  // Check onboarding (alleen voor patiënten)
-  if (profile && !profile.onboarding_completed && profile.role === 'patient') {
-    return <DashboardOnboarding />;
-  }
-
-  const completedLessons = profile?.completed_core_lessons || [];
-  const coreLessonsComplete = completedLessons.length >= 3;
-
-  // Chart data
+  // Chart data — hooks must run on every render, regardless of the
+  // onboarding branch below, to keep the hook order stable.
   const chartData = useMemo(() => {
     return measurements.map((m) => ({
       date: format(parseISO(m.date), 'dd/MM'),
@@ -116,6 +109,15 @@ export default function Dashboard() {
 
   // Stats
   const streak = useMemo(() => calculateStreak(measurements), [measurements]);
+
+  // Check onboarding (alleen voor patiënten) — must come AFTER all hooks.
+  if (profile && !profile.onboarding_completed && profile.role === 'patient') {
+    return <DashboardOnboarding />;
+  }
+
+  const completedLessons = profile?.completed_core_lessons || [];
+  const coreLessonsComplete = completedLessons.length >= 3;
+
   const latestMeasurement = measurements[measurements.length - 1];
   const thisWeekLogs = measurements.filter((m) => {
     const d = differenceInCalendarDays(new Date(), parseISO(m.date));
