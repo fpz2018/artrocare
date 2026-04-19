@@ -56,13 +56,15 @@ function PageLoader() {
 
 // Protected route wrapper
 function ProtectedRoute({ children, requiredRole, noAdmin }) {
-  const { isAuthenticated, loading, profile } = useAuth();
+  const { isAuthenticated, loading, profile, profileLoaded } = useAuth();
 
   if (loading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Wait for profile before checking roles
-  if ((requiredRole || noAdmin) && !profile) return <PageLoader />;
+  // Wait until the profile fetch has completed (success or failure).
+  // Once profileLoaded is true, continue even if profile is null so the
+  // user isn't stuck on an infinite spinner when the row is missing.
+  if ((requiredRole || noAdmin) && !profileLoaded) return <PageLoader />;
 
   // Redirect admin/practice_admin away from patient-only pages
   if (noAdmin && profile?.role === 'admin') {

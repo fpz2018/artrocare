@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const mountedRef = useRef(true);
@@ -126,6 +127,7 @@ export function AuthProvider({ children }) {
           const prof = await fetchProfile(session.user.id);
           if (mountedRef.current) {
             setProfile(prof);
+            setProfileLoaded(true);
             profileFetchedRef.current = true;
           }
 
@@ -133,6 +135,9 @@ export function AuthProvider({ children }) {
           if (hasAuthTokens && window.history.replaceState) {
             window.history.replaceState(null, '', window.location.pathname);
           }
+        } else if (mountedRef.current) {
+          // No session: profile is trivially "loaded" (nothing to load)
+          setProfileLoaded(true);
         }
       } catch (err) {
         console.error('Auth init error:', err);
@@ -153,6 +158,7 @@ export function AuthProvider({ children }) {
         if (event === 'SIGNED_OUT' || !session?.user) {
           setUser(null);
           setProfile(null);
+          setProfileLoaded(true);
           setIsAuthenticated(false);
           profileFetchedRef.current = false;
           loadingRef.current = false;
@@ -166,9 +172,11 @@ export function AuthProvider({ children }) {
 
           // Fetch profile on sign-in or if we haven't fetched it yet
           if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || !profileFetchedRef.current) {
+            setProfileLoaded(false);
             const prof = await fetchProfile(session.user.id);
             if (mountedRef.current) {
               setProfile(prof);
+              setProfileLoaded(true);
               profileFetchedRef.current = true;
             }
           }
@@ -213,6 +221,7 @@ export function AuthProvider({ children }) {
     // 1. Clear React state immediately
     setUser(null);
     setProfile(null);
+    setProfileLoaded(true);
     setIsAuthenticated(false);
     profileFetchedRef.current = false;
     loadingRef.current = false;
@@ -247,6 +256,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     profile,
+    profileLoaded,
     loading,
     isAuthenticated,
     signUp,
