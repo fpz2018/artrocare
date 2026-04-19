@@ -92,3 +92,37 @@ window.addEventListener('error', (e) => {
 window.addEventListener('unhandledrejection', (e) => {
   if (isChunkLoadError(e.reason)) selfHeal();
 });
+
+// Manual kill switch. If a user ends up stuck on a broken build (stale SW,
+// bad cached bundle, corrupt Supabase session on mobile) they can open
+// `/?reset=1` to fully wipe client state and start fresh.
+(() => {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('reset')) return;
+
+  try {
+    Object.keys(localStorage).forEach((k) => localStorage.removeItem(k));
+    sessionStorage.clear();
+  } catch {
+    /* ignore */
+  }
+
+  (async () => {
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (typeof caches !== 'undefined') {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch {
+      /* continue anyway */
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete('reset');
+    url.searchParams.set('fresh', String(Date.now()));
+    window.location.replace(url.toString());
+  })();
+})();

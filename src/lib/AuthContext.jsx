@@ -39,33 +39,48 @@ export function AuthProvider({ children }) {
   const profileFetchedRef = useRef(false);
   const loadingRef = useRef(true);
 
-  // Fetch user profile from profiles table
-  const fetchProfile = useCallback(async (userId, retries = 3) => {
+  // Fetch user profile from profiles table.
+  //
+  // Flaky mobile networks can leave a Supabase request hanging indefinitely,
+  // which is why we wrap each attempt in an AbortController with an explicit
+  // timeout. Without this, the fetch never rejects and the profile stays null
+  // forever, and an admin lands on /dashboard with "Welkom terug, Deelnemer".
+  const fetchProfile = useCallback(async (userId, retries = 5) => {
     for (let i = 0; i < retries; i++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 6000);
       try {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
+          .abortSignal(controller.signal)
           .single();
+
+        clearTimeout(timer);
 
         if (error && error.code === 'PGRST116') {
           // Profile not found yet (trigger may not have fired yet)
           if (i < retries - 1) {
-            await new Promise(r => setTimeout(r, 300));
+            await new Promise(r => setTimeout(r, 500 * (i + 1)));
             continue;
           }
           return null;
         }
         if (error) {
           console.error('Error fetching profile:', error);
+          if (i < retries - 1) {
+            await new Promise(r => setTimeout(r, 500 * (i + 1)));
+            continue;
+          }
           return null;
         }
         return data;
       } catch (err) {
+        clearTimeout(timer);
         console.error('Profile fetch error:', err);
         if (i < retries - 1) {
-          await new Promise(r => setTimeout(r, 300));
+          await new Promise(r => setTimeout(r, 500 * (i + 1)));
           continue;
         }
         return null;
@@ -293,6 +308,36 @@ export function AuthProvider({ children }) {
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
+
+  // Background retry: if the user is authenticated but we still have no
+  // profile (the initial fetch hit a timeout or transient error on a flaky
+  // mobile network), keep retrying until it succeeds. Without this an admin
+  // can stay stuck on /dashboard indefinitely because no further fetch is
+  // ever triggered.
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || profile) return;
+    let cancelled = false;
+    let delay = 2000;
+    const tick = async () => {
+      if (cancelled || !mountedRef.current) return;
+      const prof = await fetchProfile(user.id, 1);
+      if (cancelled || !mountedRef.current) return;
+      if (prof) {
+        setProfile(prof);
+        writeCachedProfile(prof);
+        setProfileLoaded(true);
+        profileFetchedRef.current = true;
+        return;
+      }
+      delay = Math.min(delay * 1.5, 15000);
+      setTimeout(tick, delay);
+    };
+    const id = setTimeout(tick, delay);
+    return () => {
+      cancelled = true;
+      clearTimeout(id);
+    };
+  }, [isAuthenticated, user?.id, profile, fetchProfile]);
 
   // Auth methods
   const signUp = useCallback(async (email, password, metadata = {}) => {
