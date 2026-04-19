@@ -3,6 +3,32 @@ import { supabase } from '@/api/supabase';
 
 const AuthContext = createContext(null);
 
+// Cache the profile so a slow/flaky mobile fetch doesn't downgrade an admin
+// to the patient landing while we wait for the network. Bumped if the cache
+// shape changes.
+const PROFILE_CACHE_KEY = 'artrocare_cached_profile_v1';
+
+function readCachedProfile(userId) {
+  if (!userId) return null;
+  try {
+    const raw = localStorage.getItem(PROFILE_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.id === userId ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedProfile(profile) {
+  try {
+    if (profile) localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+    else localStorage.removeItem(PROFILE_CACHE_KEY);
+  } catch {
+    /* ignore quota / private-mode errors */
+  }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -67,7 +93,10 @@ export function AuthProvider({ children }) {
       .single();
 
     if (error) throw error;
-    if (mountedRef.current) setProfile(data);
+    if (mountedRef.current) {
+      setProfile(data);
+      writeCachedProfile(data);
+    }
     return data;
   }, [user]);
 
@@ -148,6 +177,14 @@ export function AuthProvider({ children }) {
           setUser(session.user);
           setIsAuthenticated(true);
 
+          // Seed profile from cache so role-based routing has the right
+          // answer on first render, even before the network fetch returns.
+          const cached = readCachedProfile(session.user.id);
+          if (cached) {
+            setProfile(cached);
+            setProfileLoaded(true);
+          }
+
           // Unblock the UI as soon as we know the session state.
           // The profile fetch continues in the background and gates only
           // role-dependent routes (via profileLoaded).
@@ -161,7 +198,10 @@ export function AuthProvider({ children }) {
 
           const prof = await fetchProfile(session.user.id);
           if (mountedRef.current) {
-            setProfile(prof);
+            if (prof) {
+              setProfile(prof);
+              writeCachedProfile(prof);
+            }
             setProfileLoaded(true);
             profileFetchedRef.current = true;
           }
@@ -210,6 +250,7 @@ export function AuthProvider({ children }) {
           profileFetchedRef.current = false;
           loadingRef.current = false;
           setLoading(false);
+          writeCachedProfile(null);
           return;
         }
 
@@ -228,7 +269,10 @@ export function AuthProvider({ children }) {
           if (needsFetch) {
             const prof = await fetchProfile(session.user.id);
             if (mountedRef.current) {
-              setProfile(prof);
+              if (prof) {
+                setProfile(prof);
+                writeCachedProfile(prof);
+              }
               setProfileLoaded(true);
               profileFetchedRef.current = true;
             }
@@ -278,6 +322,7 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false);
     profileFetchedRef.current = false;
     loadingRef.current = false;
+    writeCachedProfile(null);
 
     // 2. Mark signed-out timestamp so initAuth skips session restore on next load
     sessionStorage.setItem('artrocare_signed_out', String(Date.now()));

@@ -94,7 +94,7 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
 
 // Route configuration
 function AppRoutes() {
-  const { isAuthenticated, loading, profile } = useAuth();
+  const { isAuthenticated, loading, profile, profileLoaded } = useAuth();
 
   // Prefetch the most likely post-auth chunk as soon as we know the user
   // is authenticated. This runs once per role change so the landing page
@@ -110,7 +110,12 @@ function AppRoutes() {
 
   if (loading) return <PageLoader />;
 
-  // Redirect based on role, default to /dashboard while profile loads
+  // Redirect based on role. If the user is authenticated but the profile
+  // hasn't loaded yet, we hold the login redirect back so an admin never
+  // lands on /dashboard by accident (which showed the patient nav and made
+  // it look like the role had been downgraded). profileLoaded flips true
+  // within ~2s via the AuthContext safety timeout, so the worst case is a
+  // short spinner instead of a misrouted landing page.
   const homeRedirect = !profile
     ? '/dashboard'
     : profile.role === 'admin'
@@ -130,7 +135,7 @@ function AppRoutes() {
           path="/login"
           element={
             isAuthenticated
-              ? homeRedirect
+              ? profileLoaded
                 ? <Navigate to={homeRedirect} replace />
                 : <PageLoader />
               : <Login />
