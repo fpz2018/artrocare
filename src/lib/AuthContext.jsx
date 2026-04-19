@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
         if (error && error.code === 'PGRST116') {
           // Profile not found yet (trigger may not have fired yet)
           if (i < retries - 1) {
-            await new Promise(r => setTimeout(r, 1000)); // wait 1s
+            await new Promise(r => setTimeout(r, 300));
             continue;
           }
           return null;
@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
       } catch (err) {
         console.error('Profile fetch error:', err);
         if (i < retries - 1) {
-          await new Promise(r => setTimeout(r, 1000));
+          await new Promise(r => setTimeout(r, 300));
           continue;
         }
         return null;
@@ -95,7 +95,11 @@ export function AuthProvider({ children }) {
           Object.keys(localStorage).forEach(k => {
             if (k.startsWith('sb-') && k.includes('auth')) localStorage.removeItem(k);
           });
-          if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
+          if (mountedRef.current) {
+            setProfileLoaded(true);
+            loadingRef.current = false;
+            setLoading(false);
+          }
           return;
         }
 
@@ -117,32 +121,51 @@ export function AuthProvider({ children }) {
 
         if (error) {
           console.error('Auth session error:', error);
-          if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
+          if (mountedRef.current) {
+            setProfileLoaded(true);
+            loadingRef.current = false;
+            setLoading(false);
+          }
           return;
         }
 
         if (session?.user && mountedRef.current) {
           setUser(session.user);
           setIsAuthenticated(true);
+
+          // Unblock the UI as soon as we know the session state.
+          // The profile fetch continues in the background and gates only
+          // role-dependent routes (via profileLoaded).
+          loadingRef.current = false;
+          setLoading(false);
+
+          // Clean up URL hash after successful auth
+          if (hasAuthTokens && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+
           const prof = await fetchProfile(session.user.id);
           if (mountedRef.current) {
             setProfile(prof);
             setProfileLoaded(true);
             profileFetchedRef.current = true;
           }
+          return;
+        }
 
-          // Clean up URL hash after successful auth
-          if (hasAuthTokens && window.history.replaceState) {
-            window.history.replaceState(null, '', window.location.pathname);
-          }
-        } else if (mountedRef.current) {
+        if (mountedRef.current) {
           // No session: profile is trivially "loaded" (nothing to load)
           setProfileLoaded(true);
+          loadingRef.current = false;
+          setLoading(false);
         }
       } catch (err) {
         console.error('Auth init error:', err);
-      } finally {
-        if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
+        if (mountedRef.current) {
+          setProfileLoaded(true);
+          loadingRef.current = false;
+          setLoading(false);
+        }
       }
     }
 

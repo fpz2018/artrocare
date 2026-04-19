@@ -22,12 +22,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
-  const [formReady, setFormReady] = useState(false);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => setFormReady(true), 800);
-    return () => clearTimeout(timer);
-  }, []);
 
   if (isAuthenticated) return null;
 
@@ -35,7 +29,6 @@ export default function Login() {
 
   const handleAuth = async (e) => {
     e.preventDefault();
-    if (!formReady) return;
     setError('');
     setRegistrationSuccess(false);
 
