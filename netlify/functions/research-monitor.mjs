@@ -9,6 +9,29 @@ const PUBMED_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
 const COCHRANE_SEARCH = 'https://www.cochranelibrary.com/api/search';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
+// Per-request timeouts (ms). Without these a single slow upstream can hang
+// the Netlify function until it hits the inactivity timeout.
+const TIMEOUT_PUBMED_MS = 10000;
+const TIMEOUT_COCHRANE_MS = 8000;
+const TIMEOUT_SCHOLAR_MS = 15000;
+const TIMEOUT_GEMINI_MS = 25000;
+const TIMEOUT_SUPABASE_MS = 10000;
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, label = 'request') {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err) {
+    if (err?.name === 'AbortError') {
+      throw new Error(`${label} timed out after ${timeoutMs}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // ─── PubMed API ───────────────────────────────────────────
 
 async function searchPubMed(query, maxResults = 10) {
@@ -20,7 +43,7 @@ async function searchPubMed(query, maxResults = 10) {
     retmode: 'json',
   });
 
-  const res = await fetch(`${PUBMED_BASE}/esearch.fcgi?${params}`);
+  const res = await fetchWithTimeout(`${PUBMED_BASE}/esearch.fcgi?${params}`, {}, TIMEOUT_PUBMED_MS, 'PubMed search');
   if (!res.ok) throw new Error(`PubMed search failed: ${res.status}`);
   const data = await res.json();
   return data.esearchresult?.idlist || [];
@@ -36,7 +59,7 @@ async function fetchPubMedDetails(ids) {
     rettype: 'abstract',
   });
 
-  const res = await fetch(`${PUBMED_BASE}/efetch.fcgi?${params}`);
+  const res = await fetchWithTimeout(`${PUBMED_BASE}/efetch.fcgi?${params}`, {}, TIMEOUT_PUBMED_MS, 'PubMed efetch');
   if (!res.ok) throw new Error(`PubMed fetch failed: ${res.status}`);
   const xml = await res.text();
   return parseArticlesFromXml(xml);
@@ -96,9 +119,9 @@ async function searchCochrane(query, maxResults = 10) {
       type: 'review',
     });
 
-    const res = await fetch(`${COCHRANE_SEARCH}?${params}`, {
+    const res = await fetchWithTimeout(`${COCHRANE_SEARCH}?${params}`, {
       headers: { 'Accept': 'application/json' },
-    });
+    }, TIMEOUT_COCHRANE_MS, 'Cochrane search');
 
     if (!res.ok) {
       console.warn(`Cochrane search returned ${res.status}, trying fallback`);
@@ -160,7 +183,7 @@ async function searchGoogleScholar(query, maxResults = 10, serpApiKey) {
       api_key: serpApiKey,
     });
 
-    const res = await fetch(`https://serpapi.com/search.json?${params}`);
+    const res = await fetchWithTimeout(`https://serpapi.com/search.json?${params}`, {}, TIMEOUT_SCHOLAR_MS, 'SerpAPI scholar');
     if (!res.ok) {
       console.warn(`SerpAPI returned ${res.status}`);
       return [];
@@ -302,7 +325,7 @@ Bij het kiezen van target_table:
 
 Wees nauwkeurig en evidence-based. Score de relevantie van 0-100 waarbij 100 = direct toepasbaar.`;
 
-  const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+  const res = await fetchWithTimeout(`${GEMINI_API_URL}?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -312,7 +335,7 @@ Wees nauwkeurig en evidence-based. Score de relevantie van 0-100 waarbij 100 = d
         maxOutputTokens: 3000,
       },
     }),
-  });
+  }, TIMEOUT_GEMINI_MS, 'Gemini analyze');
 
   if (!res.ok) {
     const errText = await res.text();
@@ -349,7 +372,7 @@ async function supabaseRequest(url, supabaseUrl, serviceKey, method = 'GET', bod
 
   Object.keys(opts.headers).forEach(k => opts.headers[k] === undefined && delete opts.headers[k]);
 
-  const res = await fetch(`${supabaseUrl}/rest/v1${url}`, opts);
+  const res = await fetchWithTimeout(`${supabaseUrl}/rest/v1${url}`, opts, TIMEOUT_SUPABASE_MS, `Supabase ${method} ${url}`);
   if (!res.ok) {
     const errText = await res.text();
     throw new Error(`Supabase ${method} ${url} failed (${res.status}): ${errText}`);
@@ -359,7 +382,7 @@ async function supabaseRequest(url, supabaseUrl, serviceKey, method = 'GET', bod
 }
 
 async function supabaseRpc(fnName, params, supabaseUrl, serviceKey) {
-  const res = await fetch(`${supabaseUrl}/rest/v1/rpc/${fnName}`, {
+  const res = await fetchWithTimeout(`${supabaseUrl}/rest/v1/rpc/${fnName}`, {
     method: 'POST',
     headers: {
       'apikey': serviceKey,
@@ -367,7 +390,7 @@ async function supabaseRpc(fnName, params, supabaseUrl, serviceKey) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(params),
-  });
+  }, TIMEOUT_SUPABASE_MS, `Supabase RPC ${fnName}`);
   if (!res.ok) {
     const errText = await res.text();
     throw new Error(`Supabase RPC ${fnName} failed (${res.status}): ${errText}`);
