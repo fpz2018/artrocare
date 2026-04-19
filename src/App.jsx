@@ -61,10 +61,10 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
   if (loading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Wait for profile before checking roles
-  if ((requiredRole || noAdmin) && !profile) return <PageLoader />;
+  // Render immediately without waiting for profile. Role-based redirects
+  // only fire once the profile is loaded, so a patient never spins and
+  // an admin/therapist sees at most a brief flash before redirect.
 
-  // Redirect admin/practice_admin away from patient-only pages
   if (noAdmin && profile?.role === 'admin') {
     return <Navigate to="/admin/proposals" replace />;
   }
@@ -75,13 +75,15 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
     return <Navigate to="/therapist-dashboard" replace />;
   }
 
-  // Role-based access control — redirect to role's home
-  if (requiredRole && profile?.role !== requiredRole) {
-    const home = profile?.role === 'admin'
+  // Role-based access control — only redirect when profile is loaded and
+  // the role is wrong. Without the `profile &&` guard we would bounce to
+  // /dashboard during the profile fetch and flash content.
+  if (requiredRole && profile && profile.role !== requiredRole) {
+    const home = profile.role === 'admin'
       ? '/admin/proposals'
-      : profile?.role === 'practice_admin'
+      : profile.role === 'practice_admin'
       ? '/practice'
-      : profile?.role === 'therapist'
+      : profile.role === 'therapist'
       ? '/therapist-dashboard'
       : '/dashboard';
     return <Navigate to={home} replace />;
@@ -93,6 +95,18 @@ function ProtectedRoute({ children, requiredRole, noAdmin }) {
 // Route configuration
 function AppRoutes() {
   const { isAuthenticated, loading, profile } = useAuth();
+
+  // Prefetch the most likely post-auth chunk as soon as we know the user
+  // is authenticated. This runs once per role change so the landing page
+  // is cached before the user navigates there.
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+    const role = profile?.role;
+    if (role === 'admin') import('@/pages/ContentProposals');
+    else if (role === 'practice_admin') import('@/pages/PracticeAdmin');
+    else if (role === 'therapist') import('@/pages/TherapistDashboard');
+    else import('@/pages/Dashboard');
+  }, [isAuthenticated, profile?.role]);
 
   if (loading) return <PageLoader />;
 

@@ -22,18 +22,9 @@ export default function TherapistDashboard() {
   const [copiedToken, setCopiedToken] = useState(null);
   const queryClient = useQueryClient();
 
-  if (profile?.role !== 'therapist') {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Card className="bg-red-50 border-red-200 max-w-md">
-          <CardContent className="p-6 text-center">
-            <ShieldAlert className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <p className="font-semibold text-red-800">{t('td_unauthorized')}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // All hooks must be called unconditionally on every render to keep the
+  // hook order stable. The unauthorized guard below is rendered via a
+  // conditional return AFTER every hook has been declared.
 
   // Patiënten gekoppeld aan deze therapeut
   const { data: patients = [], isLoading: patientsLoading } = useQuery({
@@ -249,6 +240,24 @@ export default function TherapistDashboard() {
 
   const activeThisWeek = patientStats.filter(p => p.measurements.length > 0).length;
   const needAttention = patientStats.filter(p => p.needsAttention).length;
+
+  // Unauthorized guard: ProtectedRoute already enforces role='therapist'
+  // at the route level, but during the brief window where the profile has
+  // not yet loaded we avoid crashing by rendering nothing instead of an
+  // "unauthorized" card (which would flash for a legit therapist).
+  if (!profile) return null;
+  if (profile.role !== 'therapist') {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Card className="bg-red-50 border-red-200 max-w-md">
+          <CardContent className="p-6 text-center">
+            <ShieldAlert className="w-12 h-12 text-red-400 mx-auto mb-4" />
+            <p className="font-semibold text-red-800">{t('td_unauthorized')}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

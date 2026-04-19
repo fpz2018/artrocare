@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/lib/AuthContext';
@@ -22,11 +22,11 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
-  const [formReady, setFormReady] = useState(false);
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setFormReady(true), 800);
-    return () => clearTimeout(timer);
+  // Prefetch the Dashboard chunk so the post-login navigation feels
+  // instant instead of waiting on network for the lazy-loaded page.
+  useEffect(() => {
+    import('@/pages/Dashboard');
   }, []);
 
   if (isAuthenticated) return null;
@@ -35,7 +35,6 @@ export default function Login() {
 
   const handleAuth = async (e) => {
     e.preventDefault();
-    if (!formReady) return;
     setError('');
     setRegistrationSuccess(false);
 

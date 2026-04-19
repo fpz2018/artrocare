@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const mountedRef = useRef(true);
@@ -25,7 +26,7 @@ export function AuthProvider({ children }) {
         if (error && error.code === 'PGRST116') {
           // Profile not found yet (trigger may not have fired yet)
           if (i < retries - 1) {
-            await new Promise(r => setTimeout(r, 1000)); // wait 1s
+            await new Promise(r => setTimeout(r, 300));
             continue;
           }
           return null;
@@ -38,7 +39,7 @@ export function AuthProvider({ children }) {
       } catch (err) {
         console.error('Profile fetch error:', err);
         if (i < retries - 1) {
-          await new Promise(r => setTimeout(r, 1000));
+          await new Promise(r => setTimeout(r, 300));
           continue;
         }
         return null;
@@ -74,6 +75,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     mountedRef.current = true;
     let timeoutId;
+    let profileTimeoutId;
 
     // Safety timeout: never stay loading forever
     // Uses a ref to avoid stale closure on the loading state value
@@ -83,6 +85,15 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     }, 8000);
+
+    // Safety net for the profile fetch: if it stalls (bad network, RLS,
+    // missing row), unblock protected routes after 3s rather than spinning.
+    profileTimeoutId = setTimeout(() => {
+      if (mountedRef.current && !profileFetchedRef.current) {
+        console.warn('Profile fetch timed out; rendering without profile.');
+        setProfileLoaded(true);
+      }
+    }, 3000);
 
     async function initAuth() {
       try {
@@ -94,7 +105,11 @@ export function AuthProvider({ children }) {
           Object.keys(localStorage).forEach(k => {
             if (k.startsWith('sb-') && k.includes('auth')) localStorage.removeItem(k);
           });
-          if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
+          if (mountedRef.current) {
+            setProfileLoaded(true);
+            loadingRef.current = false;
+            setLoading(false);
+          }
           return;
         }
 
@@ -116,28 +131,51 @@ export function AuthProvider({ children }) {
 
         if (error) {
           console.error('Auth session error:', error);
-          if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
+          if (mountedRef.current) {
+            setProfileLoaded(true);
+            loadingRef.current = false;
+            setLoading(false);
+          }
           return;
         }
 
         if (session?.user && mountedRef.current) {
           setUser(session.user);
           setIsAuthenticated(true);
-          const prof = await fetchProfile(session.user.id);
-          if (mountedRef.current) {
-            setProfile(prof);
-            profileFetchedRef.current = true;
-          }
+
+          // Unblock the UI as soon as we know the session state.
+          // The profile fetch continues in the background and gates only
+          // role-dependent routes (via profileLoaded).
+          loadingRef.current = false;
+          setLoading(false);
 
           // Clean up URL hash after successful auth
           if (hasAuthTokens && window.history.replaceState) {
             window.history.replaceState(null, '', window.location.pathname);
           }
+
+          const prof = await fetchProfile(session.user.id);
+          if (mountedRef.current) {
+            setProfile(prof);
+            setProfileLoaded(true);
+            profileFetchedRef.current = true;
+          }
+          return;
+        }
+
+        if (mountedRef.current) {
+          // No session: profile is trivially "loaded" (nothing to load)
+          setProfileLoaded(true);
+          loadingRef.current = false;
+          setLoading(false);
         }
       } catch (err) {
         console.error('Auth init error:', err);
-      } finally {
-        if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
+        if (mountedRef.current) {
+          setProfileLoaded(true);
+          loadingRef.current = false;
+          setLoading(false);
+        }
       }
     }
 
@@ -148,11 +186,21 @@ export function AuthProvider({ children }) {
       async (event, session) => {
         if (!mountedRef.current) return;
 
-        console.log('Auth event:', event);
+        // INITIAL_SESSION fires right after the subscription is set up;
+        // initAuth already handles page load, so skip to avoid a duplicate
+        // profile fetch that re-triggers the spinner.
+        if (event === 'INITIAL_SESSION') return;
+
+        // TOKEN_REFRESHED: user/session are unchanged, no need to refetch profile.
+        if (event === 'TOKEN_REFRESHED') {
+          if (session?.user && mountedRef.current) setUser(session.user);
+          return;
+        }
 
         if (event === 'SIGNED_OUT' || !session?.user) {
           setUser(null);
           setProfile(null);
+          setProfileLoaded(true);
           setIsAuthenticated(false);
           profileFetchedRef.current = false;
           loadingRef.current = false;
@@ -163,12 +211,20 @@ export function AuthProvider({ children }) {
         if (session?.user) {
           setUser(session.user);
           setIsAuthenticated(true);
+          loadingRef.current = false;
+          setLoading(false);
 
-          // Fetch profile on sign-in or if we haven't fetched it yet
-          if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || !profileFetchedRef.current) {
+          // Fetch profile on sign-in / user update. If we already have the
+          // profile for this user, don't refetch — avoids a spinner flash.
+          const needsFetch =
+            event === 'SIGNED_IN' ||
+            event === 'USER_UPDATED' ||
+            !profileFetchedRef.current;
+          if (needsFetch) {
             const prof = await fetchProfile(session.user.id);
             if (mountedRef.current) {
               setProfile(prof);
+              setProfileLoaded(true);
               profileFetchedRef.current = true;
             }
           }
@@ -178,13 +234,13 @@ export function AuthProvider({ children }) {
             window.history.replaceState(null, '', window.location.pathname);
           }
         }
-        if (mountedRef.current) { loadingRef.current = false; setLoading(false); }
       }
     );
 
     return () => {
       mountedRef.current = false;
       clearTimeout(timeoutId);
+      clearTimeout(profileTimeoutId);
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
@@ -213,6 +269,7 @@ export function AuthProvider({ children }) {
     // 1. Clear React state immediately
     setUser(null);
     setProfile(null);
+    setProfileLoaded(true);
     setIsAuthenticated(false);
     profileFetchedRef.current = false;
     loadingRef.current = false;
@@ -247,6 +304,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     profile,
+    profileLoaded,
     loading,
     isAuthenticated,
     signUp,

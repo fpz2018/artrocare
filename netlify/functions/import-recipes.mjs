@@ -247,38 +247,74 @@ async function supabaseRequest(url, supabaseUrl, serviceKey, method = 'GET', bod
 
 // ─── Core pipeline ────────────────────────────────────────
 
+// Build a PostgREST query string using URLSearchParams so quotes, parens
+// and commas inside values are encoded consistently.
+function buildQuery(params) {
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) sp.set(k, v);
+  return sp.toString();
+}
+
 async function processImports(env) {
   console.log('Recipe import pipeline started:', new Date().toISOString());
 
   // 1. Read URLs from Google Sheet
   const urls = await fetchSheetUrls(env.SHEET_ID);
-  console.log(`Found ${urls.length} new URLs in sheet`);
+  console.log(`Found ${urls.length} URLs in sheet`);
 
   if (!urls.length) {
-    return { processed: 0, extracted: 0, errors: 0 };
+    return { sheet_urls: 0, already_done: 0, processed: 0, extracted: 0, errors: 0, error_details: [] };
   }
 
-  // 2. Check which URLs we already have
+  // 2. Fetch existing imports so we know which URLs to skip or retry.
+  //    Skip only URLs that reached a terminal state (extracted/approved/rejected);
+  //    URLs in 'pending', 'fetching' or 'error' status should be retried.
+  const inClause = urls.map(u => `"${u.replace(/"/g, '\\"')}"`).join(',');
+  const existingQs = buildQuery({
+    source_url: `in.(${inClause})`,
+    select: 'id,source_url,status',
+  });
   const existing = await supabaseRequest(
-    `/recipe_imports?source_url=in.(${urls.map(u => `"${encodeURIComponent(u)}"`).join(',')})&select=source_url`,
+    `/recipe_imports?${existingQs}`,
     env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY
   );
-  const existingUrls = new Set((existing || []).map(r => r.source_url));
-  const newUrls = urls.filter(u => !existingUrls.has(u));
-  console.log(`${newUrls.length} new URLs to process`);
+
+  const TERMINAL = new Set(['extracted', 'approved', 'rejected']);
+  const existingById = new Map();
+  const alreadyDone = new Set();
+  for (const row of existing || []) {
+    if (TERMINAL.has(row.status)) {
+      alreadyDone.add(row.source_url);
+    } else {
+      existingById.set(row.source_url, row.id);
+    }
+  }
+
+  const toProcess = urls.filter(u => !alreadyDone.has(u));
+  console.log(`${alreadyDone.size} already done, ${toProcess.length} to (re)process`);
 
   let extracted = 0;
   let errors = 0;
+  const errorDetails = [];
 
-  for (const url of newUrls) {
+  for (const url of toProcess) {
+    let importId = existingById.get(url) || null;
     try {
-      // Insert as 'fetching'
-      const inserted = await supabaseRequest(
-        '/recipe_imports', env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, 'POST',
-        { source_url: url, status: 'fetching' }
-      );
-      const importId = inserted?.[0]?.id;
-      if (!importId) throw new Error('Failed to insert import record');
+      if (importId) {
+        // Retry an existing failed/stuck import: reset to 'fetching'
+        await supabaseRequest(
+          `/recipe_imports?id=eq.${importId}`,
+          env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, 'PATCH',
+          { status: 'fetching', error_message: null, updated_at: new Date().toISOString() }
+        );
+      } else {
+        const inserted = await supabaseRequest(
+          '/recipe_imports', env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, 'POST',
+          { source_url: url, status: 'fetching' }
+        );
+        importId = inserted?.[0]?.id;
+        if (!importId) throw new Error('Failed to insert import record');
+      }
 
       // Fetch page HTML
       console.log(`Fetching: ${url}`);
@@ -307,6 +343,7 @@ async function processImports(env) {
           status: 'extracted',
           title: recipeData.title_nl || recipeData.title_en || 'Onbekend recept',
           extracted_data: recipeData,
+          error_message: null,
           updated_at: new Date().toISOString(),
         }
       );
@@ -316,17 +353,23 @@ async function processImports(env) {
     } catch (err) {
       console.error(`Error processing ${url}:`, err.message);
       errors++;
+      errorDetails.push({ url, message: err.message.substring(0, 300) });
 
-      // Try to update the record with error status
-      await supabaseRequest(
-        `/recipe_imports?source_url=eq.${encodeURIComponent(url)}`,
-        env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, 'PATCH',
-        {
-          status: 'error',
-          error_message: err.message.substring(0, 500),
-          updated_at: new Date().toISOString(),
-        }
-      ).catch(() => {}); // non-critical
+      // Try to mark the record as errored. If we have an id use that,
+      // otherwise fall back to matching on source_url.
+      const errorUpdate = {
+        status: 'error',
+        error_message: err.message.substring(0, 500),
+        updated_at: new Date().toISOString(),
+      };
+      const errorPatchPath = importId
+        ? `/recipe_imports?id=eq.${importId}`
+        : `/recipe_imports?${buildQuery({ source_url: `eq.${url}` })}`;
+      try {
+        await supabaseRequest(errorPatchPath, env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, 'PATCH', errorUpdate);
+      } catch (patchErr) {
+        console.error(`Failed to write error status for ${url}:`, patchErr.message);
+      }
     }
   }
 
@@ -336,10 +379,17 @@ async function processImports(env) {
       `/profiles?role=eq.admin`,
       env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, 'PATCH',
       { pending_notifications: extracted }
-    ).catch(() => {});
+    ).catch(err => console.warn('Admin notification update failed:', err.message));
   }
 
-  return { processed: newUrls.length, extracted, errors };
+  return {
+    sheet_urls: urls.length,
+    already_done: alreadyDone.size,
+    processed: toProcess.length,
+    extracted,
+    errors,
+    error_details: errorDetails,
+  };
 }
 
 // ─── Env loader ───────────────────────────────────────────
