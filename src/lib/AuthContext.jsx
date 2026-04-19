@@ -77,23 +77,23 @@ export function AuthProvider({ children }) {
     let timeoutId;
     let profileTimeoutId;
 
-    // Safety timeout: never stay loading forever
-    // Uses a ref to avoid stale closure on the loading state value
+    // Safety timeout: never stay loading forever. Short enough that a flaky
+    // mobile network surfaces the login screen instead of a perpetual spinner.
     timeoutId = setTimeout(() => {
       if (mountedRef.current && loadingRef.current) {
         loadingRef.current = false;
         setLoading(false);
       }
-    }, 8000);
+    }, 4000);
 
     // Safety net for the profile fetch: if it stalls (bad network, RLS,
-    // missing row), unblock protected routes after 3s rather than spinning.
+    // missing row), unblock protected routes rather than spinning.
     profileTimeoutId = setTimeout(() => {
       if (mountedRef.current && !profileFetchedRef.current) {
         console.warn('Profile fetch timed out; rendering without profile.');
         setProfileLoaded(true);
       }
-    }, 3000);
+    }, 2000);
 
     async function initAuth() {
       try {
@@ -113,8 +113,8 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        // Let Supabase process any hash tokens in the URL
-        // (email verification, password recovery)
+        // Supabase handles hash tokens natively via detectSessionInUrl, so
+        // we only need to know whether we should clean up the URL afterwards.
         const hashParams = window.location.hash;
         const hasAuthTokens = hashParams && (
           hashParams.includes('access_token') ||
@@ -123,11 +123,16 @@ export function AuthProvider({ children }) {
           hashParams.includes('type=recovery')
         );
 
-        if (hasAuthTokens) {
-          await new Promise(r => setTimeout(r, 500));
-        }
-
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Race the session lookup against a short timeout. If the network
+        // stalls we unblock the UI to the (unauthenticated) login screen
+        // instead of sitting on a spinner until the outer 4s safety fires.
+        const sessionResult = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ data: { session: null }, error: null, _timedOut: true }), 2500)
+          ),
+        ]);
+        const { data: { session } = { session: null }, error } = sessionResult || {};
 
         if (error) {
           console.error('Auth session error:', error);
