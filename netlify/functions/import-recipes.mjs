@@ -6,11 +6,35 @@ import { schedule } from '@netlify/functions';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
+// Per-request timeouts (ms). Prevents the function from hanging on a slow
+// upstream and hitting Netlify's inactivity timeout.
+const TIMEOUT_SHEET_MS = 8000;
+const TIMEOUT_PAGE_MS = 8000;
+const TIMEOUT_GEMINI_MS = 20000;
+const TIMEOUT_IMAGE_FETCH_MS = 8000;
+const TIMEOUT_IMAGE_UPLOAD_MS = 12000;
+const TIMEOUT_SUPABASE_MS = 10000;
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000, label = 'request') {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err) {
+    if (err?.name === 'AbortError') {
+      throw new Error(`${label} timed out after ${timeoutMs}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // ─── Google Sheet CSV reader ──────────────────────────────
 
 async function fetchSheetUrls(sheetId) {
   const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
-  const res = await fetch(csvUrl);
+  const res = await fetchWithTimeout(csvUrl, {}, TIMEOUT_SHEET_MS, 'Google Sheet fetch');
   if (!res.ok) throw new Error(`Google Sheet fetch failed: ${res.status}`);
 
   const csv = await res.text();
@@ -58,13 +82,13 @@ function parseCsvLine(line) {
 // ─── HTML fetcher ─────────────────────────────────────────
 
 async function fetchPageHtml(url) {
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (compatible; ArtrocareBot/1.0)',
       'Accept': 'text/html',
     },
     redirect: 'follow',
-  });
+  }, TIMEOUT_PAGE_MS, `Page fetch ${url}`);
 
   if (!res.ok) throw new Error(`Page fetch failed: ${res.status} for ${url}`);
 
@@ -145,7 +169,7 @@ Richtlijnen:
 HTML:
 ${html}`;
 
-  const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+  const res = await fetchWithTimeout(`${GEMINI_API_URL}?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -155,7 +179,7 @@ ${html}`;
         maxOutputTokens: 4000,
       },
     }),
-  });
+  }, TIMEOUT_GEMINI_MS, 'Gemini extract');
 
   if (!res.ok) {
     const errText = await res.text();
@@ -177,10 +201,10 @@ async function uploadImageToStorage(imageUrl, importId, supabaseUrl, serviceKey)
   if (!imageUrl) return null;
 
   try {
-    const imgRes = await fetch(imageUrl, {
+    const imgRes = await fetchWithTimeout(imageUrl, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ArtrocareBot/1.0)' },
       redirect: 'follow',
-    });
+    }, TIMEOUT_IMAGE_FETCH_MS, 'Image fetch');
 
     if (!imgRes.ok) {
       console.warn(`Image fetch failed: ${imgRes.status} for ${imageUrl}`);
@@ -195,7 +219,7 @@ async function uploadImageToStorage(imageUrl, importId, supabaseUrl, serviceKey)
     const arrayBuffer = await imgRes.arrayBuffer();
     const fileName = `${importId}.${ext}`;
 
-    const uploadRes = await fetch(
+    const uploadRes = await fetchWithTimeout(
       `${supabaseUrl}/storage/v1/object/recipe-images/${fileName}`,
       {
         method: 'POST',
@@ -205,7 +229,9 @@ async function uploadImageToStorage(imageUrl, importId, supabaseUrl, serviceKey)
           'x-upsert': 'true',
         },
         body: arrayBuffer,
-      }
+      },
+      TIMEOUT_IMAGE_UPLOAD_MS,
+      'Image upload'
     );
 
     if (!uploadRes.ok) {
@@ -236,7 +262,7 @@ async function supabaseRequest(url, supabaseUrl, serviceKey, method = 'GET', bod
   if (body) opts.body = JSON.stringify(body);
   Object.keys(opts.headers).forEach(k => opts.headers[k] === undefined && delete opts.headers[k]);
 
-  const res = await fetch(`${supabaseUrl}/rest/v1${url}`, opts);
+  const res = await fetchWithTimeout(`${supabaseUrl}/rest/v1${url}`, opts, TIMEOUT_SUPABASE_MS, `Supabase ${method} ${url}`);
   if (!res.ok) {
     const errText = await res.text();
     throw new Error(`Supabase ${method} ${url} failed (${res.status}): ${errText}`);
@@ -462,14 +488,14 @@ Richtlijnen:
 - Focus op pijnvermindering, mobiliteit en krachtsopbouw
 - Antwoord ALLEEN in valid JSON`;
 
-      const res = await fetch(`${GEMINI_API_URL}?key=${env.GEMINI_KEY}`, {
+      const res = await fetchWithTimeout(`${GEMINI_API_URL}?key=${env.GEMINI_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { temperature: 0.3, maxOutputTokens: 2000 },
         }),
-      });
+      }, TIMEOUT_GEMINI_MS, 'Gemini exercise');
 
       if (!res.ok) {
         const errText = await res.text();

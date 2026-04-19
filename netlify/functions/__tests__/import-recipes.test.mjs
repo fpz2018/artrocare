@@ -58,7 +58,8 @@ describe('fetchSheetUrls', () => {
     const urls = await fetchSheetUrls('test-sheet-id');
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://docs.google.com/spreadsheets/d/test-sheet-id/export?format=csv'
+      'https://docs.google.com/spreadsheets/d/test-sheet-id/export?format=csv',
+      expect.any(Object)
     );
     // Only 'new' and empty status should be included
     expect(urls).toEqual(['https://recipe1.com', 'https://recipe2.com']);
@@ -125,13 +126,13 @@ describe('fetchPageHtml', () => {
 
     const result = await fetchPageHtml('https://example.com/recipe');
 
-    expect(mockFetch).toHaveBeenCalledWith('https://example.com/recipe', {
+    expect(mockFetch).toHaveBeenCalledWith('https://example.com/recipe', expect.objectContaining({
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; ArtrocareBot/1.0)',
         'Accept': 'text/html',
       },
       redirect: 'follow',
-    });
+    }));
     expect(result).toBe(html);
   });
 
