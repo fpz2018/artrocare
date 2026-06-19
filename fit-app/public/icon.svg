@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#1B4332"/>
+  <!-- Dumbbell, centred within the maskable safe zone -->
+  <g stroke="#D4A574" stroke-linecap="round" fill="#D4A574">
+    <rect x="206" y="241" width="100" height="30" rx="8"/>
+    <rect x="150" y="206" width="34" height="100" rx="12"/>
+    <rect x="120" y="226" width="26" height="60" rx="10"/>
+    <rect x="328" y="206" width="34" height="100" rx="12"/>
+    <rect x="366" y="226" width="26" height="60" rx="10"/>
+  </g>
+  <text x="256" y="372" font-family="ui-sans-serif, system-ui, Arial, sans-serif"
+        font-size="84" font-weight="700" fill="#F5F1EB" text-anchor="middle">61</text>
+</svg>

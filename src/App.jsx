@@ -41,8 +41,6 @@ const AdminChecklist = lazy(() => import('@/pages/AdminChecklist'));
 const AdminRecipeImports = lazy(() => import('@/pages/AdminRecipeImports'));
 const AdminExercises = lazy(() => import('@/pages/AdminExercises'));
 const ConceptExercises = lazy(() => import('@/pages/ConceptExercises'));
-// Self-contained "Fit Worden op 61" tracker (localStorage only, no auth).
-const FitApp = lazy(() => import('@/fit/FitApp'));
 
 // Loading spinner component
 function PageLoader() {
@@ -154,7 +152,6 @@ function AppRoutes() {
         <Route path="/voor-patienten" element={<LandingPatient />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="/beweegplan" element={<Beweegplan />} />
-        <Route path="/fit" element={<FitApp />} />
 
         {/* Protected routes */}
         <Route path="/dashboard" element={<ProtectedRoute noAdmin><Dashboard /></ProtectedRoute>} />

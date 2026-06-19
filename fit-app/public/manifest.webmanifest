@@ -1,0 +1,19 @@
+{
+  "name": "Fit Worden op 61",
+  "short_name": "Fit op 61",
+  "description": "Persoonlijke fitness- en lifestyle-tracker — training, voeding, supplementen en meer.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F1EB",
+  "theme_color": "#1B4332",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
