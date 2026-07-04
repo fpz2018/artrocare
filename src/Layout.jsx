@@ -7,7 +7,7 @@ import { supabase } from '@/api/supabase';
 import {
   LayoutDashboard, TrendingUp, Dumbbell, Target, Apple, Pill,
   Stethoscope, BookOpen, Crown, Settings, Users, Menu, X,
-  Globe, LogOut, ChevronRight, FlaskConical, Database, Building2, ChefHat, ClipboardList
+  Globe, LogOut, ChevronRight, FlaskConical, Database, Building2, ChefHat, ClipboardList, Activity
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FooterDisclaimer } from '@/components/legal/Disclaimer';
@@ -15,6 +15,7 @@ import Logo from '@/components/Logo';
 
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, labelKey: 'nav_dashboard' },
+  { path: '/kernsignalen', icon: Activity, labelKey: 'nav_kernsignalen' },
   { path: '/progress', icon: TrendingUp, labelKey: 'nav_progress' },
   { path: '/exercises', icon: Dumbbell, labelKey: 'nav_exercises' },
   { path: '/goals', icon: Target, labelKey: 'nav_goals' },

@@ -26,6 +26,7 @@ const en = {
 
   // Nav
   nav_dashboard: 'Dashboard',
+  nav_kernsignalen: 'Core signals',
   nav_progress: 'Progress',
   nav_exercises: 'Exercises',
   nav_goals: 'Goals',

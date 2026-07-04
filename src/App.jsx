@@ -36,6 +36,7 @@ const Login = lazy(() => import('@/pages/Login'));
 const HOOS12 = lazy(() => import('@/pages/HOOS12'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 const Recipes = lazy(() => import('@/pages/Recipes'));
+const Kernsignalen = lazy(() => import('@/pages/Kernsignalen'));
 const Beweegplan = lazy(() => import('@/pages/Beweegplan'));
 const AdminChecklist = lazy(() => import('@/pages/AdminChecklist'));
 const AdminRecipeImports = lazy(() => import('@/pages/AdminRecipeImports'));
@@ -167,6 +168,7 @@ function AppRoutes() {
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
         <Route path="/recipes" element={<ProtectedRoute><Recipes /></ProtectedRoute>} />
+        <Route path="/kernsignalen" element={<ProtectedRoute noAdmin><Kernsignalen /></ProtectedRoute>} />
         <Route path="/hoos12" element={<ProtectedRoute><HOOS12 /></ProtectedRoute>} />
         <Route path="/research" element={<ProtectedRoute requiredRole="therapist"><ResearchMonitor /></ProtectedRoute>} />
         <Route path="/admin/proposals" element={<ProtectedRoute requiredRole="admin"><ContentProposals /></ProtectedRoute>} />
