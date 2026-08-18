@@ -1,0 +1,45 @@
+{
+  "name": "MedicationLog",
+  "type": "object",
+  "properties": {
+    "medicationId": {
+      "type": "string",
+      "description": "Referentie naar Medication"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Datum van inname"
+    },
+    "time": {
+      "type": "string",
+      "description": "Tijd van inname"
+    },
+    "taken": {
+      "type": "boolean",
+      "description": "Wel/niet ingenomen"
+    },
+    "painBefore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Pijnscore voor inname"
+    },
+    "painAfter": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Pijnscore na inname"
+    },
+    "sideEffects": {
+      "type": "string",
+      "description": "Bijwerkingen"
+    }
+  },
+  "required": [
+    "medicationId",
+    "date",
+    "time",
+    "taken"
+  ]
+}

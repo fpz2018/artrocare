@@ -1,0 +1,96 @@
+{
+  "name": "Supplement",
+  "type": "object",
+  "properties": {
+    "name_nl": {
+      "type": "string",
+      "description": "Supplement name in Dutch"
+    },
+    "name_en": {
+      "type": "string",
+      "description": "Supplement name in English"
+    },
+    "description_nl": {
+      "type": "string",
+      "description": "Description in Dutch"
+    },
+    "description_en": {
+      "type": "string",
+      "description": "Description in English"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "omega3",
+        "vitamins",
+        "minerals",
+        "herbs",
+        "collagen",
+        "other"
+      ],
+      "description": "Supplement category"
+    },
+    "dosage": {
+      "type": "string",
+      "description": "Recommended dosage"
+    },
+    "timing": {
+      "type": "string",
+      "enum": [
+        "morning",
+        "afternoon",
+        "evening",
+        "with_meal",
+        "any"
+      ],
+      "description": "Best time to take"
+    },
+    "evidenceLevel": {
+      "type": "string",
+      "enum": [
+        "strong",
+        "moderate",
+        "limited",
+        "emerging"
+      ],
+      "description": "Scientific evidence level"
+    },
+    "benefits_nl": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Benefits in Dutch"
+    },
+    "benefits_en": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Benefits in English"
+    },
+    "interactions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Drug interactions to watch for"
+    },
+    "contraindications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Contraindications"
+    },
+    "isPremium": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "name_nl",
+    "name_en",
+    "category"
+  ]
+}

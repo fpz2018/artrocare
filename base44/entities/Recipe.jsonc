@@ -1,0 +1,112 @@
+{
+  "name": "Recipe",
+  "type": "object",
+  "properties": {
+    "title_nl": {
+      "type": "string",
+      "description": "Recept titel in Nederlands"
+    },
+    "title_en": {
+      "type": "string",
+      "description": "Recept titel in Engels"
+    },
+    "description_nl": {
+      "type": "string",
+      "description": "Beschrijving in Nederlands"
+    },
+    "description_en": {
+      "type": "string",
+      "description": "Beschrijving in Engels"
+    },
+    "mealType": {
+      "type": "string",
+      "enum": [
+        "ontbijt",
+        "lunch",
+        "avondeten",
+        "tussendoortje"
+      ],
+      "description": "Type maaltijd"
+    },
+    "prepTime": {
+      "type": "number",
+      "description": "Bereidingstijd in minuten"
+    },
+    "servings": {
+      "type": "number",
+      "description": "Aantal porties"
+    },
+    "macros": {
+      "type": "object",
+      "properties": {
+        "protein": {
+          "type": "number"
+        },
+        "carbs": {
+          "type": "number"
+        },
+        "fat": {
+          "type": "number"
+        },
+        "calories": {
+          "type": "number"
+        }
+      }
+    },
+    "ingredients_nl": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ingredi\u00ebnten in Nederlands"
+    },
+    "ingredients_en": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ingredi\u00ebnten in Engels"
+    },
+    "instructions_nl": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Instructies in Nederlands"
+    },
+    "instructions_en": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Instructies in Engels"
+    },
+    "antiInflammatoryScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Anti-inflammatoire score 0-10"
+    },
+    "isVegetarian": {
+      "type": "boolean",
+      "default": false
+    },
+    "isVegan": {
+      "type": "boolean",
+      "default": false
+    },
+    "isPremium": {
+      "type": "boolean",
+      "default": false
+    },
+    "imageUrl": {
+      "type": "string",
+      "description": "Afbeelding URL"
+    }
+  },
+  "required": [
+    "title_nl",
+    "title_en",
+    "mealType"
+  ]
+}

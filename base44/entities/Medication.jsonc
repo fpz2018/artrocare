@@ -1,0 +1,49 @@
+{
+  "name": "Medication",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Naam van het medicijn"
+    },
+    "dosage": {
+      "type": "string",
+      "description": "Dosering (bijv. 500mg)"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "once_daily",
+        "twice_daily",
+        "three_times_daily",
+        "as_needed"
+      ],
+      "description": "Hoe vaak per dag"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "nsaid",
+        "paracetamol",
+        "supplement",
+        "other"
+      ],
+      "description": "Type medicijn"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optionele notities"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true,
+      "description": "Of medicijn nog wordt gebruikt"
+    }
+  },
+  "required": [
+    "name",
+    "dosage",
+    "frequency",
+    "type"
+  ]
+}

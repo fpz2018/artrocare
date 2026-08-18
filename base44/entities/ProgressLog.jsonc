@@ -1,0 +1,48 @@
+{
+  "name": "ProgressLog",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the log entry"
+    },
+    "painLevel": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Pain level from 0-10"
+    },
+    "mobilityLevel": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Mobility level from 0-10"
+    },
+    "mood": {
+      "type": "string",
+      "enum": [
+        "great",
+        "good",
+        "okay",
+        "poor",
+        "bad"
+      ],
+      "description": "Daily mood"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "exercisesCompleted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of exercises completed"
+    }
+  },
+  "required": [
+    "date"
+  ]
+}

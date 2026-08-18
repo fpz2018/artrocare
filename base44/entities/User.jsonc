@@ -1,0 +1,156 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "language": {
+      "type": "string",
+      "enum": [
+        "nl",
+        "en"
+      ],
+      "default": "nl",
+      "description": "User's preferred language"
+    },
+    "dateOfBirth": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of birth"
+    },
+    "height": {
+      "type": "number",
+      "description": "Height in cm"
+    },
+    "weight": {
+      "type": "number",
+      "description": "Weight in kg"
+    },
+    "arthrosisStage": {
+      "type": "string",
+      "enum": [
+        "mild",
+        "moderate",
+        "severe"
+      ],
+      "description": "Stage of arthritis"
+    },
+    "affectedJoints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of affected joints"
+    },
+    "awaitingJointReplacement": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether patient is waiting for joint replacement surgery"
+    },
+    "goals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User's health goals"
+    },
+    "onboardingCompleted": {
+      "type": "boolean",
+      "default": false
+    },
+    "coreEducationCompleted": {
+      "type": "boolean",
+      "default": false
+    },
+    "completedLessons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "subscriptionTier": {
+      "type": "string",
+      "enum": [
+        "free",
+        "premium",
+        "premium_practice"
+      ],
+      "default": "free"
+    },
+    "notificationSettings": {
+      "type": "object",
+      "properties": {
+        "dailyCheckIn": {
+          "type": "boolean"
+        },
+        "exerciseReminders": {
+          "type": "boolean"
+        },
+        "progressReports": {
+          "type": "boolean"
+        }
+      }
+    },
+    "personalizedNutritionPlan": {
+      "type": "object"
+    },
+    "therapistEmail": {
+      "type": "string",
+      "description": "Email of assigned therapist"
+    },
+    "therapistName": {
+      "type": "string",
+      "description": "Name of assigned therapist"
+    },
+    "therapistPhone": {
+      "type": "string",
+      "description": "Phone number of therapist"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "patient",
+        "therapist"
+      ],
+      "default": "patient",
+      "description": "User role in the system"
+    },
+    "therapistId": {
+      "type": "string",
+      "description": "Email of the therapist (for patients)"
+    },
+    "practiceId": {
+      "type": "string",
+      "description": "Practice identifier (for therapists)"
+    },
+    "practiceName": {
+      "type": "string",
+      "description": "Name of the practice (for therapists)"
+    },
+    "disclaimerAcceptedAt": {
+      "type": "string",
+      "description": "ISO timestamp when disclaimer was accepted"
+    },
+    "disclaimerVersion": {
+      "type": "string",
+      "description": "Version of accepted disclaimer (e.g., '1.0')"
+    }
+  },
+  "required": [
+    "dateOfBirth",
+    "height",
+    "weight",
+    "arthrosisStage",
+    "affectedJoints",
+    "goals",
+    "notificationSettings",
+    "personalizedNutritionPlan",
+    "therapistEmail",
+    "therapistName",
+    "therapistPhone",
+    "therapistId",
+    "practiceId",
+    "practiceName",
+    "disclaimerAcceptedAt",
+    "disclaimerVersion"
+  ]
+}

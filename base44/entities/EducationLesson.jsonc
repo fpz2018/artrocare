@@ -1,0 +1,69 @@
+{
+  "name": "EducationLesson",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Unieke sleutel voor de les"
+    },
+    "title_nl": {
+      "type": "string",
+      "description": "Les titel in Nederlands"
+    },
+    "title_en": {
+      "type": "string",
+      "description": "Les titel in Engels"
+    },
+    "content_nl": {
+      "type": "string",
+      "description": "Volledige les inhoud in Nederlands"
+    },
+    "content_en": {
+      "type": "string",
+      "description": "Volledige les inhoud in Engels"
+    },
+    "category": {
+      "type": "string",
+      "description": "Categorie van de les"
+    },
+    "readingTime": {
+      "type": "number",
+      "description": "Geschatte leestijd in minuten"
+    },
+    "order": {
+      "type": "number",
+      "description": "Weergave volgorde"
+    },
+    "keyTakeaways_nl": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Kernpunten in Nederlands"
+    },
+    "keyTakeaways_en": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Kernpunten in Engels"
+    },
+    "isPremium": {
+      "type": "boolean",
+      "default": false,
+      "description": "Of dit premium content is"
+    },
+    "isCoreLesson": {
+      "type": "boolean",
+      "default": false,
+      "description": "Of dit een basis kennismodule is"
+    }
+  },
+  "required": [
+    "key",
+    "title_nl",
+    "title_en",
+    "content_nl",
+    "content_en"
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "name": "Exercise",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Unieke sleutel voor de oefening"
+    },
+    "title_nl": {
+      "type": "string",
+      "description": "Titel in het Nederlands"
+    },
+    "title_en": {
+      "type": "string",
+      "description": "Titel in Engels"
+    },
+    "description_nl": {
+      "type": "string",
+      "description": "Beschrijving in het Nederlands"
+    },
+    "description_en": {
+      "type": "string",
+      "description": "Beschrijving in Engels"
+    },
+    "circle": {
+      "type": "string",
+      "enum": [
+        "warming_up",
+        "core_stability",
+        "postural_orientation",
+        "muscle_strength",
+        "functional",
+        "cooling_down"
+      ],
+      "description": "Oefening cirkel"
+    },
+    "level": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ],
+      "description": "Moeilijkheidsniveau 1-3"
+    },
+    "targetJoint": {
+      "type": "string",
+      "enum": [
+        "knie",
+        "heup",
+        "hand",
+        "schouder",
+        "enkel",
+        "rug",
+        "elleboog",
+        "algemeen"
+      ],
+      "description": "Doelgewricht"
+    },
+    "duration": {
+      "type": "number",
+      "description": "Duur in minuten"
+    },
+    "sets": {
+      "type": "number",
+      "description": "Aantal sets"
+    },
+    "repetitions": {
+      "type": "string",
+      "description": "Herhalingen aanbeveling"
+    },
+    "imageUrl": {
+      "type": "string",
+      "description": "URL naar oefening afbeelding"
+    },
+    "videoUrl": {
+      "type": "string",
+      "description": "URL naar video (YouTube, Vimeo, of eigen hosting)"
+    },
+    "videoThumbnail": {
+      "type": "string",
+      "description": "Thumbnail URL voor video"
+    },
+    "videoDuration": {
+      "type": "number",
+      "description": "Duur van video in seconden"
+    },
+    "order": {
+      "type": "number",
+      "description": "Volgorde in circuit"
+    },
+    "isPremium": {
+      "type": "boolean",
+      "default": false,
+      "description": "Alleen voor premium gebruikers"
+    },
+    "focusPoints_nl": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Aandachtspunten in Nederlands"
+    },
+    "focusPoints_en": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Aandachtspunten in Engels"
+    }
+  },
+  "required": [
+    "key",
+    "title_nl",
+    "title_en",
+    "circle",
+    "level"
+  ]
+}

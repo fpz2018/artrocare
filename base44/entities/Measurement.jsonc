@@ -1,0 +1,91 @@
+{
+  "name": "Measurement",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "dagelijks",
+        "wekelijks",
+        "flare",
+        "maandelijks"
+      ],
+      "default": "dagelijks"
+    },
+    "painScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "stiffnessScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "functionScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "sleepQuality": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "stressLevel": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "steps": {
+      "type": "number"
+    },
+    "weight": {
+      "type": "number"
+    },
+    "exercisesCompleted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mealsLogged": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "supplementsTaken": {
+      "type": "boolean"
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "mood": {
+      "type": "string",
+      "enum": [
+        "geweldig",
+        "goed",
+        "ok\u00e9",
+        "matig",
+        "slecht"
+      ]
+    },
+    "isFlare": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "date"
+  ]
+}
