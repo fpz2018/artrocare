@@ -781,6 +781,49 @@ function loadEnv() {
 
 // ─── On-demand handler (POST from frontend) ───────────────
 
+// ─── Autorisatie voor de HTTP-route ───────────────────────
+// De vorige controle keek alleen of er een Authorization-header stond. Elke
+// willekeurige string gaf daarmee toegang tot een functie die met de
+// service-role werkt en betaalde API's aanroept. Nu wordt het Supabase access
+// token geverifieerd en moet de rol van de gebruiker van de staf zijn.
+// De geplande run loopt via scheduledHandler hieronder en komt hier niet langs.
+async function requireStaff(req) {
+  // Eerst kijken of er uberhaupt een token is; pas daarna of de server
+  // compleet is geconfigureerd. Zo blijft een ontbrekend token altijd 401.
+  const authHeader = req.headers.get('authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+  if (!token) return { ok: false, status: 401, error: 'Unauthorized' };
+
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+  const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !anonKey || !serviceKey) {
+    return { ok: false, status: 500, error: 'Server misconfigured' };
+  }
+
+  const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
+  });
+  if (!userRes.ok) return { ok: false, status: 401, error: 'Unauthorized' };
+
+  const user = await userRes.json().catch(() => null);
+  if (!user?.id) return { ok: false, status: 401, error: 'Unauthorized' };
+
+  const roleRes = await fetch(
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=role`,
+    { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+  );
+  const rows = await roleRes.json().catch(() => []);
+  const role = Array.isArray(rows) ? rows[0]?.role : null;
+
+  if (!['therapist', 'practice_admin', 'admin'].includes(role)) {
+    return { ok: false, status: 403, error: 'Forbidden' };
+  }
+
+  return { ok: true, role, userId: user.id };
+}
+
 export default async function handler(req) {
   // CORS
   if (req.method === 'OPTIONS') {
@@ -803,10 +846,11 @@ export default async function handler(req) {
     const body = await req.json().catch(() => ({}));
     const { action = 'fetch_and_summarize', query_id, query, max_results = 10 } = body;
 
-    // Verify auth token
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // Alleen ingelogde staf mag de HTTP-route gebruiken. De vorige controle
+    // keek alleen of de header bestond; elke willekeurige waarde volstond.
+    const auth = await requireStaff(req);
+    if (!auth.ok) {
+      return Response.json({ error: auth.error }, { status: auth.status });
     }
 
     if (action === 'fetch_and_summarize') {

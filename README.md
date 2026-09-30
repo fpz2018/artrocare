@@ -142,7 +142,9 @@ netlify/
 - **Centralized i18n**: No per-component translation objects
 - **React.memo**: Heavy list components memoized
 - **Query caching**: React Query with 5-min stale time
-- **Optimized deps**: Removed unused libraries (three.js, moment, etc.)
+- **Manual chunks**: three.js en Recharts staan bewust NIET in een vaste vendor-chunk.
+  Daarmee werden ze in de entry-graaf getrokken en op elke eerste paginalading
+  voorgeladen. Ze zitten nu in de lazy chunk van de pagina die ze gebruikt.
 
 ## Security Improvements
 
@@ -154,3 +156,35 @@ netlify/
 - **Input validation**: Max lengths, type constraints, Zod schemas
 - **HTTPS only**: Strict Transport Security headers
 - **No localStorage tokens**: Supabase handles session securely
+
+## Beveiligingswijzigingen (migratie 007)
+
+Draai `supabase/migrations/007_security_hardening.sql` in de Supabase SQL-editor.
+De migratie is herhaalbaar en verwijdert geen gegevens.
+
+| Onderdeel | Was | Is nu |
+|---|---|---|
+| Registratie | `register_as` uit clientmetadata bepaalde de rol, inclusief `admin` | alleen `patient` en `practice_admin`; therapeut alleen via geldige uitnodiging |
+| Profielupdate | eigen rol en abonnement zelf te zetten via de REST-route | trigger bevriest `role`, `subscription_tier`, `practice_id`, `therapist_id`, `email` |
+| Uitnodigingen | publiek leesbaar en door iedereen aan te maken | alleen uitnodiger en beheerder; uitlezen via `get_invitation_by_token` |
+| Contentpijplijn | vier policies met `WITH CHECK (true)` | alleen beheerders; de functions werken met de service-role |
+| Beheerfuncties | voor iedereen aanroepbaar via `/rest/v1/rpc/` | rolcheck in de functie plus `REVOKE` van `PUBLIC` |
+| Boodschappenlijst | `user_uuid` als parameter, dus paywall te omzeilen | `auth.uid()` |
+| Praktijkaanmelding | `WITH CHECK (true)`, ook met status `approved` | alleen status `pending` |
+| Storage | uploads naar `recipe-images` en `exercise-media` door iedereen | alleen beheerders |
+| Stripe-webhook | geen deduplicatie, geen UUID-controle | `stripe_events`-tabel, UUID-validatie, terugbetaling verwerkt |
+| Checkout | `user_id` uit de request body | `user_id` uit het geverifieerde Supabase-token |
+| Netlify functions | alleen een aanwezige `Authorization`-header volstond | token geverifieerd bij Supabase plus rolcheck |
+
+### Nieuwe of gewijzigde omgevingsvariabelen
+
+| Variabele | Verplicht | Toelichting |
+|---|---|---|
+| `STRIPE_PRICE_FOUNDING_CENTS` | nee | Prijs in centen, standaard `9700` |
+| `ALLOWED_ORIGINS` | nee | Komma-gescheiden lijst voor de redirect na betaling; standaard de eigen domeinen |
+| `WEBHOOK_SECRET` | ja | De Edge Function `process-content` weigert aanvragen als dit ontbreekt |
+
+### Gewijzigde functiesignatuur
+
+- `generate_shopping_list(p_week INT)` — de oude variant met `p_user_id` is verwijderd.
+- `get_invitation_by_token(p_token TEXT)` — nieuw, vervangt de publieke SELECT op `invitations`.

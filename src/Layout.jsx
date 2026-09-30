@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/i18n';
@@ -56,6 +56,22 @@ export default function Layout({ children }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Het mobiele menu sluit met Escape, zodat toetsenbordgebruikers niet
+  // vastlopen in een opengeklapt menu.
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mobileMenuOpen]);
+
+  // Sluit het menu zodra er genavigeerd wordt.
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
   const items = useMemo(() => {
     if (profile?.role === 'admin') return adminNavItems;
     if (profile?.role === 'practice_admin') return practiceAdminNavItems;
@@ -78,7 +94,7 @@ export default function Layout({ children }) {
       return data?.pending_notifications || 0;
     },
     enabled: profile?.role === 'admin',
-    refetchInterval: 60000, // Poll every minute
+    refetchInterval: 300000, // Elke 5 minuten is genoeg voor een teller
   });
 
   const toggleLanguage = () => {
@@ -94,22 +110,36 @@ export default function Layout({ children }) {
             <Logo height={56} />
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleLanguage}>
-              <Globe className="w-5 h-5" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLanguage}
+              aria-label={language === 'nl' ? 'Schakel naar Engels' : 'Switch to Dutch'}
+            >
+              <Globe className="w-5 h-5" aria-hidden="true" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? t('nav_menu_close') : t('nav_menu_open')}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen
+                ? <X className="w-5 h-5" aria-hidden="true" />
+                : <Menu className="w-5 h-5" aria-hidden="true" />}
             </Button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <nav className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg max-h-[80vh] overflow-y-auto">
+          <nav
+            id="mobile-nav"
+            aria-label={t('nav_main_menu')}
+            className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg max-h-[80vh] overflow-y-auto"
+          >
             {items.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -125,7 +155,7 @@ export default function Layout({ children }) {
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5" aria-hidden="true" />
                   {t(item.labelKey)}
                   {showBadge && (
                     <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
@@ -156,7 +186,7 @@ export default function Layout({ children }) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+          <nav aria-label={t('nav_main_menu')} className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
             {items.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -171,7 +201,7 @@ export default function Layout({ children }) {
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} aria-hidden="true" />
                   {t(item.labelKey)}
                   {showBadge && (
                     <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">

@@ -1,8 +1,10 @@
 {
+  "id": "/",
   "name": "ArtroCare",
   "short_name": "ArtroCare",
   "description": "Begeleidingsprogramma bij gewrichtsklachten",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563EB",
@@ -10,16 +12,40 @@
   "lang": "nl-NL",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Kernsignalen",
+      "short_name": "Kernsignalen",
+      "url": "/kernsignalen"
+    },
+    {
+      "name": "Oefeningen",
+      "short_name": "Oefeningen",
+      "url": "/exercises"
     }
   ]
 }

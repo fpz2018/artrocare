@@ -86,3 +86,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Respecteer de systeeminstelling voor minder beweging. De app gebruikt
+   framer-motion en diverse animaties; voor gebruikers die beweging als
+   storend of misselijkmakend ervaren zetten we die vrijwel uit. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

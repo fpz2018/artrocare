@@ -187,7 +187,16 @@ Deno.serve(async (req: Request) => {
   const webhookSecret = Deno.env.get('WEBHOOK_SECRET');
   const incomingSecret = req.headers.get('x-webhook-secret');
 
-  if (webhookSecret && incomingSecret !== webhookSecret) {
+  // Fail-closed. De vorige variant sloeg de controle over wanneer het secret
+  // ontbrak, waardoor deze functie met de service-role openstond voor iedereen.
+  if (!webhookSecret) {
+    console.error('WEBHOOK_SECRET niet ingesteld - aanvraag geweigerd');
+    return new Response(JSON.stringify({ error: 'Server niet geconfigureerd' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  if (incomingSecret !== webhookSecret) {
     return new Response(JSON.stringify({ error: 'Ongeldige webhook secret' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

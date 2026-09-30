@@ -29,20 +29,28 @@ export default function AcceptInvite() {
     }
 
     async function fetchInvite() {
-      const { data, error } = await supabase
-        .from('invitations')
-        .select('*, practices(name, city)')
-        .eq('token', token)
-        .single();
+      // De uitnodiging komt via een server-side functie binnen in plaats van
+      // via een publieke SELECT. Zo kan niemand de uitnodigingstabel uitlezen
+      // en krijgt dit scherm alleen de velden die het nodig heeft.
+      const { data, error } = await supabase.rpc('get_invitation_by_token', {
+        p_token: token,
+      });
 
-      if (error || !data) {
+      const invite = Array.isArray(data) ? data[0] : data;
+
+      if (error || !invite) {
         setInviteError('Uitnodiging niet gevonden.');
-      } else if (data.status === 'accepted') {
+      } else if (invite.status === 'accepted') {
         setInviteError('Deze uitnodiging is al geaccepteerd.');
-      } else if (data.status === 'expired' || new Date(data.expires_at) < new Date()) {
+      } else if (invite.status === 'expired' || new Date(invite.expires_at) < new Date()) {
         setInviteError('Deze uitnodiging is verlopen. Vraag een nieuwe aan.');
       } else {
-        setInvitation(data);
+        setInvitation({
+          ...invite,
+          practices: invite.practice_name
+            ? { name: invite.practice_name, city: invite.practice_city }
+            : null,
+        });
       }
       setLoadingInvite(false);
     }

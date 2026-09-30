@@ -146,8 +146,8 @@ export default function AdminChecklist() {
         category: 'frontend',
         label: 'Boodschappenlijst functie (generate_shopping_list)',
         run: async () => {
+          // De functie gebruikt auth.uid() en neemt alleen het weeknummer aan.
           const { data, error } = await supabase.rpc('generate_shopping_list', {
-            p_user_id: '00000000-0000-0000-0000-000000000000',
             p_week: 1,
           });
           // We expect either data or an RPC error — not a "function not found" error

@@ -12,20 +12,27 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-slider',
-            '@radix-ui/react-progress',
-          ],
-          'chart-vendor': ['recharts'],
-          'supabase': ['@supabase/supabase-js'],
-          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-          'remotion-vendor': ['remotion', '@remotion/player'],
+        // Let op: gebruik hier géén objectvorm met 'three' of 'recharts' erin.
+        // Daarmee belandden die chunks in de entry-graaf en werden three.js
+        // (218 kB gzip) en Recharts (100 kB gzip) op elke eerste paginalading
+        // voorgeladen, ook op de openbare landingspagina. De 3D-oefeningen en
+        // grafieken zitten achter de login en worden lazy geladen; Rollup
+        // plaatst ze nu in de chunk van de pagina die ze daadwerkelijk gebruikt.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+
+          if (id.includes('@supabase')) return 'supabase';
+          if (
+            id.includes('react-router') ||
+            id.includes('/react/') ||
+            id.includes('react-dom') ||
+            id.includes('/scheduler/')
+          ) {
+            return 'react-vendor';
+          }
+          if (id.includes('@radix-ui')) return 'ui-vendor';
+
+          return undefined;
         },
       },
     },
