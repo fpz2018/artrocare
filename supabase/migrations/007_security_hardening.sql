@@ -186,7 +186,9 @@ CREATE POLICY "Uitnodiger beheert eigen uitnodigingen" ON public.invitations
 
 -- Het acceptatiescherm leest de uitnodiging via deze functie in plaats van
 -- via een publieke SELECT. De functie geeft alleen de velden terug die het
--- scherm nodig heeft en alleen bij een openstaande, niet-verlopen uitnodiging.
+-- scherm nodig heeft, en alleen bij een openstaande, niet-verlopen uitnodiging.
+-- Die twee voorwaarden staan in de query zelf: een verlopen of al geaccepteerd
+-- token hoort geen e-mailadres, rol of praktijk meer terug te geven.
 CREATE OR REPLACE FUNCTION public.get_invitation_by_token(p_token TEXT)
 RETURNS TABLE (
   id            UUID,
@@ -212,6 +214,8 @@ BEGIN
       FROM public.invitations i
       LEFT JOIN public.practices p ON p.id = i.practice_id
      WHERE i.token = p_token
+       AND i.status = 'pending'
+       AND i.expires_at > NOW()
      LIMIT 1;
 END;
 $$;

@@ -1,7 +1,20 @@
 -- =============================================
 -- Artrocare Platform - Volledig Schema
 -- CLEAN INSTALL: verwijdert alles en bouwt opnieuw op
--- Versie 2.0 - Vier-rollen platformarchitectuur
+-- Versie 2.1 - Vier-rollen platformarchitectuur
+--
+-- LET OP — DIT IS HET BEGINPUNT, NIET DE HELE INSTALLATIE.
+--
+-- Dit bestand is veilig by default: de autorisatie staat dicht. Draai daarna
+-- wel de migraties in supabase/migrations/, op oplopend nummer. De volledige
+-- volgorde en de controle staan in db/INSTALLATIE.md.
+--
+-- Waarom deze waarschuwing er staat: tot 30-09-2026 zette dit bestand acht
+-- policies op WITH CHECK (true) en nam het de rol over uit registratiemetadata.
+-- Een verse installatie was daarmee open voor iedereen met de publieke sleutel.
+-- Migratie 007_security_hardening.sql dichtte dat voor bestaande databases; de
+-- definities hieronder zijn nu dezelfde, veilige versies. De test in
+-- supabase/tests/run-security.sh bewaakt dat dit zo blijft.
 -- =============================================
 
 -- ─── Bestaande objecten verwijderen ──────────────────────────────────────────
@@ -476,16 +489,33 @@ CREATE POLICY "Praktijkbeheerder past eigen praktijk aan" ON public.practices
   FOR UPDATE USING (id = get_my_practice_id());
 CREATE POLICY "Iedereen ziet goedgekeurde praktijken" ON public.practices
   FOR SELECT USING (status = 'approved');
+-- Een zelfaanmelding mag nooit een al goedgekeurde praktijk opleveren.
 CREATE POLICY "Nieuwe praktijk aanmelden" ON public.practices
-  FOR INSERT WITH CHECK (true);
+  FOR INSERT WITH CHECK (
+    status = 'pending'
+    AND approved_by IS NULL
+    AND approved_at IS NULL
+    AND rejected_reason IS NULL
+    AND length(COALESCE(name, '')) BETWEEN 2 AND 200
+  );
 
 -- PROFILES
 CREATE POLICY "Eigen profiel lezen" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Eigen profiel aanpassen" ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
+-- Een zelf aangemaakte profielrij mag nooit een bevoorrechte rol, een
+-- betaald abonnement of een praktijkkoppeling hebben. De trigger
+-- protect_profile_privileged_columns hieronder bevriest die kolommen ook
+-- bij een update.
 CREATE POLICY "Eigen profiel aanmaken" ON public.profiles
-  FOR INSERT WITH CHECK (auth.uid() = id);
+  FOR INSERT WITH CHECK (
+    auth.uid() = id
+    AND role = 'patient'
+    AND subscription_tier = 'free'
+    AND practice_id IS NULL
+    AND therapist_id IS NULL
+  );
 CREATE POLICY "Therapeut ziet eigen patiënten" ON public.profiles
   FOR SELECT USING (
     get_my_role() IN ('therapist', 'practice_admin')
@@ -500,16 +530,29 @@ CREATE POLICY "Admin ziet alle profielen" ON public.profiles
   FOR ALL USING (get_my_role() = 'admin');
 
 -- INVITATIONS
+-- De uitnodiger beheert alleen zijn eigen rijen, en mag alleen rollen uitdelen
+-- die bij zijn eigen rol passen. Anon heeft hier geen toegang meer; het
+-- acceptatiescherm leest via get_invitation_by_token().
 CREATE POLICY "Uitnodiger beheert eigen uitnodigingen" ON public.invitations
-  FOR ALL USING (invited_by = auth.uid());
+  FOR ALL
+  USING (invited_by = auth.uid() OR get_my_role() = 'admin')
+  WITH CHECK (
+    invited_by = auth.uid()
+    AND (
+      (get_my_role() = 'therapist'         AND role = 'patient')
+      OR (get_my_role() = 'practice_admin' AND role IN ('therapist', 'patient'))
+      OR get_my_role() = 'admin'
+    )
+    AND (
+      practice_id IS NULL
+      OR get_my_role() = 'admin'
+      OR practice_id = get_my_practice_id()
+    )
+  );
 CREATE POLICY "Uitgenodigde ziet eigen uitnodiging" ON public.invitations
   FOR SELECT USING (email = (SELECT email FROM public.profiles WHERE id = auth.uid()));
-CREATE POLICY "Service mag uitnodiging aanmaken" ON public.invitations
-  FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admin beheert alle uitnodigingen" ON public.invitations
   FOR ALL USING (get_my_role() = 'admin');
-CREATE POLICY "Publiek: uitnodiging lezen via token" ON public.invitations
-  FOR SELECT USING (true);
 
 -- PATIENT REQUESTS
 CREATE POLICY "Aanvrager ziet eigen verzoek" ON public.patient_requests
@@ -518,8 +561,17 @@ CREATE POLICY "Therapeut beheert patiëntverzoeken" ON public.patient_requests
   FOR ALL USING (get_my_role() IN ('therapist', 'practice_admin'));
 CREATE POLICY "Admin beheert alle verzoeken" ON public.patient_requests
   FOR ALL USING (get_my_role() = 'admin');
+-- Een bezoeker mag een verzoek indienen, maar zichzelf daarbij geen
+-- therapeut of praktijk toewijzen en geen andere status zetten.
 CREATE POLICY "Iedereen kan verzoek indienen" ON public.patient_requests
-  FOR INSERT WITH CHECK (true);
+  FOR INSERT WITH CHECK (
+    status = 'pending'
+    AND patient_id IS NULL
+    AND therapist_id IS NULL
+    AND practice_id IS NULL
+    AND length(COALESCE(full_name, '')) BETWEEN 2 AND 200
+    AND length(COALESCE(email, ''))     BETWEEN 5 AND 254
+  );
 
 -- MEASUREMENTS
 CREATE POLICY "Eigen metingen beheren" ON public.measurements
@@ -550,8 +602,9 @@ CREATE POLICY "Therapeuten lezen papers" ON public.research_papers
   FOR SELECT USING (get_my_role() IN ('therapist', 'practice_admin', 'admin'));
 CREATE POLICY "Admin beheert papers" ON public.research_papers
   FOR ALL USING (get_my_role() IN ('practice_admin', 'admin'));
-CREATE POLICY "Service mag papers inserten" ON public.research_papers
-  FOR INSERT WITH CHECK (true);
+-- Geen open insert meer op de onderzoeks- en contentpijplijn. De Netlify-
+-- functions en Edge Functions schrijven met de service-role en omzeilen RLS;
+-- anon en authenticated hebben hier niets te zoeken.
 CREATE POLICY "Gepubliceerde inzichten zijn publiek" ON public.research_insights
   FOR SELECT USING (is_published = true);
 CREATE POLICY "Therapeuten beheren inzichten" ON public.research_insights
@@ -560,18 +613,12 @@ CREATE POLICY "Therapeuten beheren zoekopdrachten" ON public.research_queries
   FOR ALL USING (get_my_role() IN ('therapist', 'practice_admin', 'admin'));
 CREATE POLICY "Therapeuten zien fetchlog" ON public.research_fetch_log
   FOR SELECT USING (get_my_role() IN ('therapist', 'practice_admin', 'admin'));
-CREATE POLICY "Service mag fetchlog inserten" ON public.research_fetch_log
-  FOR INSERT WITH CHECK (true);
 
 -- CONTENT PIPELINE
 CREATE POLICY "Admin beheert content sources" ON public.content_sources
   FOR ALL USING (get_my_role() = 'admin');
-CREATE POLICY "Service mag source inserten" ON public.content_sources
-  FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admin beheert voorstellen" ON public.content_proposals
   FOR ALL USING (get_my_role() = 'admin') WITH CHECK (get_my_role() = 'admin');
-CREATE POLICY "Service mag voorstel inserten" ON public.content_proposals
-  FOR INSERT WITH CHECK (true);
 
 -- ─── FUNCTIE: Voorstel toepassen ──────────────────────────────────────────────
 
@@ -586,6 +633,13 @@ DECLARE
   allowed_cols TEXT[];
   sql_stmt     TEXT;
 BEGIN
+  -- Zonder deze controle is de functie via /rest/v1/rpc/ voor iedereen
+  -- aanroepbaar: een nieuwe functie krijgt in PostgreSQL standaard EXECUTE
+  -- voor PUBLIC.
+  IF NOT (auth.role() = 'service_role' OR get_my_role() = 'admin') THEN
+    RAISE EXCEPTION 'Alleen beheerders mogen een voorstel toepassen';
+  END IF;
+
   SELECT * INTO prop FROM content_proposals WHERE id = proposal_id AND status = 'approved';
   IF NOT FOUND THEN RAISE EXCEPTION 'Voorstel niet gevonden of niet goedgekeurd: %', proposal_id; END IF;
 
@@ -633,6 +687,9 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.apply_content_proposal(UUID) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.apply_content_proposal(UUID) TO authenticated;
+
 -- ─── FUNCTIE: Nieuw profiel aanmaken bij registratie ─────────────────────────
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -640,9 +697,41 @@ RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
   v_practice_id uuid;
-  v_role text;
+  v_role        text;
+  v_invite      RECORD;
+  v_token       text;
+  v_requested   text;
 BEGIN
-  v_role := COALESCE(NEW.raw_user_meta_data->>'register_as', NEW.raw_user_meta_data->>'role', 'patient');
+  -- raw_user_meta_data is door de CLIENT gevuld bij supabase.auth.signUp().
+  -- Daar mag dus nooit een bevoorrechte rol uit komen. Alleen 'patient' en
+  -- 'practice_admin' zijn zonder uitnodiging toegestaan; 'practice_admin' is
+  -- de zelfaanmelding van een praktijk en krijgt status 'pending'. De
+  -- therapeut- en praktijkrollen lopen uitsluitend via een geldige,
+  -- openstaande uitnodiging voor hetzelfde e-mailadres.
+  v_requested := NEW.raw_user_meta_data->>'register_as';
+  v_token     := NEW.raw_user_meta_data->>'invitation_token';
+
+  v_role := CASE
+    WHEN v_requested IN ('patient', 'practice_admin') THEN v_requested
+    ELSE 'patient'
+  END;
+
+  IF v_token IS NOT NULL AND length(v_token) >= 16 THEN
+    SELECT i.role, i.practice_id
+      INTO v_invite
+      FROM public.invitations i
+     WHERE i.token = v_token
+       AND lower(i.email) = lower(NEW.email)
+       AND i.status = 'pending'
+       AND i.expires_at > NOW()
+     LIMIT 1;
+
+    IF FOUND THEN
+      v_role        := v_invite.role;
+      v_practice_id := v_invite.practice_id;
+      UPDATE public.invitations SET status = 'accepted' WHERE token = v_token;
+    END IF;
+  END IF;
 
   IF v_role = 'practice_admin' THEN
     INSERT INTO public.practices (name, city, address, postal_code, phone, email, website, status)
@@ -667,12 +756,13 @@ BEGIN
       v_practice_id
     );
   ELSE
-    INSERT INTO public.profiles (id, email, full_name, role)
+    INSERT INTO public.profiles (id, email, full_name, role, practice_id)
     VALUES (
       NEW.id,
       NEW.email,
       COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-      CASE WHEN v_role IN ('patient', 'therapist', 'practice_admin', 'admin') THEN v_role ELSE 'patient' END
+      v_role,
+      v_practice_id
     );
   END IF;
 
@@ -683,6 +773,85 @@ $$;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ─── TRIGGER: bevoorrechte profielkolommen bevriezen ─────────────────────────
+-- De policy "Eigen profiel aanpassen" staat alleen auth.uid() = id toe en
+-- beperkt geen kolommen. Zonder deze trigger kan een patiënt zichzelf via
+-- PostgREST alsnog op 'admin' of 'premium' zetten.
+
+CREATE OR REPLACE FUNCTION public.protect_profile_privileged_columns()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+BEGIN
+  -- Anonieme clients hebben hier niets te zoeken.
+  IF auth.role() = 'anon' THEN
+    RAISE EXCEPTION 'Niet geautoriseerd';
+  END IF;
+
+  -- Server-side context (service-role, directe DB-toegang): toestaan.
+  IF auth.role() = 'service_role' OR auth.uid() IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  -- Beheerders mogen alles.
+  IF public.get_my_role() = 'admin' THEN
+    RETURN NEW;
+  END IF;
+
+  -- Iedereen anders: deze velden blijven ongewijzigd.
+  NEW.role              := OLD.role;
+  NEW.subscription_tier := OLD.subscription_tier;
+  NEW.practice_id       := OLD.practice_id;
+  NEW.therapist_id      := OLD.therapist_id;
+  NEW.email             := OLD.email;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_protect_profile_privileged_columns ON public.profiles;
+CREATE TRIGGER trg_protect_profile_privileged_columns
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.protect_profile_privileged_columns();
+
+-- ─── FUNCTIE: uitnodiging opzoeken met een token ─────────────────────────────
+-- Het acceptatiescherm las de uitnodiging via een publieke SELECT op de hele
+-- tabel, waardoor elke bezoeker alle tokens, e-mailadressen en rollen kon
+-- opvragen. Deze functie geeft alleen de nodige velden terug, en alleen bij
+-- een openstaande, niet-verlopen uitnodiging.
+
+CREATE OR REPLACE FUNCTION public.get_invitation_by_token(p_token TEXT)
+RETURNS TABLE (
+  id            UUID,
+  email         TEXT,
+  role          TEXT,
+  practice_id   UUID,
+  practice_name TEXT,
+  practice_city TEXT,
+  status        TEXT,
+  expires_at    TIMESTAMPTZ
+)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+BEGIN
+  -- Tokens zijn 64 hex-tekens; korte waarden blokkeren we vooraf.
+  IF p_token IS NULL OR length(p_token) < 16 THEN
+    RETURN;
+  END IF;
+
+  RETURN QUERY
+    SELECT i.id, i.email, i.role, i.practice_id,
+           p.name, p.city, i.status, i.expires_at
+      FROM public.invitations i
+      LEFT JOIN public.practices p ON p.id = i.practice_id
+     WHERE i.token = p_token
+       AND i.status = 'pending'
+       AND i.expires_at > NOW()
+     LIMIT 1;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.get_invitation_by_token(TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_invitation_by_token(TEXT) TO anon, authenticated;
 
 -- ─── INDEXES ──────────────────────────────────────────────────────────────────
 

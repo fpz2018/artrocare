@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:security": "bash supabase/tests/run-security.sh",
+    "test:security:schema": "bash supabase/tests/run-security.sh --schema-only"
   },
   "dependencies": {
     "@netlify/functions": "^5.1.5",

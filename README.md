@@ -16,8 +16,10 @@ Jouw persoonlijke gids bij artrose. Een webapp voor mensen met artrose (van begi
 
 ### 1. Supabase
 1. Create a project at [supabase.com](https://supabase.com)
-2. Run the schema in `supabase/schema.sql` in the SQL Editor
-3. Copy your project URL and anon key
+2. Run the database files in the order given in **[`db/INSTALLATIE.md`](db/INSTALLATIE.md)**.
+   `supabase/schema.sql` is alleen het beginpunt; de migraties daarna zijn verplicht.
+3. Run the check at the bottom of `db/INSTALLATIE.md`. It must return zero rows.
+4. Copy your project URL and anon key
 
 ### 2. Environment Variables
 ```bash
@@ -127,9 +129,14 @@ src/
   pages/         - All page components (lazy loaded)
   hooks/         - Custom React hooks
 supabase/
-  schema.sql     - Database schema + RLS + seed data
-  migrations/    - Incremental SQL migrations (006 = Kernsignalen)
+  schema.sql     - Database schema + RLS + seed data. Beginpunt, niet de hele installatie
+  migrations/    - Incremental SQL migrations, in volgorde te draaien (zie db/INSTALLATIE.md)
+  tests/         - Aanvalstests: veertig aanvallen als anon en als ingelogde gebruiker
   functions/     - Supabase Edge Functions (analyze-day = Kernsignalen AI)
+db/
+  INSTALLATIE.md - De volledige installatievolgorde plus de controle
+tests/
+  installatie-volgorde.test.mjs - Bewaakt dat de installatielijst compleet blijft
 netlify/
   functions/     - Netlify serverless functions
 ```
@@ -159,8 +166,26 @@ netlify/
 
 ## Beveiligingswijzigingen (migratie 007)
 
-Draai `supabase/migrations/007_security_hardening.sql` in de Supabase SQL-editor.
-De migratie is herhaalbaar en verwijdert geen gegevens.
+**Bij een bestaande database:** draai `supabase/migrations/007_security_hardening.sql`
+in de Supabase SQL-editor. De migratie is herhaalbaar en verwijdert geen gegevens.
+
+**Bij een nieuwe installatie:** volg de volledige volgorde in
+[`db/INSTALLATIE.md`](db/INSTALLATIE.md). `supabase/schema.sql` bevat sinds
+30-09-2026 dezelfde veilige definities, maar de migraties daarna zijn verplicht.
+
+### Automatische controle
+
+```bash
+npm test                    # installatievolgorde en bestaande testsuite
+npm run test:security       # veertig aanvallen op een vers opgebouwde database
+npm run test:security:schema # alleen supabase/schema.sql, zonder migraties
+```
+
+De aanvalstests bouwen de database opnieuw op en doen vervolgens wat een
+aanvaller via PostgREST zou doen: met de publieke anon-sleutel of met een
+gewone gebruikersaccount de grenzen opzoeken. Ze hebben een PostgreSQL nodig.
+Op het schema van vóór 30-09-2026 falen 21 van de 40 controles; op de huidige
+versie geen enkele.
 
 | Onderdeel | Was | Is nu |
 |---|---|---|
